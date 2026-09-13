@@ -1788,6 +1788,44 @@
 
 
 
+**Future product-image normalization flow:**
+
+
+
+**1. Admin uploads a product image.**
+
+**2. The server validates the file type, extension, size, and image integrity.**
+
+**3. The processing workflow may remove or replace the source background.**
+
+**4. The product is placed on the standard Coolcase storefront canvas.**
+
+**5. A high-quality normalized storefront asset is generated and saved.**
+
+**6. The storefront uses the processed asset while the original upload remains unchanged.**
+
+
+
+**Normalized storefront target:**
+
+**- Transparent PNG or WebP support**
+
+**- Standard background: `#F6F6F6`**
+
+**- Aspect ratio: `4:5`**
+
+**- Centered composition**
+
+**- Consistent internal padding**
+
+**- No stretching or destructive cropping**
+
+
+
+**This processing is a future admin capability. It is not part of the Phase 1 storefront implementation. The long-term storefront should use automatic normalization rather than require administrators to prepare perfectly matched backgrounds manually.**
+
+
+
 **Do not permanently delete products associated with historical orders.**
 
 
