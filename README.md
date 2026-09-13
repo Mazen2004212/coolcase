@@ -118,6 +118,14 @@
 
 
 
+**Supabase setup and security:**
+
+
+
+**`docs/SUPABASE\_SETUP.md`**
+
+
+
 **Homepage visual reference:**
 
 

@@ -40,7 +40,7 @@
 
 **- id UUID PRIMARY KEY**
 
-**- full\_name TEXT NOT NULL**
+**- full\_name TEXT**
 
 **- email TEXT**
 
@@ -206,6 +206,10 @@
 
 **- display\_order INTEGER NOT NULL DEFAULT 0**
 
+**- silicone\_price\_override INTEGER**
+
+**- acrylic\_price\_override INTEGER**
+
 **- created\_at TIMESTAMPTZ NOT NULL DEFAULT now()**
 
 **- updated\_at TIMESTAMPTZ NOT NULL DEFAULT now()**
@@ -237,6 +241,10 @@
 **- product\_id UUID NOT NULL**
 
 **- storage\_path TEXT NOT NULL**
+
+**- original\_storage\_path TEXT**
+
+**- processed\_storage\_path TEXT**
 
 **- alt\_text TEXT**
 
@@ -390,7 +398,7 @@
 
 **- file\_size\_bytes BIGINT**
 
-**- upload\_type TEXT NOT NULL**
+**- upload\_type upload\_type NOT NULL**
 
 **- created\_at TIMESTAMPTZ NOT NULL DEFAULT now()**
 
@@ -400,9 +408,17 @@
 
 
 
+**- PRODUCT\_IMAGE**
+
+
+
 **- CUSTOM\_CASE\_DESIGN**
 
 **- PAYMENT\_PROOF**
+
+
+
+**Uploads referenced by historical order items or payments must not be deleted.**
 
 
 
@@ -1018,7 +1034,7 @@
 
 
 
-**`payment-proofs/{orderId}/{uuid}.jpg`**
+**`payment-proofs/{userId}/{uuid}.jpg`**
 
 
 
