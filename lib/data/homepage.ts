@@ -1,84 +1,92 @@
-export type SiteNavItem = Readonly<{
-  href: string;
-  label: string;
+export type SiteNavItem = Readonly<{ href: string; label: string }>;
+
+export type HeroSlide = Readonly<{
+  id: "women" | "men" | "cases";
+  imageAlt: string;
+  imagePath: string;
+  desktopPosition: string;
+  tabletPosition: string;
+  mobilePosition: string;
+  ctaPlacement: "center" | "top";
+  ctaTone: "dark" | "light";
 }>;
 
-export type CategoryItem = Readonly<{
-  icon:
-    | "all"
-    | "iphone"
-    | "samsung"
-    | "custom"
-    | "clear"
-    | "tough"
-    | "magsafe"
-    | "accessories";
-  label: string;
-}>;
-
+// Homepage presentation only. Product prices are not authoritative.
 export type PresentationProduct = Readonly<{
   imageAlt: string;
   imagePath: string;
-  imageTransparent?: boolean;
   name: string;
 }>;
 
+export const startingPriceLabel = "From 150 EGP";
+
 export const siteNavigation = [
-  { href: "#top", label: "Home" },
-  { href: "#featured", label: "Shop" },
-  { href: "#featured", label: "iPhone Cases" },
-  { href: "#custom-cases", label: "Custom Cases" },
-  { href: "#footer", label: "About" },
-  { href: "#footer", label: "Contact" },
+  { href: "/shop", label: "Shop" },
+  { href: "/shop", label: "Collections" },
+  { href: "/custom-cases", label: "Custom Cases" },
+  { href: "/about", label: "About" },
 ] as const satisfies readonly SiteNavItem[];
 
-export const categories = [
-  { icon: "all", label: "All Cases" },
-  { icon: "iphone", label: "iPhone Cases" },
-  { icon: "samsung", label: "Samsung Cases" },
-  { icon: "custom", label: "Custom Cases" },
-  { icon: "clear", label: "Clear Cases" },
-  { icon: "tough", label: "Tough Cases" },
-  { icon: "magsafe", label: "MagSafe" },
-  { icon: "accessories", label: "Accessories" },
-] as const satisfies readonly CategoryItem[];
+export const heroSlides = [
+  {
+    id: "women",
+    imagePath: "/assets/hero/hero-women.png",
+    imageAlt:
+      "Coolcase campaign with fashion phone cases and a woman holding a leopard case",
+    desktopPosition: "50% 50%",
+    tabletPosition: "54% 50%",
+    mobilePosition: "61% center",
+    ctaPlacement: "center",
+    ctaTone: "light",
+  },
+  {
+    id: "men",
+    imagePath: "/assets/hero/hero-men.png",
+    imageAlt:
+      "Coolcase campaign with a man holding a star case beside statement case designs",
+    desktopPosition: "50% 50%",
+    tabletPosition: "50% 50%",
+    mobilePosition: "57% center",
+    ctaPlacement: "center",
+    ctaTone: "light",
+  },
+  {
+    id: "cases",
+    imagePath: "/assets/hero/hero-cases.png",
+    imageAlt: "Three Coolcase designs styled on stone with metallic accessories",
+    desktopPosition: "50% 50%",
+    tabletPosition: "50% 50%",
+    mobilePosition: "50% center",
+    ctaPlacement: "top",
+    ctaTone: "dark",
+  },
+] as const satisfies readonly HeroSlide[];
 
 export const featuredProducts = [
   {
-    imageAlt: "Beige phone case with a pink flower and leopard pattern",
-    imagePath: "/assets/products/beige flowers.png",
-    imageTransparent: false,
-    name: "beige flowers",
+    name: "Abstract Halftone",
+    imagePath: "/assets/products/Abstract halftone.png",
+    imageAlt: "Abstract monochrome halftone phone case design",
   },
   {
-    imageAlt: "Pink Billie Eilish portrait phone case",
-    imagePath: "/assets/products/Billie eilish.png",
-    imageTransparent: false,
-    name: "Billie eilish",
-  },
-  {
-    imageAlt: "Black and pink lace iPhone case",
+    name: "Pink Lace",
     imagePath: "/assets/products/Black and pink lace iPhone case.png",
-    imageTransparent: false,
-    name: "Black and pink lace iPhone case",
+    imageAlt: "Black phone case with a pink lace design",
   },
   {
-    imageAlt: "Black phone case with pink floral design",
+    name: "Black Lily",
     imagePath: "/assets/products/Black Floral iPhone Case Mockup.png",
-    imageTransparent: false,
-    name: "Black Floral iPhone Case Mockup",
+    imageAlt: "Black phone case with a dramatic floral lily design",
   },
   {
-    imageAlt: "Clear phone case with black flower illustrations",
-    imagePath: "/assets/products/black flowers.png",
-    imageTransparent: false,
-    name: "black flowers",
+    name: "Amor",
+    imagePath: "/assets/products/amor.png",
+    imageAlt: "Amor phone case design",
   },
   {
-    imageAlt: "Clear phone case with blue stars and silver leopard motifs",
+    name: "Blue Collage",
     imagePath: "/assets/products/Blue-silver leopard.png",
-    imageTransparent: false,
-    name: "Blue-silver leopard",
+    imageAlt: "Blue and silver leopard collage phone case design",
   },
 ] as const satisfies readonly PresentationProduct[];
 
@@ -86,25 +94,21 @@ export const footerGroups = [
   {
     label: "Shop",
     links: [
-      { href: "#featured", label: "All Cases" },
-      { href: "#featured", label: "iPhone Cases" },
-      { href: "#custom-cases", label: "Custom Cases" },
+      { href: "/shop", label: "All Cases" },
+      { href: "/shop", label: "Collections" },
+      { href: "/custom-cases", label: "Custom Cases" },
     ],
   },
   {
     label: "Help",
     links: [
       { href: "/track-order", label: "Track Order" },
-      { href: "#footer", label: "Contact" },
-      { href: "#footer", label: "About" },
+      { href: "/contact", label: "Contact" },
     ],
   },
   {
-    label: "Company",
-    links: [
-      { href: "#footer", label: "About" },
-      { href: "#footer", label: "Contact" },
-    ],
+    label: "About",
+    links: [{ href: "/about", label: "About Coolcase" }],
   },
   {
     label: "Account",

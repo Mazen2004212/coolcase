@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, ShoppingBag, UserRound, Menu, X } from "lucide-react";
+import { Menu, Search, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 
 import type { SiteNavItem } from "@/lib/data/homepage";
 
@@ -13,10 +14,12 @@ type MobileNavProps = {
 export function MobileNav({ items }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const firstLinkRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key !== "Escape") return;
+      if (event.key !== "Escape" || !isOpen) return;
 
       setIsOpen(false);
       triggerRef.current?.focus();
@@ -24,10 +27,32 @@ export function MobileNav({ items }: MobileNavProps) {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) firstLinkRef.current?.focus();
+  }, [isOpen]);
 
   function closeMenu() {
     setIsOpen(false);
+  }
+
+  function trapFocus(event: ReactKeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Tab" || !menuRef.current) return;
+
+    const items = Array.from(
+      menuRef.current.querySelectorAll<HTMLElement>("a, button"),
+    );
+    const first = items[0];
+    const last = items.at(-1);
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last?.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first?.focus();
+    }
   }
 
   return (
@@ -50,15 +75,19 @@ export function MobileNav({ items }: MobileNavProps) {
 
       {isOpen ? (
         <div
+          ref={menuRef}
           id="mobile-navigation"
+          onKeyDown={trapFocus}
           className="absolute inset-x-0 top-full border-t border-white/15 bg-surface-black px-5 pb-7 pt-4 shadow-2xl"
         >
           <nav aria-label="Mobile navigation">
             <ul className="divide-y divide-white/10">
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <li key={`${item.label}-${item.href}`}>
                   <Link
+                    ref={index === 0 ? firstLinkRef : undefined}
                     href={item.href}
+                    prefetch={false}
                     className="flex min-h-12 items-center text-base font-medium text-white/90 hover:text-white"
                     onClick={closeMenu}
                   >
@@ -69,16 +98,15 @@ export function MobileNav({ items }: MobileNavProps) {
             </ul>
           </nav>
 
-          <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/15 pt-5">
-            <button
-              type="button"
-              disabled
-              className="flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/15 text-sm text-white/45"
-              aria-label="Search is available in a later phase"
+          <div className="mt-5 grid grid-cols-2 gap-2 border-t border-white/15 pt-5">
+            <a
+              href="#discovery"
+              onClick={closeMenu}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/15 text-sm text-white"
             >
               <Search aria-hidden="true" className="size-4" strokeWidth={1.8} />
               Search
-            </button>
+            </a>
             <Link
               href="/login"
               prefetch={false}
@@ -87,15 +115,6 @@ export function MobileNav({ items }: MobileNavProps) {
             >
               <UserRound aria-hidden="true" className="size-4" strokeWidth={1.8} />
               Account
-            </Link>
-            <Link
-              href="/cart"
-              prefetch={false}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/15 text-sm text-white"
-              onClick={closeMenu}
-            >
-              <ShoppingBag aria-hidden="true" className="size-4" strokeWidth={1.8} />
-              Cart (0)
             </Link>
           </div>
         </div>
