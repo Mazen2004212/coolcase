@@ -2,6 +2,7 @@ import { z } from "zod";
 import { materialIds, phoneModels, type PhoneBrand } from "@/lib/data/product-options";
 
 export const LOCAL_CART_KEY = "coolcase.cart.v1";
+export const LOCAL_CART_CHANGE_EVENT = "coolcase:cart-change";
 
 const commonFields = {
   productId: z.string().min(1), slug: z.string().min(1), productName: z.string().min(1),
@@ -28,26 +29,101 @@ const customItemSchema = z.object({
 const itemSchema = z.union([productItemSchema, customItemSchema]);
 const cartSchema = z.object({ version: z.literal(1), items: z.array(itemSchema).max(200) });
 export type LocalCartItem = z.input<typeof itemSchema>;
-type StoredCartItem = z.output<typeof itemSchema>;
+export type StoredCartItem = z.output<typeof itemSchema>;
+export type StoredLocalCart = { version: 1; items: StoredCartItem[] };
 
-function sameConfiguration(left: StoredCartItem, right: StoredCartItem) {
-  if (left.kind !== right.kind || left.slug !== right.slug || left.phoneBrand !== right.phoneBrand || left.phoneModel !== right.phoneModel || left.networkType !== right.networkType) return false;
-  if (left.kind === "product" && right.kind === "product") return left.material === right.material;
-  return left.kind === "custom" && right.kind === "custom" && left.image === right.image;
+const EMPTY_CART: StoredLocalCart = { version: 1, items: [] };
+let cachedRaw: string | null | undefined;
+let cachedCart: StoredLocalCart = EMPTY_CART;
+
+function imageFingerprint(value: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+export function getCartItemKey(item: StoredCartItem) {
+  const fields = [item.kind, item.productId, item.phoneBrand, item.phoneModel, item.networkType];
+  if (item.kind === "product") fields.push(item.material);
+  else fields.push(imageFingerprint(item.image));
+  return fields.join("::");
+}
+
+function readRawCart(raw: string | null): StoredLocalCart {
+  if (!raw) return EMPTY_CART;
+  try {
+    const parsed = cartSchema.safeParse(JSON.parse(raw));
+    return parsed.success ? parsed.data : EMPTY_CART;
+  } catch {
+    return EMPTY_CART;
+  }
+}
+
+export function getLocalCartSnapshot(): StoredLocalCart {
+  if (typeof window === "undefined") return EMPTY_CART;
+  const raw = window.localStorage.getItem(LOCAL_CART_KEY);
+  if (raw === cachedRaw) return cachedCart;
+  cachedRaw = raw;
+  cachedCart = readRawCart(raw);
+  return cachedCart;
+}
+
+export function getLocalCartServerSnapshot(): StoredLocalCart {
+  return EMPTY_CART;
+}
+
+export function subscribeToLocalCart(onStoreChange: () => void) {
+  function handleStorage(event: StorageEvent) {
+    if (event.key === LOCAL_CART_KEY) onStoreChange();
+  }
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(LOCAL_CART_CHANGE_EVENT, onStoreChange);
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(LOCAL_CART_CHANGE_EVENT, onStoreChange);
+  };
+}
+
+function saveLocalCart(cart: StoredLocalCart) {
+  const validated = cartSchema.parse(cart);
+  const raw = JSON.stringify(validated);
+  window.localStorage.setItem(LOCAL_CART_KEY, raw);
+  cachedRaw = raw;
+  cachedCart = validated;
+  window.dispatchEvent(new Event(LOCAL_CART_CHANGE_EVENT));
 }
 
 // Browser-only draft cart. Checkout will calculate authoritative prices again.
 export function addToLocalCart(input: LocalCartItem): void {
   const item = itemSchema.parse(input);
-  const raw = localStorage.getItem(LOCAL_CART_KEY);
-  const cart = raw ? cartSchema.parse(JSON.parse(raw)) : { version: 1 as const, items: [] as StoredCartItem[] };
-  const existing = cart.items.find((other) => sameConfiguration(other, item));
+  const items = getLocalCartSnapshot().items.map((existing) => ({ ...existing }));
+  const existing = items.find((other) => getCartItemKey(other) === getCartItemKey(item));
   if (existing) {
     const quantity = existing.quantity + item.quantity;
     if (quantity > 99) throw new Error("A maximum of 99 of the same case can be saved in your bag.");
     Object.assign(existing, item, { quantity, subtotal: quantity * item.discountedUnitPrice });
   } else {
-    cart.items.push(item);
+    items.push(item);
   }
-  localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(cartSchema.parse(cart)));
+  saveLocalCart({ version: 1, items });
+}
+
+export function updateLocalCartQuantity(itemKey: string, quantity: number) {
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) return;
+  const items = getLocalCartSnapshot().items.map((item) => getCartItemKey(item) === itemKey
+    ? { ...item, quantity, subtotal: quantity * item.discountedUnitPrice }
+    : item);
+  saveLocalCart({ version: 1, items });
+}
+
+export function removeFromLocalCart(itemKey: string) {
+  const items = getLocalCartSnapshot().items.filter((item) => getCartItemKey(item) !== itemKey);
+  saveLocalCart({ version: 1, items });
+}
+
+export function getLocalCartCount(cart: StoredLocalCart) {
+  return cart.items.reduce((total, item) => total + item.quantity, 0);
 }

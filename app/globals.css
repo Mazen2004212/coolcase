@@ -34,6 +34,8 @@ section[id], footer[id], main[id] { scroll-margin-top: 76px; }
 .header-link { display: block; padding: 20px 0; color: #ddd; font-size: 13px; transition: color .2s ease; }
 .header-link:hover { color: #fff; }
 .icon-button { display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 3px; cursor: pointer; }
+.cart-header-link { position: relative; }
+.cart-header-badge { position: absolute; top: 3px; right: 1px; display: grid; min-width: 17px; height: 17px; place-items: center; border: 2px solid #070707; border-radius: 999px; background: #fff; color: #070707; padding: 0 3px; font-size: 9px; font-weight: 750; line-height: 1; }
 .text-link { display: inline-flex; min-height: 44px; align-items: center; gap: 9px; font-size: 13px; font-weight: 580; text-decoration: underline; text-underline-offset: 5px; }
 
 .hero-carousel { position: relative; overflow: hidden; background: #080808; color: #fff; }

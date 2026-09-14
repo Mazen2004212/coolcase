@@ -1,5 +1,6 @@
-import { Search, ShoppingBag, UserRound } from "lucide-react";
+import { Search, UserRound } from "lucide-react";
 import Link from "next/link";
+import { CartBadgeLink } from "@/components/cart/cart-badge-link";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { SiteContainer } from "@/components/layout/site-container";
 import { siteNavigation } from "@/lib/data/homepage";
@@ -37,14 +38,7 @@ export function SiteHeader() {
           >
             <UserRound size={20} strokeWidth={1.6} aria-hidden="true" />
           </Link>
-          <Link
-            href="/cart"
-            prefetch={false}
-            className="icon-button hover:bg-white/10"
-            aria-label="Cart"
-          >
-            <ShoppingBag size={21} strokeWidth={1.6} aria-hidden="true" />
-          </Link>
+          <CartBadgeLink />
           <MobileNav items={siteNavigation} />
         </div>
       </SiteContainer>
