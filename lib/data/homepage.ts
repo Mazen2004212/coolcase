@@ -1,3 +1,6 @@
+import { products } from "@/lib/data/products";
+import { defaultMaterialPricing, formatPrice } from "@/lib/data/product-options";
+
 export type SiteNavItem = Readonly<{ href: string; label: string }>;
 
 export type HeroSlide = Readonly<{
@@ -12,13 +15,7 @@ export type HeroSlide = Readonly<{
 }>;
 
 // Homepage presentation only. Product prices are not authoritative.
-export type PresentationProduct = Readonly<{
-  imageAlt: string;
-  imagePath: string;
-  name: string;
-}>;
-
-export const startingPriceLabel = "From 150 EGP";
+export const startingPriceLabel = `From ${formatPrice(defaultMaterialPricing.silicon.discounted)}`;
 
 export const siteNavigation = [
   { href: "/shop", label: "Shop" },
@@ -62,33 +59,7 @@ export const heroSlides = [
   },
 ] as const satisfies readonly HeroSlide[];
 
-export const featuredProducts = [
-  {
-    name: "Abstract Halftone",
-    imagePath: "/assets/products/Abstract halftone.png",
-    imageAlt: "Abstract monochrome halftone phone case design",
-  },
-  {
-    name: "Pink Lace",
-    imagePath: "/assets/products/Black and pink lace iPhone case.png",
-    imageAlt: "Black phone case with a pink lace design",
-  },
-  {
-    name: "Black Lily",
-    imagePath: "/assets/products/Black Floral iPhone Case Mockup.png",
-    imageAlt: "Black phone case with a dramatic floral lily design",
-  },
-  {
-    name: "Amor",
-    imagePath: "/assets/products/amor.png",
-    imageAlt: "Amor phone case design",
-  },
-  {
-    name: "Blue Collage",
-    imagePath: "/assets/products/Blue-silver leopard.png",
-    imageAlt: "Blue and silver leopard collage phone case design",
-  },
-] as const satisfies readonly PresentationProduct[];
+export const featuredProducts = products;
 
 export const footerGroups = [
   {

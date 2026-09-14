@@ -15,10 +15,10 @@ export function CustomCaseCard() {
         />
         <div>
           <h3>MAKE IT YOURS.</h3>
-          <p>Your image. Your case.</p>
+          <p>Upload your image. We’ll make the case.</p>
         </div>
         <span>
-          Customize Your Case
+          Customize · From 239 EGP
           <ArrowUpRight aria-hidden="true" size={18} strokeWidth={1.7} />
         </span>
       </Link>

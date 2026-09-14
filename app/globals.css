@@ -72,6 +72,7 @@ section[id], footer[id], main[id] { scroll-margin-top: 76px; }
 .product-card { min-width: 0; }
 .product-media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: #f6f6f6; }
 .product-media > img { padding: 24px; }
+.product-sold-out { position: absolute; z-index: 2; top: 12px; left: 12px; border-radius: 999px; background: #e8e8e8; color: #555; padding: 6px 9px; font-size: 10px; font-weight: 600; }
 .product-link-icon { position: absolute; right: 12px; bottom: 12px; display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: #fff; opacity: 0; transform: translateY(5px); transition: opacity .2s ease, transform .2s ease; }
 .product-card a:hover .product-link-icon, .product-card a:focus-visible .product-link-icon { opacity: 1; transform: none; }
 .product-details { padding-top: 15px; }
@@ -101,6 +102,18 @@ section[id], footer[id], main[id] { scroll-margin-top: 76px; }
 .footer-main li a { display: inline-flex; min-height: 30px; align-items: center; color: #aaa; font-size: 12px; }
 .footer-main li a:hover { color: #fff; }
 .footer-bottom { border-top: 1px solid #ffffff24; padding-top: 16px; color: #8f8f8f; font-size: 11px; }
+
+.delivery-timeline { margin-top: 24px; border: 1px solid #dedede; padding: 16px; }
+.delivery-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.delivery-heading h2 { font-size: 12px; font-weight: 620; }
+.delivery-heading > span { color: #666; font-size: 10px; }
+.delivery-timeline ol { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 15px; }
+.delivery-timeline li { position: relative; display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
+.delivery-timeline li:not(:last-child)::after { position: absolute; top: 14px; left: calc(50% + 17px); width: calc(100% - 34px); height: 1px; background: #cfcfcf; content: ""; }
+.delivery-timeline li > span { position: relative; z-index: 1; display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #cfcfcf; border-radius: 50%; background: #fff; }
+.delivery-timeline strong { font-size: 10px; font-weight: 580; }
+.delivery-timeline small { color: #666; font-size: 9px; }
+.delivery-timeline > p { margin-top: 12px; color: #666; font-size: 10px; text-align: center; }
 
 @media (max-width: 1023px) {
   .hero-stage { height: 340px; }

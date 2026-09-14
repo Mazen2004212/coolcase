@@ -1,0 +1,26 @@
+.shop-page { background: #fff; }
+.shop-intro { border-bottom: 1px solid #dedede; padding: 44px 0 34px; }
+.shop-intro p { color: #777; font-size: 10px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }
+.shop-intro h1 { margin-top: 8px; font-size: clamp(40px, 5vw, 68px); font-weight: 650; letter-spacing: -.065em; line-height: .95; }
+.shop-intro span { display: block; margin-top: 14px; color: #5f5f5f; font-size: 13px; }
+.shop-control-bar { display: flex; min-height: 76px; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #dedede; }
+.shop-control-bar > p { font-size: 11px; color: #666; }
+.shop-control-bar > p span { color: #111; font-weight: 650; }
+.shop-control-bar > div { display: flex; align-self: stretch; }
+.shop-control-bar label { display: flex; min-width: 190px; align-items: center; justify-content: space-between; gap: 18px; border-left: 1px solid #dedede; padding-left: 22px; color: #777; font-size: 10px; }
+.shop-control-bar select { height: 44px; min-width: 100px; border: 0; background: #fff; color: #111; font-size: 12px; cursor: pointer; }
+.shop-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px 22px; padding: 38px 0 86px; }
+.shop-grid .custom-case-card { min-height: 100%; }
+.shop-empty { min-height: 340px; display: grid; place-content: center; text-align: center; }
+.shop-empty h2 { font-size: 24px; font-weight: 620; letter-spacing: -.04em; }
+.shop-empty p { margin-top: 8px; color: #777; font-size: 12px; }
+@media (max-width: 1023px) { .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 639px) {
+  .shop-intro { padding: 30px 0 25px; }
+  .shop-control-bar { align-items: flex-start; flex-direction: column; gap: 8px; padding: 15px 0; }
+  .shop-control-bar > div { width: 100%; border-top: 1px solid #dedede; }
+  .shop-control-bar label { flex: 1; min-width: 0; padding: 8px 4px 0; flex-direction: column; align-items: flex-start; gap: 0; }
+  .shop-control-bar label:first-child { border-left: 0; }
+  .shop-control-bar select { width: 100%; font-size: 16px; }
+  .shop-grid { gap: 30px 12px; padding: 28px 0 54px; }
+}

@@ -1,0 +1,26 @@
+.custom-cases-page { background: #fff; padding: 34px 0 82px; }
+.custom-builder-layout { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); align-items: start; gap: clamp(36px, 6vw, 88px); }
+.custom-preview-panel { position: sticky; top: 98px; }
+.custom-preview-image { position: relative; overflow: hidden; aspect-ratio: 2.2 / 1; background: #f4f1ed; }
+.custom-preview-image img { object-fit: cover; object-position: center top; }
+.custom-preview-image[data-uploaded="true"] { aspect-ratio: 5 / 4; }
+.custom-preview-image[data-uploaded="true"] img { object-fit: contain; object-position: center; }
+.custom-preview-image > span { position: absolute; bottom: 18px; left: 18px; background: #fff; padding: 7px 10px; font-size: 10px; font-weight: 580; }
+.custom-preview-panel > p { margin-top: 10px; color: #777; font-size: 10px; line-height: 1.6; }
+.custom-builder-information { padding-top: 28px; }
+.custom-builder-information h1 { margin-top: 10px; font-size: clamp(38px, 4vw, 54px); font-weight: 640; letter-spacing: -.06em; line-height: 1; }
+.custom-builder-description { max-width: 45ch; margin-top: 16px; color: #666; font-size: 13px; line-height: 1.7; }
+.custom-builder-form fieldset { border: 0; margin: 0 0 22px; padding: 0; }
+.custom-builder-form legend, .custom-upload-control { margin-bottom: 11px; color: #777; font-size: 10px; }
+.custom-builder-form legend span, .custom-upload-control > span { margin-left: 9px; color: #111; font-size: 12px; font-weight: 600; }
+.custom-upload-control { display: block; margin-bottom: 23px; }
+.custom-upload-control input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.custom-upload-control strong { display: flex; min-height: 52px; align-items: center; gap: 10px; margin-top: 11px; border: 1px dashed #aaa; border-radius: 4px; padding: 0 14px; color: #111; font-size: 12px; font-weight: 550; cursor: pointer; overflow-wrap: anywhere; }
+.custom-upload-control:focus-within strong { outline: 2px solid #111; outline-offset: 3px; }
+.custom-how-it-works { margin-top: 26px; border-top: 1px solid #dedede; padding-top: 22px; }
+.custom-how-it-works h2 { margin-top: 7px; font-size: 22px; font-weight: 620; letter-spacing: -.04em; }
+.custom-how-it-works ol { display: grid; grid-template-columns: repeat(4, 1fr); counter-reset: step; margin-top: 14px; }
+.custom-how-it-works li { min-width: 0; border-left: 1px solid #dedede; padding: 5px 10px; color: #555; font-size: 10px; line-height: 1.5; counter-increment: step; }
+.custom-how-it-works li::before { display: block; margin-bottom: 5px; color: #111; font-weight: 650; content: "0" counter(step); }
+@media (max-width: 1023px) { .custom-builder-layout { grid-template-columns: 1fr; } .custom-preview-panel { position: static; max-width: 630px; width: 100%; margin: auto; } .custom-builder-information { max-width: 630px; width: 100%; margin: auto; padding-top: 0; } }
+@media (max-width: 639px) { .custom-cases-page { padding: 20px 0 50px; } .custom-preview-image[data-uploaded="true"] { aspect-ratio: 1 / 1; } .custom-how-it-works ol { grid-template-columns: repeat(2, 1fr); gap: 14px 0; } }

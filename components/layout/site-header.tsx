@@ -8,7 +8,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 h-[var(--header-height)] bg-surface-black text-white">
       <SiteContainer className="relative flex h-full items-center justify-between gap-4">
-        <Link href="#top" className="brand-wordmark" aria-label="Coolcase home">Coolcase</Link>
+        <Link href="/" className="brand-wordmark" aria-label="Coolcase home">Coolcase</Link>
         <nav aria-label="Primary navigation" className="hidden lg:block">
           <ul className="flex items-center gap-8">
             {siteNavigation.map((item) => (

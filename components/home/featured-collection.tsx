@@ -26,7 +26,7 @@ export function FeaturedCollection() {
         <div className="product-grid" data-merchandising-grid>
           {featuredProducts.map((product) => (
            
-            <ProductCard key={product.imagePath} product={product} />
+            <ProductCard key={product.slug} product={product} />
           ))}
           <CustomCaseCard />
         </div>
