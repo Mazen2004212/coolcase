@@ -19,7 +19,7 @@ export const startingPriceLabel = `From ${formatPrice(defaultMaterialPricing.sil
 
 export const siteNavigation = [
   { href: "/shop", label: "Shop" },
-  { href: "/shop", label: "Collections" },
+  { href: "/collections", label: "Collections" },
   { href: "/custom-cases", label: "Custom Cases" },
   { href: "/about", label: "About" },
 ] as const satisfies readonly SiteNavItem[];

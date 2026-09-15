@@ -1,6 +1,6 @@
 import { defaultMaterialPricing, phoneBrands, type Material, type MaterialPrice, type PhoneBrand } from "@/lib/data/product-options";
 
-export type ProductImage = { src: string; alt: string; label: string; view: "full" | "detail" };
+export type ProductImage = { src: string; alt: string; label: string; view: "full" | "detail" | "guide" };
 export type StorefrontProduct = {
   id: string;
   slug: string;

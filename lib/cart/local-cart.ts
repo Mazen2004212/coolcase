@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { materialIds, phoneModels, type PhoneBrand } from "@/lib/data/product-options";
+import { customCasePricing, materialIds, phoneModels, type Material, type PhoneBrand } from "@/lib/data/product-options";
 
 export const LOCAL_CART_KEY = "coolcase.cart.v1";
 export const LOCAL_CART_CHANGE_EVENT = "coolcase:cart-change";
@@ -21,9 +21,14 @@ const productItemSchema = z.object({
 
 const customItemSchema = z.object({
   kind: z.literal("custom"), ...commonFields,
+  material: z.enum(materialIds).default("silicon"),
   image: z.string().startsWith("data:image/").max(4_000_000), uploadFileName: z.string().min(1).max(180),
 }).refine((item) => (phoneModels[item.phoneBrand as PhoneBrand] as readonly string[]).includes(item.phoneModel), "Choose a supported phone model.")
-  .refine((item) => item.discountedUnitPrice === 239 && item.originalUnitPrice === 289, "Invalid custom-case price.")
+  .refine((item) => item.material !== "acrylic" || item.phoneBrand === "iPhone", "Acrylic requires an iPhone.")
+  .refine((item) => {
+    const price = customCasePricing[item.material];
+    return item.discountedUnitPrice === price.discounted && item.originalUnitPrice === price.original;
+  }, "Invalid custom-case price.")
   .refine((item) => item.subtotal === item.quantity * item.discountedUnitPrice, "Invalid subtotal.");
 
 const itemSchema = z.union([productItemSchema, customItemSchema]);
@@ -47,15 +52,26 @@ function imageFingerprint(value: string) {
 
 export function getCartItemKey(item: StoredCartItem) {
   const fields = [item.kind, item.productId, item.phoneBrand, item.phoneModel, item.networkType];
-  if (item.kind === "product") fields.push(item.material);
-  else fields.push(imageFingerprint(item.image));
+  fields.push(item.material);
+  if (item.kind === "custom") fields.push(imageFingerprint(item.image));
   return fields.join("::");
 }
 
 function readRawCart(raw: string | null): StoredLocalCart {
   if (!raw) return EMPTY_CART;
   try {
-    const parsed = cartSchema.safeParse(JSON.parse(raw));
+    const stored = JSON.parse(raw) as { items?: unknown[] };
+    if (Array.isArray(stored.items)) {
+      stored.items = stored.items.map((value) => {
+        if (!value || typeof value !== "object") return value;
+        const item = value as Record<string, unknown>;
+        if (item.kind !== "custom" || !materialIds.includes(item.material as Material)) return item;
+        const price = customCasePricing[item.material as Material];
+        const quantity = typeof item.quantity === "number" ? item.quantity : 1;
+        return { ...item, discountedUnitPrice: price.discounted, originalUnitPrice: price.original, subtotal: quantity * price.discounted };
+      });
+    }
+    const parsed = cartSchema.safeParse(stored);
     return parsed.success ? parsed.data : EMPTY_CART;
   } catch {
     return EMPTY_CART;

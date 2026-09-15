@@ -13,15 +13,43 @@ export const phoneBrands = Object.keys(phoneModels) as PhoneBrand[];
 export const materialIds = ["silicon", "acrylic", "double-layer"] as const;
 export type Material = (typeof materialIds)[number];
 export type MaterialPrice = { original: number; discounted: number };
-export const materialOptions: Record<Material, { label: string; note: string }> = {
-  silicon: { label: "Silicon", note: "Flexible and lightweight. A practical everyday option with a comfortable grip and good protection." },
-  acrylic: { label: "Acrylic", note: "More rigid with a premium finish and sharper print presentation. Best for customers who want a refined look and stronger protection." },
-  "double-layer": { label: "Double Layer", note: "Extra protection with a dual-layer build. Best for stronger durability and heavier everyday use." },
+type MaterialOption = {
+  label: string;
+  note: string;
+  optionImage: { src: string; alt: string };
+  galleryGuide?: { src: string; alt: string; label: string; view: "guide" };
+};
+export const materialOptions: Record<Material, MaterialOption> = {
+  silicon: {
+    label: "Silicon",
+    note: "Flexible and lightweight. A practical everyday option with a comfortable grip and good protection.",
+    optionImage: { src: "/assets/material-options/silicon.png", alt: "Clear silicon case material" },
+  },
+  acrylic: {
+    label: "Acrylic",
+    note: "More rigid with a premium finish and sharper print presentation. Best for customers who want a refined look and stronger protection.",
+    optionImage: { src: "/assets/material-options/acrylic.png", alt: "Clear acrylic case with black edges" },
+  },
+  "double-layer": {
+    label: "Double Layer",
+    note: "Extra protection with a dual-layer build. Best for stronger durability and heavier everyday use.",
+    optionImage: { src: "/assets/material-options/double-layered.png", alt: "Double layer phone case construction" },
+    galleryGuide: {
+      src: "/assets/material-guides/double-layered-info.png",
+      alt: "Double layer case showing protective inner and outer layers",
+      label: "Double Layer guide",
+      view: "guide",
+    },
+  },
 };
 export const defaultMaterialPricing: Record<Material, MaterialPrice> = {
   silicon: { original: 230, discounted: 180 },
   acrylic: { original: 299, discounted: 225 },
   "double-layer": { original: 460, discounted: 399 },
 };
-export const customCasePricing: MaterialPrice = { original: 289, discounted: 239 };
+export const customCasePricing: Record<Material, MaterialPrice> = {
+  silicon: { original: 229, discounted: 199 },
+  acrylic: { original: 289, discounted: 239 },
+  "double-layer": { original: 489, discounted: 429 },
+};
 export const formatPrice = (amount: number) => `${amount.toLocaleString("en-EG")} EGP`;

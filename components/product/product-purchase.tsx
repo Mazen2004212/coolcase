@@ -1,13 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import { useState, type FormEvent } from "react";
 import { ArrowRight, Check, Minus, Plus } from "lucide-react";
+import { useProductMaterial } from "@/components/product/product-material-context";
 import { addToLocalCart } from "@/lib/cart/local-cart";
 import { formatPrice, materialIds, materialOptions, phoneModels, type Material, type PhoneBrand } from "@/lib/data/product-options";
 import type { StorefrontProduct } from "@/lib/data/products";
 
 export function ProductPurchase({ product }: { product: StorefrontProduct }) {
-  const [material, setMaterial] = useState<Material>("silicon");
+  const { material, setMaterial } = useProductMaterial();
   const [brand, setBrand] = useState<PhoneBrand>("iPhone");
   const [model, setModel] = useState("");
   const [network, setNetwork] = useState<"4G" | "5G" | "">("");
@@ -53,7 +55,11 @@ export function ProductPurchase({ product }: { product: StorefrontProduct }) {
           {materialIds.map((id) => (
             <label key={id}>
               <input type="radio" name="material" value={id} checked={material === id} onChange={() => changeMaterial(id)} />
-              <span>{materialOptions[id].label}<small>{formatPrice(product.pricing[id].discounted)}</small></span>
+              <span className="pdp-material-card">
+                <span className="pdp-material-image"><Image src={materialOptions[id].optionImage.src} alt={materialOptions[id].optionImage.alt} fill sizes="(min-width: 640px) 140px, 30vw" /></span>
+                <strong>{materialOptions[id].label}</strong>
+                <small>{formatPrice(product.pricing[id].discounted)}</small>
+              </span>
             </label>
           ))}
         </div>

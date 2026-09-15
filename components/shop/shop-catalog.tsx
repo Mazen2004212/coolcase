@@ -9,7 +9,7 @@ type Availability = "all" | "available" | "sold-out";
 type SortOrder = "a-z" | "z-a";
 const DEFAULT_SORT: SortOrder = "a-z";
 
-export function ShopCatalog({ products }: { products: StorefrontProduct[] }) {
+export function ShopCatalog({ products, collectionFilter = false }: { products: StorefrontProduct[]; collectionFilter?: boolean }) {
   const [availability, setAvailability] = useState<Availability>("all");
   const [sort, setSort] = useState<SortOrder>(DEFAULT_SORT);
   const visibleProducts = useMemo(() => {
@@ -36,11 +36,11 @@ export function ShopCatalog({ products }: { products: StorefrontProduct[] }) {
       </div>
       {visibleProducts.length ? (
         <div className="shop-grid" aria-live="polite">
-          {visibleProducts.map((product) => <ProductCard key={product.slug} product={product} />)}
-          {availability !== "sold-out" ? <CustomCaseCard /> : null}
+          {visibleProducts.map((product, index) => <ProductCard key={product.slug} product={product} eager={index < 3} />)}
+          {availability !== "sold-out" && !collectionFilter ? <CustomCaseCard /> : null}
         </div>
       ) : (
-        <div className="shop-empty" role="status"><h2>No sold-out cases right now.</h2><p>Every current Coolcase design is available to configure.</p></div>
+        <div className="shop-empty" role="status"><h2>{availability === "sold-out" ? "No sold-out cases right now." : "No cases found."}</h2><p>{availability === "sold-out" ? "Every current Coolcase design is available to configure." : collectionFilter ? "Try another collection." : "Try another filter."}</p></div>
       )}
     </>
   );

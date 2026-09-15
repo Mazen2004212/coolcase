@@ -100,14 +100,15 @@ export function MobileNav({ items, accountHref = "/login" }: MobileNavProps) {
           </nav>
 
           <div className="mt-5 grid grid-cols-2 gap-2 border-t border-white/15 pt-5">
-            <a
-              href="#discovery"
+            <Link
+              href="/search"
+              prefetch={false}
               onClick={closeMenu}
               className="flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/15 text-sm text-white"
             >
               <Search aria-hidden="true" className="size-4" strokeWidth={1.8} />
               Search
-            </a>
+            </Link>
             <Link
               href={accountHref}
               prefetch={false}

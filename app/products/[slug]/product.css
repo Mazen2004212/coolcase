@@ -15,6 +15,8 @@
 .pdp-main-image { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: #f6f6f6; }
 .pdp-main-image > img { object-fit: contain; padding: 30px; }
 .pdp-main-image[data-view="detail"] > img { transform: scale(1.85); }
+.pdp-main-image[data-view="guide"] { background: #fff; }
+.pdp-main-image[data-view="guide"] > img { padding: 18px; }
 .pdp-image-label { position: absolute; bottom: 16px; left: 16px; background: #ffffffed; padding: 6px 9px; font-size: 10px; }
 .pdp-gallery figcaption { margin-top: 12px; color: #777; font-size: 10px; line-height: 1.6; }
 .pdp-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: #656565; }
@@ -35,7 +37,10 @@
 .pdp-materials { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .pdp-materials label, .pdp-network-options label { position: relative; cursor: pointer; }
 .pdp-materials input, .pdp-network-options input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.pdp-materials label > span { display: flex; flex-direction: column; justify-content: center; min-height: 66px; border: 1px solid #d8d8d8; border-radius: 5px; padding: 10px 12px; font-size: 12px; font-weight: 580; }
+.pdp-materials label > .pdp-material-card { display: flex; flex-direction: column; min-height: 132px; border: 1px solid #d8d8d8; border-radius: 5px; padding: 8px; font-size: 12px; }
+.pdp-material-image { position: relative; display: block; width: 100%; height: 78px; margin-bottom: 7px; overflow: hidden; background: #f6f6f6; }
+.pdp-material-image img { object-fit: contain; padding: 4px; }
+.pdp-materials strong { font-size: 11px; font-weight: 620; line-height: 1.25; }
 .pdp-materials small { margin-top: 4px; font-size: 10px; font-weight: 400; color: #666; }
 .pdp-materials input:checked + span, .pdp-network-options input:checked + span { border-color: #111; box-shadow: inset 0 0 0 1px #111; background: #f7f7f5; }
 .pdp input:focus-visible + span { outline: 2px solid #111; outline-offset: 3px; }
@@ -95,7 +100,9 @@
   .pdp-main-image > img { padding: 20px; }
   .pdp-gallery figcaption { font-size: 9px; margin-top: 8px; }
   .pdp-information h1 { font-size: 36px; }
-  .pdp-materials label > span { padding: 10px; }
+  .pdp-materials { gap: 6px; }
+  .pdp-materials label > .pdp-material-card { min-height: 112px; padding: 6px; }
+  .pdp-material-image { height: 60px; margin-bottom: 6px; }
   .pdp-device-selects { grid-template-columns: 1fr; }
   .pdp-device-selects select { font-size: 16px; height: 48px; }
   .pdp-bag-row { flex-wrap: wrap; gap: 10px; }

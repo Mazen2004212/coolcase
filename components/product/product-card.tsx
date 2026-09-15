@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { formatPrice } from "@/lib/data/product-options";
 import type { StorefrontProduct } from "@/lib/data/products";
 
-export function ProductCard({ product }: { product: StorefrontProduct }) {
+export function ProductCard({ product, eager = false }: { product: StorefrontProduct; eager?: boolean }) {
   return (
     <article className="product-card" data-merchandising-tile="product">
       <Link href={`/products/${product.slug}`} prefetch={false} className="group block" aria-label={`View ${product.name} case`}>
@@ -13,6 +13,7 @@ export function ProductCard({ product }: { product: StorefrontProduct }) {
             src={product.images[0].src}
             alt={product.images[0].alt}
             fill
+            loading={eager ? "eager" : "lazy"}
             sizes="(min-width: 1024px) 31vw, (min-width: 640px) 48vw, 50vw"
             className="object-contain transition-transform duration-500 group-hover:scale-[1.025]"
           />

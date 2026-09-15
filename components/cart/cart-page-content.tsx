@@ -59,7 +59,7 @@ function CartLine({ item }: { item: StoredCartItem }) {
         </div>
 
         <dl className="cart-configuration">
-          {item.kind === "product" ? <><dt>Material</dt><dd>{materialOptions[item.material].label}</dd></> : null}
+          <dt>Material</dt><dd>{materialOptions[item.material].label}</dd>
           <dt>Phone</dt><dd>{item.phoneBrand} — {item.phoneModel}</dd>
           <dt>Network</dt><dd>{item.networkType}</dd>
         </dl>

@@ -26,7 +26,7 @@ export async function SiteHeader() {
         </nav>
         <div className="flex items-center gap-1">
           <Link
-            href="/shop"
+            href="/search"
             prefetch={false}
             className="icon-button hidden hover:bg-white/10 lg:inline-flex"
             aria-label="Search"

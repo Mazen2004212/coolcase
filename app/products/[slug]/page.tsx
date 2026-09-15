@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteContainer } from "@/components/layout/site-container";
 import { ProductGallery } from "@/components/product/product-gallery";
+import { ProductMaterialProvider } from "@/components/product/product-material-context";
 import { ProductPurchase } from "@/components/product/product-purchase";
 import { DeliveryTimeline } from "@/components/storefront/delivery-timeline";
 import { getProductBySlug, getRelatedProducts, products } from "@/lib/data/products";
@@ -31,9 +32,10 @@ export default async function ProductPage({ params }: Props) {
       <main id="main-content" className="pdp">
         <SiteContainer>
           <nav className="pdp-breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><ChevronRight size={12} aria-hidden="true" /><Link href="/shop">Cases</Link><ChevronRight size={12} aria-hidden="true" /><span aria-current="page">{product.name}</span></nav>
-          <div className="pdp-layout">
-            <ProductGallery key={product.slug} images={product.images} name={product.name} />
-            <div className="pdp-information">
+          <ProductMaterialProvider>
+            <div className="pdp-layout">
+              <ProductGallery key={product.slug} images={product.images} name={product.name} />
+              <div className="pdp-information">
               <p className="pdp-eyebrow">The Coolcase Edit / {product.category}</p>
               <h1>{product.name}</h1>
               <p className="pdp-description">{product.description}</p>
@@ -46,8 +48,9 @@ export default async function ProductPage({ params }: Props) {
                   {related.map((item) => <Link key={item.slug} href={`/products/${item.slug}`} aria-label={`View ${item.name}`}><Image src={item.images[0].src} alt={item.name} fill sizes="85px" /></Link>)}
                 </div>
               </section>
+              </div>
             </div>
-          </div>
+          </ProductMaterialProvider>
           <section className="pdp-recommendations" id="more-cases" aria-labelledby="more-cases-title">
             <div className="pdp-recommendations-heading"><div><p className="pdp-eyebrow">A different day. A different mood.</p><h2 id="more-cases-title">More Cases</h2></div><span>Keep your options open.</span></div>
             <div className="pdp-related-grid">
