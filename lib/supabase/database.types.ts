@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       addresses: {
@@ -688,7 +713,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      set_default_address: {
+        Args: { target_address_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       case_material: "SILICONE" | "ACRYLIC"
@@ -836,6 +864,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       case_material: ["SILICONE", "ACRYLIC"],

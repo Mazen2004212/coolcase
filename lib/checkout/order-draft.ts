@@ -23,6 +23,8 @@ export const futurePaymentStatuses = [
 ] as const;
 export type FuturePaymentStatus = (typeof futurePaymentStatuses)[number];
 export type CheckoutPaymentMethod = "COD" | "INSTAPAY";
+export const deliveryCities = ["Cairo", "Giza"] as const;
+export type DeliveryCity = (typeof deliveryCities)[number];
 
 export type CheckoutFormValues = {
   fullName: string;
@@ -37,6 +39,7 @@ export type CheckoutFormValues = {
   apartment: string;
   landmark: string;
   deliveryNotes: string;
+  saveAddress?: boolean;
   paymentMethod: CheckoutPaymentMethod;
 };
 
@@ -45,19 +48,19 @@ export type CheckoutFormValues = {
 export type CheckoutSubmissionDraft = {
   customer: { fullName: string; phone: string; email: string };
   address: {
-    governorate: string; city: string; area: string; street: string; building: string;
+    governorate?: string; city: string; area: string; street: string; building: string;
     floor?: string; apartment?: string; landmark?: string; deliveryNotes?: string;
   };
   payment: { method: CheckoutPaymentMethod };
   cart: { items: StoredCartItem[]; subtotal: number; shipping: number; total: number };
 };
 
-export function createCheckoutSubmissionDraft(values: CheckoutFormValues, items: StoredCartItem[]): CheckoutSubmissionDraft {
+export function createCheckoutSubmissionDraft(values: CheckoutFormValues, items: StoredCartItem[], addressSnapshot?: CheckoutSubmissionDraft["address"]): CheckoutSubmissionDraft {
   const subtotal = items.reduce((sum, item) => sum + item.discountedUnitPrice * item.quantity, 0);
   return {
     customer: { fullName: values.fullName.trim(), phone: values.phone.trim(), email: values.email.trim() },
-    address: {
-      governorate: values.governorate.trim(), city: values.city.trim(), area: values.area.trim(),
+    address: addressSnapshot || {
+      governorate: values.governorate.trim() || undefined, city: values.city.trim(), area: values.area.trim(),
       street: values.street.trim(), building: values.building.trim(), floor: values.floor.trim() || undefined,
       apartment: values.apartment.trim() || undefined, landmark: values.landmark.trim() || undefined,
       deliveryNotes: values.deliveryNotes.trim() || undefined,

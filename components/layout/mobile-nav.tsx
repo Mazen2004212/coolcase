@@ -9,9 +9,10 @@ import type { SiteNavItem } from "@/lib/data/homepage";
 
 type MobileNavProps = {
   items: readonly SiteNavItem[];
+  accountHref?: string;
 };
 
-export function MobileNav({ items }: MobileNavProps) {
+export function MobileNav({ items, accountHref = "/login" }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -108,7 +109,7 @@ export function MobileNav({ items }: MobileNavProps) {
               Search
             </a>
             <Link
-              href="/login"
+              href={accountHref}
               prefetch={false}
               className="flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/15 text-sm text-white"
               onClick={closeMenu}

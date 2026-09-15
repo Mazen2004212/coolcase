@@ -127,11 +127,21 @@ async function createDevelopmentIdentity(label, metadata) {
   const emailLabel = label.toLowerCase().replaceAll("_", "-");
   const email = `coolcase.phase2b.${emailLabel}.${runId}@gmail.com`;
   const password = `${randomBytes(24).toString("base64url")}Aa1!`;
-  const signupClient = createClient(url, anonKey, authOptions);
-  const signup = await signupClient.auth.signUp({
+  const userMetadata = {
+    full_name: `Phase 2B ${label}`,
+    phone: "01000000001",
+    governorate: "Cairo",
+    city: "Cairo",
+    area: "Nasr City",
+    street: "Runtime Test Street",
+    building: "1",
+    ...metadata,
+  };
+  const signup = await service.auth.admin.createUser({
     email,
     password,
-    options: { data: metadata },
+    email_confirm: true,
+    user_metadata: userMetadata,
   });
 
   if (signup.error || !signup.data.user) {
@@ -140,16 +150,6 @@ async function createDevelopmentIdentity(label, metadata) {
 
   const id = signup.data.user.id;
   createdUsers.push(id);
-
-  if (!signup.data.session) {
-    const confirmation = await service.auth.admin.updateUserById(id, {
-      email_confirm: true,
-    });
-
-    if (confirmation.error) {
-      throw new Error(`Could not confirm ${label}: ${confirmation.error.message}`);
-    }
-  }
 
   const loginClient = createClient(url, anonKey, authOptions);
   const login = await loginClient.auth.signInWithPassword({ email, password });
@@ -237,21 +237,14 @@ async function verifyAddresses(customerA, customerB) {
   };
 
   const addressA = ensureNoError(
-    await customerA.client
-      .from("addresses")
-      .insert({ ...commonAddress, user_id: customerA.id, label: "Phase2B A", is_default: true })
-      .select("id, user_id, label")
-      .single(),
-    "CUSTOMER_A can insert an own address",
+    await customerA.client.from("addresses").select("id, user_id, label, is_default").eq("user_id", customerA.id).single(),
+    "signup trigger created CUSTOMER_A default address",
   );
   const addressB = ensureNoError(
-    await customerB.client
-      .from("addresses")
-      .insert({ ...commonAddress, user_id: customerB.id, label: "Phase2B B", is_default: true })
-      .select("id, user_id")
-      .single(),
-    "CUSTOMER_B can insert an own address",
+    await customerB.client.from("addresses").select("id, user_id, is_default").eq("user_id", customerB.id).single(),
+    "signup trigger created CUSTOMER_B default address",
   );
+  ensure(addressA.is_default && addressB.is_default, "signup addresses are default addresses");
 
   const ownRead = ensureNoError(
     await customerA.client.from("addresses").select("id").eq("id", addressA.id),
@@ -305,7 +298,24 @@ async function verifyAddresses(customerA, customerB) {
     "CUSTOMER_A can update their own address",
   );
   ensureNoError(
-    await customerA.client.from("addresses").delete().eq("id", editableAddress.id),
+    await customerA.client.rpc("set_default_address", { target_address_id: editableAddress.id }),
+    "CUSTOMER_A can atomically change their default address",
+  );
+  const defaultRows = ensureNoError(
+    await customerA.client.from("addresses").select("id, is_default").eq("user_id", customerA.id),
+    "CUSTOMER_A can inspect addresses after changing the default",
+  );
+  ensure(
+    defaultRows.filter((address) => address.is_default).length === 1
+      && defaultRows.find((address) => address.is_default)?.id === editableAddress.id,
+    "exactly one CUSTOMER_A address remains default",
+  );
+  ensureDenied(
+    await customerA.client.rpc("set_default_address", { target_address_id: addressB.id }),
+    "CUSTOMER_A cannot make CUSTOMER_B address the default",
+  );
+  ensureNoError(
+    await customerA.client.from("addresses").delete().eq("id", addressA.id),
     "CUSTOMER_A can delete their own address",
   );
 }
@@ -705,7 +715,7 @@ try {
     full_name: "Phase 2B Admin Test",
   });
 
-  record("three temporary identities were created through Supabase Auth signup");
+  record("three temporary confirmed identities were created through Supabase Auth admin test setup");
   await verifyProfiles(customerA, customerB, adminTest);
   await verifyAddresses(customerA, customerB);
   await verifyCatalogAndSettings(customerA, adminTest);

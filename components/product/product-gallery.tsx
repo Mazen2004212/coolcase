@@ -19,7 +19,7 @@ export function ProductGallery({ images, name }: { images: ProductImage[]; name:
       </div>
       <figure>
         <div className="pdp-main-image" data-view={selected.view}>
-          <Image src={selected.src} alt={selected.alt} fill priority sizes="(min-width: 1024px) 49vw, (min-width: 640px) 85vw, 100vw" />
+          <Image src={selected.src} alt={selected.alt} fill loading="eager" sizes="(min-width: 1024px) 49vw, (min-width: 640px) 85vw, 100vw" />
           <span className="pdp-image-label">{selected.label}</span>
         </div>
         <figcaption>Design shown on a sample phone. Camera cutouts vary by model.</figcaption>

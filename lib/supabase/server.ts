@@ -19,8 +19,8 @@ export async function createClient() {
             cookieStore.set(name, value, options);
           });
         } catch {
-          // Server Components cannot write cookies. A later auth phase will add
-          // the request-level session refresh required by Supabase SSR.
+          // Server Components cannot write cookies. The root proxy refreshes
+          // sessions at the request boundary where response cookies are writable.
         }
       },
     },
