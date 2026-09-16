@@ -59,3 +59,16 @@ supabase/.temp/
 # Local uploads / generated private data
 private/
 uploads/
+
+
+
+# Secrets / credentials
+secrets/
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# AI/local tooling
+.claude/

@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       addresses: {
@@ -563,8 +538,10 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number
+          double_layer_price_override: number | null
           id: string
           is_active: boolean
+          is_available: boolean
           is_featured: boolean
           name: string
           short_description: string | null
@@ -578,8 +555,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          double_layer_price_override?: number | null
           id?: string
           is_active?: boolean
+          is_available?: boolean
           is_featured?: boolean
           name: string
           short_description?: string | null
@@ -593,8 +572,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          double_layer_price_override?: number | null
           id?: string
           is_active?: boolean
+          is_available?: boolean
           is_featured?: boolean
           name?: string
           short_description?: string | null
@@ -864,9 +845,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       case_material: ["SILICONE", "ACRYLIC"],

@@ -1,4 +1,3 @@
-import { products } from "@/lib/data/products";
 import { defaultMaterialPricing, formatPrice } from "@/lib/data/product-options";
 
 export type SiteNavItem = Readonly<{ href: string; label: string }>;
@@ -59,7 +58,7 @@ export const heroSlides = [
   },
 ] as const satisfies readonly HeroSlide[];
 
-export const featuredProducts = products;
+// featuredProducts: use lib/catalog/queries getFeaturedProducts() instead.
 
 export const footerGroups = [
   {

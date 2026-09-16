@@ -1,4 +1,3 @@
-import { products } from '@/lib/data/products';
 import { defaultMaterialPricing, materialIds, phoneModels } from '@/lib/data/product-options';
 import { orderStatuses, type AdminOrderShipping, type AdminState } from './types';
 
@@ -7,9 +6,19 @@ export const DEMO_TODAY = '2026-09-15';
 
 const emptyShipping: AdminOrderShipping = { courier: '', trackingNumber: '', currentLocation: '', shippingNotes: '' };
 
+// Demo product stubs — uses real seeded Supabase slugs/names but placeholder images.
+// In production, admin UI fetches real products from Supabase via server actions.
+const DEMO_PRODUCTS = [
+  { id: 'd8ebc8fc-6268-493a-9393-5f7c272b68d4', name: 'Abstract Halftone', slug: 'abstract-halftone', category: 'Graphic', image: '/assets/products/Abstract halftone.png' },
+  { id: '9bc56b01-7176-4b0f-9e16-66509b0c8a91', name: 'Pink Lace',          slug: 'pink-lace',         category: 'Lace',    image: '/assets/products/Black and pink lace iPhone case.png' },
+  { id: '80364866-9dc5-49a9-a90e-f92a4ebbfd8a', name: 'Black Lily',         slug: 'black-lily',        category: 'Floral',  image: '/assets/products/Black Floral iPhone Case Mockup.png' },
+  { id: '6694c0a6-8adc-4cb8-b1ae-eb9869d2dc21', name: 'Amor',               slug: 'amor',              category: 'Typography', image: '/assets/products/amor.png' },
+  { id: '99f2c2ba-1b41-4890-bbfb-4862605e6b1b', name: 'Blue Collage',       slug: 'blue-collage',      category: 'Collage', image: '/assets/products/Blue-silver leopard.png' },
+];
+
 export function createAdminDemo(): AdminState {
   const customers: AdminState['customers'] = ['Nour Hassan', 'Omar Ahmed', 'Salma Ali', 'Youssef Adel', 'Farida Khaled', 'Adam Mostafa'].map((name, i) => ({ id: `demo-customer-${i + 1}`, name, email: `customer${i + 1}@example.com`, phone: `0100000000${i}`, since: `2026-08-0${i + 1}`, addresses: [`${12 + i} Demo Street, ${i % 2 ? 'Dokki, Giza' : 'Nasr City, Cairo'}`] }));
-  const catalog: AdminState['products'] = products.map((p, i) => ({ id: p.id, name: p.name, slug: p.slug, shortDescription: p.description, description: p.description, collection: p.category, category: 'Phone Cases', regularPrice: 230, salePrice: 180, saleEnabled: true, saleStarts: '', saleEnds: '', status: i === 4 ? 'Draft' : 'Active', materials: [...materialIds], materialPricing: structuredClone(defaultMaterialPricing), models: { iPhone: [...phoneModels.iPhone], Samsung: [...phoneModels.Samsung] }, featured: i < 2, isNew: i === 2, bestSeller: i === 0, images: p.images.slice(0, 1).map((image, j) => ({ id: `${p.id}-${j}`, src: image.src, alt: image.alt, group: 'General Gallery' as const })), updatedAt: `${DEMO_TODAY}T10:00:00Z` }));
+  const catalog: AdminState['products'] = DEMO_PRODUCTS.map((p, i) => ({ id: p.id, name: p.name, slug: p.slug, shortDescription: p.name, description: p.name, collection: p.category, category: 'Phone Cases', regularPrice: 230, salePrice: 180, saleEnabled: true, saleStarts: '', saleEnds: '', status: i === 4 ? 'Draft' : 'Active', materials: [...materialIds], materialPricing: structuredClone(defaultMaterialPricing), models: { iPhone: [...phoneModels.iPhone], Samsung: [...phoneModels.Samsung] }, featured: i < 2, isNew: i === 2, bestSeller: i === 0, images: [{ id: `${p.id}-0`, src: p.image, alt: p.name, group: 'General Gallery' as const }], updatedAt: `${DEMO_TODAY}T10:00:00Z` }));
   const orders: AdminState['orders'] = Array.from({ length: 32 }, (_, i) => {
     const p = catalog[i % catalog.length];
     const material = materialIds[i % 3];

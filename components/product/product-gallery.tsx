@@ -4,13 +4,26 @@ import Image from "next/image";
 import { useState } from "react";
 import { useProductMaterial } from "@/components/product/product-material-context";
 import { materialOptions } from "@/lib/data/product-options";
-import type { ProductImage } from "@/lib/data/products";
+// Gallery image shape — decoupled from old StorefrontProduct
+export type GalleryImage = { src: string; alt: string; label: string; view: "full" | "detail" | "guide" };
 
-export function ProductGallery({ images, name }: { images: ProductImage[]; name: string }) {
+export function ProductGallery({ images, name }: { images: GalleryImage[]; name: string }) {
   const { material } = useProductMaterial();
   const [active, setActive] = useState(0);
   const guide = materialOptions[material].galleryGuide;
-  const galleryImages: ProductImage[] = guide ? [...images, guide] : images;
+  const galleryImages: GalleryImage[] = guide ? [...images, guide] : images;
+
+  // Guard: if no images yet, show a placeholder so the PDP doesn't crash
+  if (galleryImages.length === 0) {
+    return (
+      <div className="pdp-gallery">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f3f4f6', borderRadius: 12, aspectRatio: '3/4', color: '#9ca3af', fontSize: '0.875rem' }}>
+          No images yet
+        </div>
+      </div>
+    );
+  }
+
   const activeIndex = Math.min(active, galleryImages.length - 1);
   const selected = galleryImages[activeIndex];
 
@@ -34,3 +47,4 @@ export function ProductGallery({ images, name }: { images: ProductImage[]; name:
     </div>
   );
 }
+

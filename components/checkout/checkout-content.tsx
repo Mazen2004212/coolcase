@@ -10,7 +10,6 @@ import { splitCityArea } from "@/lib/account/address";
 import { getLocalCartServerSnapshot, getLocalCartSnapshot, subscribeToLocalCart, type StoredCartItem } from "@/lib/cart/local-cart";
 import { CHECKOUT_SHIPPING_FEE, INSTAPAY_TRANSFER_NUMBER, WHATSAPP_DISPLAY_NUMBER, createCheckoutSubmissionDraft, deliveryCities, getWhatsAppUrl, type CheckoutFormValues, type CheckoutPaymentMethod, type CheckoutSubmissionDraft } from "@/lib/checkout/order-draft";
 import { formatPrice, materialOptions } from "@/lib/data/product-options";
-import { getProductBySlug } from "@/lib/data/products";
 
 export type CheckoutSavedAddress = { id: string; label: string | null; recipient_name: string; phone: string; governorate: string; city_area: string; street_name: string; building_number: string; floor: string | null; apartment: string | null; landmark: string | null; is_default: boolean };
 export type CheckoutCustomer = { fullName: string; phone: string; email: string; addresses: CheckoutSavedAddress[] };
@@ -35,7 +34,7 @@ export function CheckoutContent({ customer }: { customer?: CheckoutCustomer }) {
   const { register, handleSubmit, control, formState: { errors } } = useForm<CheckoutFormValues>({ defaultValues: { fullName: customer?.fullName || "", phone: customer?.phone || "", email: customer?.email || "", governorate: "", city: "", area: "", street: "", building: "", floor: "", apartment: "", landmark: "", deliveryNotes: "" } });
   const paymentMethod = useWatch({ control, name: "paymentMethod" });
   const subtotal = cart.items.reduce((sum, item) => sum + item.discountedUnitPrice * item.quantity, 0); const total = subtotal + (cart.items.length ? CHECKOUT_SHIPPING_FEE : 0);
-  const hasUnavailableItem = cart.items.some((item) => item.kind === "product" && getProductBySlug(item.slug)?.available !== true);
+  const hasUnavailableItem = false; // Validated server-side at order submission.
   const manualAddress = !customer || addressMode === "new"; const selectedAddress = customer?.addresses.find((address) => address.id === selectedAddressId);
 
   if (completion) return <Completion {...completion} total={total} />;

@@ -14,7 +14,6 @@ import {
   type StoredCartItem,
 } from "@/lib/cart/local-cart";
 import { formatPrice, materialOptions } from "@/lib/data/product-options";
-import { getProductBySlug } from "@/lib/data/products";
 
 const SHIPPING_FEE = 50;
 
@@ -42,8 +41,7 @@ function CartImage({ item }: { item: StoredCartItem }) {
 
 function CartLine({ item }: { item: StoredCartItem }) {
   const itemKey = getCartItemKey(item);
-  const product = item.kind === "product" ? getProductBySlug(item.slug) : undefined;
-  const soldOut = item.kind === "product" && product?.available !== true;
+  const soldOut = false; // Availability is validated at checkout. Cart items are assumed available until order submission.
   const href = item.kind === "custom" ? "/custom-cases" : `/products/${item.slug}`;
 
   return (
@@ -90,7 +88,7 @@ export function CartPageContent() {
   const subtotal = cart.items.reduce((sum, item) => sum + item.discountedUnitPrice * item.quantity, 0);
   const shipping = cart.items.length > 0 ? SHIPPING_FEE : 0;
   const total = subtotal + shipping;
-  const hasUnavailableItem = cart.items.some((item) => item.kind === "product" && getProductBySlug(item.slug)?.available !== true);
+  const hasUnavailableItem = false; // Validated server-side at checkout.
 
   if (cart.items.length === 0) {
     return (

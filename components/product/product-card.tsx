@@ -2,16 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { formatPrice } from "@/lib/data/product-options";
-import type { StorefrontProduct } from "@/lib/data/products";
+import type { ShopProduct } from "@/components/shop/shop-catalog";
 
-export function ProductCard({ product, eager = false }: { product: StorefrontProduct; eager?: boolean }) {
+export function ProductCard({ product, eager = false }: { product: ShopProduct; eager?: boolean }) {
+  const src = product.coverImage ?? product.images[0]?.src ?? '';
+  const alt = product.images[0]?.alt ?? product.name;
   return (
     <article className="product-card" data-merchandising-tile="product">
       <Link href={`/products/${product.slug}`} prefetch={false} className="group block" aria-label={`View ${product.name} case`}>
         <div className="product-media">
           <Image
-            src={product.images[0].src}
-            alt={product.images[0].alt}
+            src={src}
+            alt={alt}
             fill
             loading={eager ? "eager" : "lazy"}
             sizes="(min-width: 1024px) 31vw, (min-width: 640px) 48vw, 50vw"

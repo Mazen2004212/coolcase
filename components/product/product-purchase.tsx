@@ -5,10 +5,20 @@ import { useState, type FormEvent } from "react";
 import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 import { useProductMaterial } from "@/components/product/product-material-context";
 import { addToLocalCart } from "@/lib/cart/local-cart";
-import { formatPrice, materialIds, materialOptions, phoneModels, type Material, type PhoneBrand } from "@/lib/data/product-options";
-import type { StorefrontProduct } from "@/lib/data/products";
+import { formatPrice, materialIds, materialOptions, phoneModels, type Material, type MaterialPrice, type PhoneBrand } from "@/lib/data/product-options";
 
-export function ProductPurchase({ product }: { product: StorefrontProduct }) {
+// Lean product shape — decoupled from StorefrontProduct
+export type PurchaseProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  available: boolean;
+  images: Array<{ src: string; alt: string }>;
+  pricing: Record<Material, MaterialPrice>;
+  supportedBrands: readonly PhoneBrand[];
+};
+
+export function ProductPurchase({ product }: { product: PurchaseProduct }) {
   const { material, setMaterial } = useProductMaterial();
   const [brand, setBrand] = useState<PhoneBrand>("iPhone");
   const [model, setModel] = useState("");
@@ -33,12 +43,12 @@ export function ProductPurchase({ product }: { product: StorefrontProduct }) {
     event.preventDefault();
     if (!product.available || !model || !network) return;
     try {
-      addToLocalCart({ kind: "product", productId: product.id, slug: product.slug, productName: product.name, material, phoneBrand: brand, phoneModel: model, networkType: network, quantity, discountedUnitPrice: price.discounted, originalUnitPrice: price.original, image: product.images[0].src, subtotal: quantity * price.discounted });
+      addToLocalCart({ kind: "product", productId: product.id, slug: product.slug, productName: product.name, material, phoneBrand: brand, phoneModel: model, networkType: network, quantity, discountedUnitPrice: price.discounted, originalUnitPrice: price.original, image: product.images[0]?.src ?? '', subtotal: quantity * price.discounted });
       setFailed(false);
       setFeedback(`${quantity} × ${product.name} added to your bag — ${materialOptions[material].label}, ${model}, ${network}. Saved on this device.`);
     } catch {
       setFailed(true);
-      setFeedback("We couldn’t save this selection. Check that browser storage is available and your bag has fewer than 99 of this configuration, then try again.");
+      setFeedback("We couldn't save this selection. Check that browser storage is available and your bag has fewer than 99 of this configuration, then try again.");
     }
   }
 
@@ -89,7 +99,7 @@ export function ProductPurchase({ product }: { product: StorefrontProduct }) {
             <label key={value}><input type="radio" name="network" value={value} required checked={network === value} onChange={() => setNetwork(value)} /><span>{value}</span></label>
           ))}
         </div>
-        <p>Match the version in your phone’s settings for the right fit.</p>
+        <p>Match the version in your phone&apos;s settings for the right fit.</p>
       </fieldset>
       <div className="pdp-bag-row">
         <div className="pdp-quantity" role="group" aria-label="Quantity">

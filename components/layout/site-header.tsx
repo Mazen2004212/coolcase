@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Search, UserRound } from "lucide-react";
 import Link from "next/link";
 import { CartBadgeLink } from "@/components/cart/cart-badge-link";
@@ -12,7 +13,16 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 h-[var(--header-height)] bg-surface-black text-white">
       <SiteContainer className="relative flex h-full items-center justify-between gap-4">
-        <Link href="/" className="brand-wordmark" aria-label="Coolcase home">Coolcase</Link>
+        <Link href="/" className="brand-wordmark" aria-label="Coolcase home">
+          <Image
+            src="/assets/logo/coolcase-logo.png"
+            alt="Coolcase"
+            width={160}
+            height={30}
+            style={{ height: 30, width: 'auto', objectFit: 'contain', filter: 'invert(1)' }}
+            priority
+          />
+        </Link>
         <nav aria-label="Primary navigation" className="hidden lg:block">
           <ul className="flex items-center gap-8">
             {siteNavigation.map((item) => (

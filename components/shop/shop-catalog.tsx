@@ -3,13 +3,25 @@
 import { useMemo, useState } from "react";
 import { CustomCaseCard } from "@/components/home/custom-case-card";
 import { ProductCard } from "@/components/product/product-card";
-import type { StorefrontProduct } from "@/lib/data/products";
+import type { Material, MaterialPrice } from "@/lib/data/product-options";
+
+// Lean catalog shape — matches what the server passes from CatalogProduct
+export type ShopProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  available: boolean;
+  coverImage: string | null;
+  category: string;
+  images: Array<{ src: string; alt: string }>;
+  pricing: Record<Material, MaterialPrice>;
+};
 
 type Availability = "all" | "available" | "sold-out";
 type SortOrder = "a-z" | "z-a";
 const DEFAULT_SORT: SortOrder = "a-z";
 
-export function ShopCatalog({ products, collectionFilter = false }: { products: StorefrontProduct[]; collectionFilter?: boolean }) {
+export function ShopCatalog({ products, collectionFilter = false }: { products: ShopProduct[]; collectionFilter?: boolean }) {
   const [availability, setAvailability] = useState<Availability>("all");
   const [sort, setSort] = useState<SortOrder>(DEFAULT_SORT);
   const visibleProducts = useMemo(() => {
