@@ -197,6 +197,50 @@ export type Database = {
           },
         ]
       }
+      email_delivery_log: {
+        Row: {
+          error_message: string | null
+          event: string
+          id: string
+          order_id: string
+          provider_message_id: string | null
+          recipient_email: string
+          sent_at: string
+          subject: string | null
+          success: boolean
+        }
+        Insert: {
+          error_message?: string | null
+          event: string
+          id?: string
+          order_id: string
+          provider_message_id?: string | null
+          recipient_email: string
+          sent_at?: string
+          subject?: string | null
+          success?: boolean
+        }
+        Update: {
+          error_message?: string | null
+          event?: string
+          id?: string
+          order_id?: string
+          provider_message_id?: string | null
+          recipient_email?: string
+          sent_at?: string
+          subject?: string | null
+          success?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_delivery_log_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -278,6 +322,7 @@ export type Database = {
           id: string
           internal_note: string | null
           order_id: string
+          previous_status: Database["public"]["Enums"]["order_status"] | null
           status: Database["public"]["Enums"]["order_status"]
         }
         Insert: {
@@ -287,6 +332,7 @@ export type Database = {
           id?: string
           internal_note?: string | null
           order_id: string
+          previous_status?: Database["public"]["Enums"]["order_status"] | null
           status: Database["public"]["Enums"]["order_status"]
         }
         Update: {
@@ -296,6 +342,7 @@ export type Database = {
           id?: string
           internal_note?: string | null
           order_id?: string
+          previous_status?: Database["public"]["Enums"]["order_status"] | null
           status?: Database["public"]["Enums"]["order_status"]
         }
         Relationships: [
@@ -326,6 +373,7 @@ export type Database = {
           confirmed_at: string | null
           created_at: string
           currency: string
+          customer_email: string
           customer_id: string | null
           customer_name: string
           customer_phone: string
@@ -337,8 +385,13 @@ export type Database = {
           landmark: string | null
           order_number: string
           payment_method: Database["public"]["Enums"]["payment_method"]
+          rejected_at: string | null
           shipped_at: string | null
           shipping_amount: number
+          shipping_courier: string
+          shipping_current_location: string
+          shipping_notes: string
+          shipping_tracking_number: string
           status: Database["public"]["Enums"]["order_status"]
           street_name: string
           subtotal_amount: number
@@ -355,6 +408,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string
           currency?: string
+          customer_email: string
           customer_id?: string | null
           customer_name: string
           customer_phone: string
@@ -366,8 +420,13 @@ export type Database = {
           landmark?: string | null
           order_number: string
           payment_method: Database["public"]["Enums"]["payment_method"]
+          rejected_at?: string | null
           shipped_at?: string | null
           shipping_amount: number
+          shipping_courier?: string
+          shipping_current_location?: string
+          shipping_notes?: string
+          shipping_tracking_number?: string
           status?: Database["public"]["Enums"]["order_status"]
           street_name: string
           subtotal_amount: number
@@ -384,6 +443,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string
           currency?: string
+          customer_email?: string
           customer_id?: string | null
           customer_name?: string
           customer_phone?: string
@@ -395,8 +455,13 @@ export type Database = {
           landmark?: string | null
           order_number?: string
           payment_method?: Database["public"]["Enums"]["payment_method"]
+          rejected_at?: string | null
           shipped_at?: string | null
           shipping_amount?: number
+          shipping_courier?: string
+          shipping_current_location?: string
+          shipping_notes?: string
+          shipping_tracking_number?: string
           status?: Database["public"]["Enums"]["order_status"]
           street_name?: string
           subtotal_amount?: number
@@ -698,18 +763,50 @@ export type Database = {
         Args: { target_address_id: string }
         Returns: undefined
       }
+      create_order: {
+        Args: {
+          p_customer_id: string | null
+          p_customer_name: string
+          p_customer_phone: string
+          p_customer_email: string
+          p_governorate: string
+          p_city_area: string
+          p_street_name: string
+          p_building_number: string
+          p_floor: string | null
+          p_apartment: string | null
+          p_landmark: string | null
+          p_delivery_notes: string | null
+          p_subtotal_amount: number
+          p_shipping_amount: number
+          p_total_amount: number
+          p_payment_method: Database["public"]["Enums"]["payment_method"]
+          p_items: Json
+          p_address_id?: string | null
+        }
+        Returns: Json
+      }
+      track_order: {
+        Args: {
+          p_order_number: string
+          p_contact: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
-      case_material: "SILICONE" | "ACRYLIC"
+      case_material: "SILICONE" | "ACRYLIC" | "DOUBLE_LAYER"
       network_type: "FOUR_G" | "FIVE_G"
       order_status:
         | "PENDING_CONFIRMATION"
+        | "PENDING_ADMIN_APPROVAL"
         | "CONFIRMED"
         | "PREPARING"
         | "SHIPPED"
         | "OUT_FOR_DELIVERY"
         | "DELIVERED"
         | "CANCELLED"
+        | "REJECTED"
       payment_method: "INSTAPAY" | "CASH_ON_DELIVERY"
       payment_status:
         | "PENDING"
@@ -847,16 +944,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      case_material: ["SILICONE", "ACRYLIC"],
+      case_material: ["SILICONE", "ACRYLIC", "DOUBLE_LAYER"],
       network_type: ["FOUR_G", "FIVE_G"],
       order_status: [
         "PENDING_CONFIRMATION",
+        "PENDING_ADMIN_APPROVAL",
         "CONFIRMED",
         "PREPARING",
         "SHIPPED",
         "OUT_FOR_DELIVERY",
         "DELIVERED",
         "CANCELLED",
+        "REJECTED",
       ],
       payment_method: ["INSTAPAY", "CASH_ON_DELIVERY"],
       payment_status: [

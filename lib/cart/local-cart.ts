@@ -14,7 +14,10 @@ const commonFields = {
 
 const productItemSchema = z.object({
   kind: z.literal("product").default("product"), ...commonFields,
-  material: z.enum(materialIds), image: z.string().startsWith("/assets/"),
+  material: z.enum(materialIds), image: z.string().refine(
+    (value) => value.startsWith("/assets/") || /^https?:\/\//.test(value),
+    "Invalid product image."
+  ),
 }).refine((item) => (phoneModels[item.phoneBrand as PhoneBrand] as readonly string[]).includes(item.phoneModel), "Choose a supported phone model.")
   .refine((item) => item.material !== "acrylic" || item.phoneBrand === "iPhone", "Acrylic requires an iPhone.")
   .refine((item) => item.subtotal === item.quantity * item.discountedUnitPrice, "Invalid subtotal.");
