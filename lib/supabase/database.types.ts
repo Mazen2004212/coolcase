@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       addresses: {
@@ -120,6 +145,44 @@ export type Database = {
           },
         ]
       }
+      admin_staff: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          is_active: boolean
+          permissions: string[]
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          is_active?: boolean
+          permissions?: string[]
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          is_active?: boolean
+          permissions?: string[]
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_staff_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -155,6 +218,261 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      coupon_redemptions: {
+        Row: {
+          coupon_id: string
+          created_at: string
+          customer_id: string
+          discount_amount: number
+          id: string
+          order_id: string
+          subtotal_amount: number
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string
+          customer_id: string
+          discount_amount: number
+          id?: string
+          order_id: string
+          subtotal_amount: number
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string
+          customer_id?: string
+          discount_amount?: number
+          id?: string
+          order_id?: string
+          subtotal_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_redemptions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_redemptions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          minimum_subtotal: number
+          per_customer_limit: number | null
+          starts_at: string | null
+          title: string
+          updated_at: string
+          usage_limit: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          discount_type: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          minimum_subtotal?: number
+          per_customer_limit?: number | null
+          starts_at?: string | null
+          title: string
+          updated_at?: string
+          usage_limit?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          minimum_subtotal?: number
+          per_customer_limit?: number | null
+          starts_at?: string | null
+          title?: string
+          updated_at?: string
+          usage_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupons_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_case_templates: {
+        Row: {
+          allowed_script: string
+          arabic_font_key: string
+          arabic_font_size: number
+          arabic_font_weight: number
+          arabic_max_characters: number
+          arabic_text_align: string
+          arabic_text_color: string
+          arabic_text_rotation: number
+          arabic_text_x: number
+          arabic_text_y: number
+          created_at: string
+          created_by: string | null
+          english_font_key: string
+          english_font_size: number
+          english_font_weight: number
+          english_max_characters: number
+          english_text_align: string
+          english_text_color: string
+          english_text_rotation: number
+          english_text_transform: string
+          english_text_x: number
+          english_text_y: number
+          font_key: string
+          font_size: number
+          font_weight: number
+          id: string
+          image_path: string
+          is_active: boolean
+          max_characters: number
+          name: string
+          slug: string
+          sort_order: number
+          text_align: string
+          text_color: string
+          text_rotation: number
+          text_transform: string
+          text_x: number
+          text_y: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_script?: string
+          arabic_font_key?: string
+          arabic_font_size?: number
+          arabic_font_weight?: number
+          arabic_max_characters?: number
+          arabic_text_align?: string
+          arabic_text_color?: string
+          arabic_text_rotation?: number
+          arabic_text_x?: number
+          arabic_text_y?: number
+          created_at?: string
+          created_by?: string | null
+          english_font_key?: string
+          english_font_size?: number
+          english_font_weight?: number
+          english_max_characters?: number
+          english_text_align?: string
+          english_text_color?: string
+          english_text_rotation?: number
+          english_text_transform?: string
+          english_text_x?: number
+          english_text_y?: number
+          font_key?: string
+          font_size?: number
+          font_weight?: number
+          id?: string
+          image_path: string
+          is_active?: boolean
+          max_characters?: number
+          name: string
+          slug: string
+          sort_order?: number
+          text_align?: string
+          text_color?: string
+          text_rotation?: number
+          text_transform?: string
+          text_x?: number
+          text_y?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_script?: string
+          arabic_font_key?: string
+          arabic_font_size?: number
+          arabic_font_weight?: number
+          arabic_max_characters?: number
+          arabic_text_align?: string
+          arabic_text_color?: string
+          arabic_text_rotation?: number
+          arabic_text_x?: number
+          arabic_text_y?: number
+          created_at?: string
+          created_by?: string | null
+          english_font_key?: string
+          english_font_size?: number
+          english_font_weight?: number
+          english_max_characters?: number
+          english_text_align?: string
+          english_text_color?: string
+          english_text_rotation?: number
+          english_text_transform?: string
+          english_text_x?: number
+          english_text_y?: number
+          font_key?: string
+          font_size?: number
+          font_weight?: number
+          id?: string
+          image_path?: string
+          is_active?: boolean
+          max_characters?: number
+          name?: string
+          slug?: string
+          sort_order?: number
+          text_align?: string
+          text_color?: string
+          text_rotation?: number
+          text_transform?: string
+          text_x?: number
+          text_y?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_case_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_uploads: {
         Row: {
@@ -246,6 +564,9 @@ export type Database = {
           created_at: string
           custom_design_upload_id: string | null
           custom_phone_model: string | null
+          custom_template_id: string | null
+          customization_snapshot: Json | null
+          customization_type: string | null
           id: string
           line_total: number
           material: Database["public"]["Enums"]["case_material"]
@@ -262,6 +583,9 @@ export type Database = {
           created_at?: string
           custom_design_upload_id?: string | null
           custom_phone_model?: string | null
+          custom_template_id?: string | null
+          customization_snapshot?: Json | null
+          customization_type?: string | null
           id?: string
           line_total: number
           material: Database["public"]["Enums"]["case_material"]
@@ -278,6 +602,9 @@ export type Database = {
           created_at?: string
           custom_design_upload_id?: string | null
           custom_phone_model?: string | null
+          custom_template_id?: string | null
+          customization_snapshot?: Json | null
+          customization_type?: string | null
           id?: string
           line_total?: number
           material?: Database["public"]["Enums"]["case_material"]
@@ -296,6 +623,13 @@ export type Database = {
             columns: ["custom_design_upload_id"]
             isOneToOne: false
             referencedRelation: "customer_uploads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_custom_template_id_fkey"
+            columns: ["custom_template_id"]
+            isOneToOne: false
+            referencedRelation: "custom_case_templates"
             referencedColumns: ["id"]
           },
           {
@@ -371,6 +705,8 @@ export type Database = {
           cancelled_at: string | null
           city_area: string
           confirmed_at: string | null
+          coupon_code_snapshot: string | null
+          coupon_id: string | null
           created_at: string
           currency: string
           customer_email: string
@@ -379,9 +715,11 @@ export type Database = {
           customer_phone: string
           delivered_at: string | null
           delivery_notes: string | null
+          discount_amount: number
           floor: string | null
           governorate: string
           id: string
+          is_test: boolean
           landmark: string | null
           order_number: string
           payment_method: Database["public"]["Enums"]["payment_method"]
@@ -406,6 +744,8 @@ export type Database = {
           cancelled_at?: string | null
           city_area: string
           confirmed_at?: string | null
+          coupon_code_snapshot?: string | null
+          coupon_id?: string | null
           created_at?: string
           currency?: string
           customer_email: string
@@ -414,9 +754,11 @@ export type Database = {
           customer_phone: string
           delivered_at?: string | null
           delivery_notes?: string | null
+          discount_amount?: number
           floor?: string | null
           governorate: string
           id?: string
+          is_test?: boolean
           landmark?: string | null
           order_number: string
           payment_method: Database["public"]["Enums"]["payment_method"]
@@ -441,6 +783,8 @@ export type Database = {
           cancelled_at?: string | null
           city_area?: string
           confirmed_at?: string | null
+          coupon_code_snapshot?: string | null
+          coupon_id?: string | null
           created_at?: string
           currency?: string
           customer_email?: string
@@ -449,9 +793,11 @@ export type Database = {
           customer_phone?: string
           delivered_at?: string | null
           delivery_notes?: string | null
+          discount_amount?: number
           floor?: string | null
           governorate?: string
           id?: string
+          is_test?: boolean
           landmark?: string | null
           order_number?: string
           payment_method?: Database["public"]["Enums"]["payment_method"]
@@ -477,6 +823,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "orders_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "orders_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
@@ -497,6 +850,7 @@ export type Database = {
           rejection_reason: string | null
           status: Database["public"]["Enums"]["payment_status"]
           updated_at: string
+          verification_source: string | null
           verified_at: string | null
           verified_by: string | null
         }
@@ -511,6 +865,7 @@ export type Database = {
           rejection_reason?: string | null
           status: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
+          verification_source?: string | null
           verified_at?: string | null
           verified_by?: string | null
         }
@@ -525,6 +880,7 @@ export type Database = {
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
+          verification_source?: string | null
           verified_at?: string | null
           verified_by?: string | null
         }
@@ -598,11 +954,15 @@ export type Database = {
       }
       products: {
         Row: {
+          acrylic_enabled: boolean
+          acrylic_original_price_override: number | null
           acrylic_price_override: number | null
           category_id: string | null
           created_at: string
           description: string | null
           display_order: number
+          double_layer_enabled: boolean
+          double_layer_original_price_override: number | null
           double_layer_price_override: number | null
           id: string
           is_active: boolean
@@ -610,16 +970,22 @@ export type Database = {
           is_featured: boolean
           name: string
           short_description: string | null
+          silicone_enabled: boolean
+          silicone_original_price_override: number | null
           silicone_price_override: number | null
           slug: string
           updated_at: string
         }
         Insert: {
+          acrylic_enabled?: boolean
+          acrylic_original_price_override?: number | null
           acrylic_price_override?: number | null
           category_id?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
+          double_layer_enabled?: boolean
+          double_layer_original_price_override?: number | null
           double_layer_price_override?: number | null
           id?: string
           is_active?: boolean
@@ -627,16 +993,22 @@ export type Database = {
           is_featured?: boolean
           name: string
           short_description?: string | null
+          silicone_enabled?: boolean
+          silicone_original_price_override?: number | null
           silicone_price_override?: number | null
           slug: string
           updated_at?: string
         }
         Update: {
+          acrylic_enabled?: boolean
+          acrylic_original_price_override?: number | null
           acrylic_price_override?: number | null
           category_id?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
+          double_layer_enabled?: boolean
+          double_layer_original_price_override?: number | null
           double_layer_price_override?: number | null
           id?: string
           is_active?: boolean
@@ -644,6 +1016,8 @@ export type Database = {
           is_featured?: boolean
           name?: string
           short_description?: string | null
+          silicone_enabled?: boolean
+          silicone_original_price_override?: number | null
           silicone_price_override?: number | null
           slug?: string
           updated_at?: string
@@ -687,6 +1061,35 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      staff_signup_tokens: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_signup_tokens_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_staff"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       store_settings: {
         Row: {
@@ -759,37 +1162,71 @@ export type Database = {
       }
     }
     Functions: {
+      attach_instapay_proof: {
+        Args: { p_order_id: string; p_upload_id: string }
+        Returns: Json
+      }
+      attach_payment_proof: {
+        Args: { p_order_id: string; p_upload_id: string }
+        Returns: Json
+      }
+      create_order: {
+        Args: {
+          p_address_id?: string
+          p_apartment: string
+          p_building_number: string
+          p_city_area: string
+          p_coupon_code?: string
+          p_customer_email: string
+          p_customer_id: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_delivery_notes: string
+          p_floor: string
+          p_governorate: string
+          p_items: Json
+          p_landmark: string
+          p_payment_method: Database["public"]["Enums"]["payment_method"]
+          p_shipping_amount: number
+          p_street_name: string
+          p_subtotal_amount: number
+        }
+        Returns: Json
+      }
+      generate_order_number: { Args: never; Returns: string }
+      review_instapay_payment: {
+        Args: {
+          p_decision: Database["public"]["Enums"]["payment_status"]
+          p_expected_proof_upload_id: string
+          p_order_id: string
+          p_rejection_reason?: string
+        }
+        Returns: Json
+      }
+      review_payment_proof: {
+        Args: {
+          p_decision: Database["public"]["Enums"]["payment_status"]
+          p_expected_proof_upload_id: string
+          p_order_id: string
+          p_rejection_reason?: string
+        }
+        Returns: Json
+      }
       set_default_address: {
         Args: { target_address_id: string }
         Returns: undefined
       }
-      create_order: {
-        Args: {
-          p_customer_id: string | null
-          p_customer_name: string
-          p_customer_phone: string
-          p_customer_email: string
-          p_governorate: string
-          p_city_area: string
-          p_street_name: string
-          p_building_number: string
-          p_floor: string | null
-          p_apartment: string | null
-          p_landmark: string | null
-          p_delivery_notes: string | null
-          p_subtotal_amount: number
-          p_shipping_amount: number
-          p_total_amount: number
-          p_payment_method: Database["public"]["Enums"]["payment_method"]
-          p_items: Json
-          p_address_id?: string | null
-        }
+      track_order: {
+        Args: { p_contact: string; p_order_number: string }
         Returns: Json
       }
-      track_order: {
+      transition_order_status: {
         Args: {
-          p_order_number: string
-          p_contact: string
+          p_customer_visible_note?: string
+          p_internal_note?: string
+          p_new_status: Database["public"]["Enums"]["order_status"]
+          p_order_id: string
+          p_send_email?: boolean
         }
         Returns: Json
       }
@@ -799,13 +1236,13 @@ export type Database = {
       network_type: "FOUR_G" | "FIVE_G"
       order_status:
         | "PENDING_CONFIRMATION"
-        | "PENDING_ADMIN_APPROVAL"
         | "CONFIRMED"
         | "PREPARING"
         | "SHIPPED"
         | "OUT_FOR_DELIVERY"
         | "DELIVERED"
         | "CANCELLED"
+        | "PENDING_ADMIN_APPROVAL"
         | "REJECTED"
       payment_method: "INSTAPAY" | "CASH_ON_DELIVERY"
       payment_status:
@@ -942,19 +1379,22 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       case_material: ["SILICONE", "ACRYLIC", "DOUBLE_LAYER"],
       network_type: ["FOUR_G", "FIVE_G"],
       order_status: [
         "PENDING_CONFIRMATION",
-        "PENDING_ADMIN_APPROVAL",
         "CONFIRMED",
         "PREPARING",
         "SHIPPED",
         "OUT_FOR_DELIVERY",
         "DELIVERED",
         "CANCELLED",
+        "PENDING_ADMIN_APPROVAL",
         "REJECTED",
       ],
       payment_method: ["INSTAPAY", "CASH_ON_DELIVERY"],

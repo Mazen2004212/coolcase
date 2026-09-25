@@ -4,9 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createProduct, updateProduct, deleteProduct, setProductActive } from '@/app/admin/actions/products';
+import type { StoreSettings } from '@/lib/catalog/types';
+import { PriceDisplay } from '@/components/ui/price-display';
 import { ActionLink, ConfirmReal, Empty, Field, PageHeading, Panel, Pill, Table, Thumb, Toggle } from './admin-ui';
 import { ImageManagerLive } from './image-manager-live';
 import type { LiveImage } from './image-manager-live';
+import { useAdmin } from './admin-provider';
+import { requirePermission } from '@/lib/admin/permissions';
 
 // ─── Types matching fetchAdminProducts() output ───────────────────────────────
 
@@ -20,9 +24,15 @@ export type LiveProduct = {
   is_available: boolean;
   is_featured: boolean;
   display_order: number;
+  silicone_original_price_override: number | null;
+  acrylic_original_price_override: number | null;
+  double_layer_original_price_override: number | null;
   silicone_price_override: number | null;
   acrylic_price_override: number | null;
   double_layer_price_override: number | null;
+  silicone_enabled: boolean;
+  acrylic_enabled: boolean;
+  double_layer_enabled: boolean;
   created_at: string;
   updated_at: string;
   categories: { id: string; name: string; slug: string } | null;
@@ -55,6 +65,8 @@ function coverSrc(p: LiveProduct): string {
 // ─── Products List ────────────────────────────────────────────────────────────
 
 export function ProductsListLive({ products }: { products: LiveProduct[] }) {
+  const { staff } = useAdmin();
+  const canManage = requirePermission(staff, 'products.manage');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -104,7 +116,7 @@ export function ProductsListLive({ products }: { products: LiveProduct[] }) {
       <PageHeading
         title="Products"
         description="Manage your catalog in Supabase. Changes publish to the storefront immediately."
-        action={<ActionLink href="/admin/products/new">Add Product</ActionLink>}
+        action={canManage ? <ActionLink href="/admin/products/new">Add Product</ActionLink> : undefined}
       />
       {message && (
         <div className="ad-notice" role="status">
@@ -132,7 +144,7 @@ export function ProductsListLive({ products }: { products: LiveProduct[] }) {
             </select>
           </Field>
         </div>
-        <div className="ad-actions ad-bulk">
+        {canManage && <div className="ad-actions ad-bulk">
           <label>
             <input
               type="checkbox"
@@ -146,12 +158,12 @@ export function ProductsListLive({ products }: { products: LiveProduct[] }) {
           <button disabled={!selected.length || busy} onClick={() => bulkSetActive(selected, true)}>Publish</button>
           <button disabled={!selected.length || busy} onClick={() => bulkSetActive(selected, false)}>Unpublish</button>
           <button disabled={!selected.length || busy} onClick={() => setArchiveConfirm(selected)}>Delete</button>
-        </div>
-        <Table headings={['', 'Product', 'Category', 'Status', 'Available', 'Featured', 'Actions']}>
+        </div>}
+        <Table headings={['', 'Product', 'Category', 'Materials', 'Status', 'Available', 'Featured', 'Actions']}>
           {filtered.map(p => (
             <tr key={p.id}>
               <td>
-                <input type="checkbox" aria-label={`Select ${p.name}`} checked={selected.includes(p.id)} onChange={e => setSelected(e.target.checked ? [...selected, p.id] : selected.filter(id => id !== p.id))} />
+                {canManage ? <input type="checkbox" aria-label={`Select ${p.name}`} checked={selected.includes(p.id)} onChange={e => setSelected(e.target.checked ? [...selected, p.id] : selected.filter(id => id !== p.id))} /> : null}
               </td>
               <td>
                 <Link className="ad-product-cell" href={`/admin/products/${p.id}`}>
@@ -160,21 +172,28 @@ export function ProductsListLive({ products }: { products: LiveProduct[] }) {
                 </Link>
               </td>
               <td>{p.categories?.name ?? <span style={{ color: 'var(--muted)' }}>—</span>}</td>
+              <td>
+                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                  {p.silicone_enabled && <Pill color="grey">Silicone</Pill>}
+                  {p.acrylic_enabled && <Pill color="grey">Acrylic</Pill>}
+                  {p.double_layer_enabled && <Pill color="grey">Double Layer</Pill>}
+                </div>
+              </td>
               <td><Pill color={productStatusColor(p)}>{productStatusLabel(p)}</Pill></td>
               <td>{p.is_available ? '✓ In Stock' : '✗ Sold Out'}</td>
               <td>{p.is_featured ? '★' : '—'}</td>
               <td>
                 <div className="ad-actions">
-                  <Link href={`/admin/products/${p.id}`}>Edit</Link>
-                  <button disabled={busy} onClick={async () => {
+                  <Link href={`/admin/products/${p.id}`}>{canManage ? 'Edit' : 'View'}</Link>
+                  {canManage && <button disabled={busy} onClick={async () => {
                     setBusy(true);
                     await setProductActive(p.id, !p.is_active, p.slug);
                     setBusy(false);
                     router.refresh();
                   }}>
                     {p.is_active ? 'Unpublish' : 'Publish'}
-                  </button>
-                  <button disabled={busy} onClick={() => setDeleteConfirm(p)}>Delete</button>
+                  </button>}
+                  {canManage && <button disabled={busy} onClick={() => setDeleteConfirm(p)}>Delete</button>}
                 </div>
               </td>
             </tr>
@@ -223,9 +242,11 @@ type EditorProps = {
   categories: LiveCategory[];
 };
 
-export function ProductEditorLive({ id, product, categories }: EditorProps) {
+export function ProductEditorLive({ id, product, categories, pricingSettings }: EditorProps & { pricingSettings: StoreSettings }) {
   const router = useRouter();
   const isNew = id === 'new';
+  const { staff } = useAdmin();
+  const canEdit = requirePermission(staff, 'products.manage');
 
   const [name, setName]               = useState(product?.name ?? '');
   const [slug, setSlug]               = useState(product?.slug ?? '');
@@ -236,9 +257,18 @@ export function ProductEditorLive({ id, product, categories }: EditorProps) {
   const [isAvailable, setIsAvailable] = useState(product?.is_available ?? true);
   const [isFeatured, setIsFeatured]   = useState(product?.is_featured ?? false);
   const [displayOrder, setDisplayOrder] = useState(product?.display_order ?? 0);
+  
+  const [siliconeOriginalPrice, setSiliconeOriginalPrice] = useState<string>(product?.silicone_original_price_override?.toString() ?? '');
+  const [acrylicOriginalPrice, setAcrylicOriginalPrice] = useState<string>(product?.acrylic_original_price_override?.toString() ?? '');
+  const [doubleLayerOriginalPrice, setDoubleLayerOriginalPrice] = useState<string>(product?.double_layer_original_price_override?.toString() ?? '');
+  
   const [siliconePrice, setSiliconePrice]     = useState<string>(product?.silicone_price_override?.toString() ?? '');
   const [acrylicPrice, setAcrylicPrice]       = useState<string>(product?.acrylic_price_override?.toString() ?? '');
   const [doubleLayerPrice, setDoubleLayerPrice] = useState<string>(product?.double_layer_price_override?.toString() ?? '');
+
+  const [siliconeEnabled, setSiliconeEnabled]     = useState(product?.silicone_enabled ?? true);
+  const [acrylicEnabled, setAcrylicEnabled]       = useState(product?.acrylic_enabled ?? true);
+  const [doubleLayerEnabled, setDoubleLayerEnabled] = useState(product?.double_layer_enabled ?? true);
 
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -281,9 +311,15 @@ export function ProductEditorLive({ id, product, categories }: EditorProps) {
       isAvailable,
       isFeatured,
       displayOrder,
+      siliconeOriginalPriceOverride: siliconeOriginalPrice ? parseInt(siliconeOriginalPrice, 10) : null,
+      acrylicOriginalPriceOverride:  acrylicOriginalPrice ? parseInt(acrylicOriginalPrice, 10) : null,
+      doubleLayerOriginalPriceOverride: doubleLayerOriginalPrice ? parseInt(doubleLayerOriginalPrice, 10) : null,
       siliconePriceOverride:   siliconePrice ? parseInt(siliconePrice, 10) : null,
       acrylicPriceOverride:    acrylicPrice ? parseInt(acrylicPrice, 10) : null,
       doubleLayerPriceOverride:doubleLayerPrice ? parseInt(doubleLayerPrice, 10) : null,
+      siliconeEnabled,
+      acrylicEnabled,
+      doubleLayerEnabled,
     };
 
     setBusy(true);
@@ -320,10 +356,10 @@ export function ProductEditorLive({ id, product, categories }: EditorProps) {
         title={isNew ? 'Add Product' : `Edit ${product?.name ?? ''}`}
         description={isNew
           ? 'Create a product. Add images on the next step after saving.'
-          : 'Changes save to Supabase and revalidate the storefront immediately.'}
+          : 'Saved changes appear on the storefront.'}
         action={<Link href="/admin/products">Back to products</Link>}
       />
-      <form onSubmit={handleSubmit}>
+      {!canEdit && <p className="cc-helper">Read-only access. Product changes require manage permission.</p>}<form onSubmit={handleSubmit}><fieldset disabled={!canEdit || busy}>
         <div className="ad-editor">
           {/* Left column */}
           <div className="ad-stack">
@@ -373,21 +409,60 @@ export function ProductEditorLive({ id, product, categories }: EditorProps) {
             </Panel>
 
             {/* Pricing overrides */}
-            <Panel title="Pricing overrides (optional)">
+            <Panel title="Pricing overrides (optional)"><p>Only enabled materials are offered to customers. Preview values below reflect the current form.</p><div className="cc-price-preview">{[
+  { label:'Silicone', enabled:siliconeEnabled, original:siliconeOriginalPrice, sale:siliconePrice, originalDefault:pricingSettings.siliconOriginalPrice, saleDefault:pricingSettings.siliconSellingPrice },
+  { label:'Acrylic', enabled:acrylicEnabled, original:acrylicOriginalPrice, sale:acrylicPrice, originalDefault:pricingSettings.acrylicOriginalPrice, saleDefault:pricingSettings.acrylicSellingPrice },
+  { label:'Double Layer', enabled:doubleLayerEnabled, original:doubleLayerOriginalPrice, sale:doubleLayerPrice, originalDefault:pricingSettings.doubleLayerOriginalPrice, saleDefault:pricingSettings.doubleLayerSellingPrice },
+].map(row=><div key={row.label}><strong>{row.label} · {row.enabled?'Available':'Disabled'}</strong><PriceDisplay current={row.sale?Number.parseInt(row.sale,10):row.saleDefault} original={row.original?Number.parseInt(row.original,10):row.originalDefault}/><p>Original: {row.original?'Product override':'Global default'} · Selling: {row.sale?'Product override':'Global default'}</p></div>)}</div>
               <p style={{ fontSize: '0.8125rem', color: 'var(--muted)', marginBottom: 12 }}>
-                Leave blank to use global store settings. Enter an EGP value to override for this product.
+                Leave blank to use global store settings. Enter an EGP value to override for this product. Original Price should be &gt;= Sale Price.
               </p>
-              <div className="ad-form-grid">
-                <Field label="Silicon selling price (EGP)">
-                  <input type="number" min={1} step={1} value={siliconePrice} onChange={e => setSiliconePrice(e.target.value)} placeholder="Global default" />
-                </Field>
-                <Field label="Acrylic selling price (EGP)">
-                  <input type="number" min={1} step={1} value={acrylicPrice} onChange={e => setAcrylicPrice(e.target.value)} placeholder="Global default" />
-                </Field>
-                <Field label="Double Layer price (EGP)">
-                  <input type="number" min={1} step={1} value={doubleLayerPrice} onChange={e => setDoubleLayerPrice(e.target.value)} placeholder="Global default" />
-                </Field>
+              
+              <div style={{ marginBottom: '16px' }}>
+                <h4 style={{ fontSize: '0.875rem', marginBottom: '8px' }}>Silicone</h4>
+                <div className="ad-form-grid">
+                  <Field label="Silicone Original Price Override (EGP)">
+                    <input type="number" min={1} step={1} value={siliconeOriginalPrice} onChange={e => setSiliconeOriginalPrice(e.target.value)} placeholder="Global default" />
+                  </Field>
+                  <Field label="Silicone Sale Price Override (EGP)">
+                    <input type="number" min={1} step={1} value={siliconePrice} onChange={e => setSiliconePrice(e.target.value)} placeholder="Global default" />
+                  </Field>
+                </div>
               </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <h4 style={{ fontSize: '0.875rem', marginBottom: '8px' }}>Acrylic</h4>
+                <div className="ad-form-grid">
+                  <Field label="Acrylic Original Price Override (EGP)">
+                    <input type="number" min={1} step={1} value={acrylicOriginalPrice} onChange={e => setAcrylicOriginalPrice(e.target.value)} placeholder="Global default" />
+                  </Field>
+                  <Field label="Acrylic Sale Price Override (EGP)">
+                    <input type="number" min={1} step={1} value={acrylicPrice} onChange={e => setAcrylicPrice(e.target.value)} placeholder="Global default" />
+                  </Field>
+                </div>
+              </div>
+
+              <div>
+                <h4 style={{ fontSize: '0.875rem', marginBottom: '8px' }}>Double Layer</h4>
+                <div className="ad-form-grid">
+                  <Field label="Double Layer Original Price Override (EGP)">
+                    <input type="number" min={1} step={1} value={doubleLayerOriginalPrice} onChange={e => setDoubleLayerOriginalPrice(e.target.value)} placeholder="Global default" />
+                  </Field>
+                  <Field label="Double Layer Sale Price Override (EGP)">
+                    <input type="number" min={1} step={1} value={doubleLayerPrice} onChange={e => setDoubleLayerPrice(e.target.value)} placeholder="Global default" />
+                  </Field>
+                </div>
+              </div>
+            </Panel>
+
+            {/* Material availability */}
+            <Panel title="Material availability">
+              <p style={{ fontSize: '0.8125rem', color: 'var(--muted)', marginBottom: 12 }}>
+                Disable a material if this product cannot be manufactured in it.
+              </p>
+              <Toggle label="Silicone Enabled" checked={siliconeEnabled} onChange={setSiliconeEnabled} />
+              <Toggle label="Acrylic Enabled" checked={acrylicEnabled} onChange={setAcrylicEnabled} />
+              <Toggle label="Double Layer Enabled" checked={doubleLayerEnabled} onChange={setDoubleLayerEnabled} />
             </Panel>
 
             {/* Images — only on edit */}
@@ -433,11 +508,11 @@ export function ProductEditorLive({ id, product, categories }: EditorProps) {
         {error && <p className="ad-error" role="alert">{error}</p>}
         <div className="ad-savebar">
           <Link href="/admin/products">Cancel</Link>
-          <button className="ad-primary" type="submit" disabled={busy}>
-            {busy ? 'Saving…' : isNew ? 'Create Product' : 'Save Changes'}
+          <button className="ad-primary" type="submit" disabled={!canEdit || busy}>
+            {busy ? 'Saving…' : isNew ? 'Create & add images' : 'Save Changes'}
           </button>
         </div>
-      </form>
+      </fieldset></form>
 
       {showDeleteConfirm && (
         <ConfirmReal

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { formatPrice } from "@/lib/data/product-options";
+import { PriceDisplay } from "@/components/ui/price-display";
 import type { ShopProduct } from "@/components/shop/shop-catalog";
 
 export function ProductCard({ product, eager = false }: { product: ShopProduct; eager?: boolean }) {
@@ -22,7 +22,7 @@ export function ProductCard({ product, eager = false }: { product: ShopProduct; 
           {!product.available ? <span className="product-sold-out">Sold Out</span> : null}
           <span className="product-link-icon"><ArrowUpRight size={18} aria-hidden="true" /></span>
         </div>
-        <div className="product-details"><h3>{product.name}</h3><p>From {formatPrice(product.pricing.silicon.discounted)}</p></div>
+        <div className="product-details"><h3>{product.name}</h3><PriceDisplay from current={product.pricing.silicon.discounted} original={product.pricing.silicon.original}/></div>
       </Link>
     </article>
   );

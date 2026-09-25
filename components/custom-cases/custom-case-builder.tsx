@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Minus, Plus, Upload } from "lucide-react";
-import { addToLocalCart } from "@/lib/cart/local-cart";
+import { addToLocalCart, setBuyNowItem } from "@/lib/cart/local-cart";
 import { customCasePricing, formatPrice, materialIds, materialOptions, phoneBrands, phoneModels, type Material, type PhoneBrand } from "@/lib/data/product-options";
 import { DeliveryTimeline } from "@/components/storefront/delivery-timeline";
 
@@ -34,6 +36,7 @@ function createStoredPreview(file: File): Promise<string> {
 }
 
 export function CustomCaseBuilder() {
+  const router = useRouter();
   const [preview, setPreview] = useState("");
   const [fileName, setFileName] = useState("");
   const [material, setMaterial] = useState<Material>("silicon");
@@ -43,6 +46,7 @@ export function CustomCaseBuilder() {
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [processing, setProcessing] = useState(false);
   const brands = material === "acrylic" ? phoneBrands.filter((item) => item === "iPhone") : phoneBrands;
   const pricing = customCasePricing[material];
 
@@ -63,25 +67,40 @@ export function CustomCaseBuilder() {
     if (!file) return;
     if (!acceptedTypes.has(file.type)) { setError("Choose a JPEG, PNG, or WebP image."); event.target.value = ""; return; }
     if (file.size > 10 * 1024 * 1024) { setError("Choose an image smaller than 10 MB."); event.target.value = ""; return; }
+    setProcessing(true);
     try {
       setPreview(await createStoredPreview(file));
       setFileName(file.name);
     } catch {
       setError("We couldn’t read this image. Try another JPEG, PNG, or WebP file.");
-    }
+    } finally { setProcessing(false); }
+  }
+
+  function buildItem() {
+    if (!preview) { setError("Upload an image for your custom case."); return null; }
+    if (!model) { setError("Choose your phone model."); return null; }
+    if (!network) { setError("Choose 4G or 5G for the right fit."); return null; }
+    return { kind: "custom" as const, customizationType: "UPLOAD_DESIGN" as const, productId: "custom-case", slug: "custom-case-upload", productName: "Custom Case — Your Design", material, phoneBrand: brand, phoneModel: model, networkType: network, quantity, discountedUnitPrice: pricing.discounted, originalUnitPrice: pricing.original, image: preview, uploadFileName: fileName, subtotal: quantity * pricing.discounted };
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(""); setFeedback("");
-    if (!preview) return setError("Upload an image for your custom case.");
-    if (!model) return setError("Choose your phone model.");
-    if (!network) return setError("Choose 4G or 5G for the right fit.");
+    const item = buildItem();
+    if (!item) return;
     try {
-      addToLocalCart({ kind: "custom", productId: "custom-case", slug: "custom-case", productName: "Your Custom Case", material, phoneBrand: brand, phoneModel: model, networkType: network, quantity, discountedUnitPrice: pricing.discounted, originalUnitPrice: pricing.original, image: preview, uploadFileName: fileName, subtotal: quantity * pricing.discounted });
-      setFeedback(`${quantity} × custom case added to your bag — ${materialOptions[material].label}, ${model}, ${network}. Your image is saved on this device.`);
+      addToLocalCart(item);
+      setFeedback("Added to cart.");
     } catch {
       setError("We couldn’t save this custom case. Try a smaller image or check that browser storage is available.");
     }
+  }
+
+  function buyNow() {
+    setError(""); setFeedback("");
+    const item = buildItem();
+    if (!item) return;
+    try { setBuyNowItem(item); router.push("/checkout?mode=buy-now"); }
+    catch { setError("We couldn’t prepare Buy It Now. Try a smaller image or check browser storage."); }
   }
 
   return (
@@ -94,12 +113,12 @@ export function CustomCaseBuilder() {
         <p>This is an image preview, not a generated case render. Final placement is prepared during processing.</p>
       </section>
       <section className="custom-builder-information">
-        <p className="pdp-eyebrow">Made by you / Finished by Coolcase</p>
-        <h1>Your Custom Case</h1>
+        <p className="pdp-eyebrow">CUSTOM CASE</p>
+        <h1>Upload Your Design</h1>
         <p className="custom-builder-description">Make your phone personal. Upload your own image and we’ll turn it into a Coolcase.</p>
         <div className="pdp-price"><strong>{formatPrice(pricing.discounted)}</strong><del><span className="sr-only">Original price </span>{formatPrice(pricing.original)}</del><span className="pdp-saving">Save {formatPrice(pricing.original - pricing.discounted)}</span></div>
         <form className="custom-builder-form" onSubmit={submit} noValidate>
-          <label className="custom-upload-control">01 <span>Upload your image</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={selectImage} /><strong><Upload size={17} aria-hidden="true" />{fileName || "Choose JPEG, PNG, or WebP"}</strong></label>
+          <label className="custom-upload-control">01 <span>Upload your image</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={selectImage} disabled={processing} aria-describedby="custom-upload-help" /><strong><Upload size={17} aria-hidden="true" />{processing ? "Preparing preview…" : fileName ? `Replace: ${fileName}` : "Choose JPEG, PNG, or WebP"}</strong></label><p id="custom-upload-help" className="cc-helper" role="status">JPEG, PNG, or WebP · maximum 10 MB. {processing ? "Preparing your image preview…" : ""}</p>
           <fieldset><legend>02 <span>Choose your material</span></legend><div className="pdp-materials">
             {materialIds.map((id) => <label key={id}><input type="radio" name="custom-material" value={id} checked={material === id} onChange={() => changeMaterial(id)} /><span className="pdp-material-card"><span className="pdp-material-image"><Image src={materialOptions[id].optionImage.src} alt={materialOptions[id].optionImage.alt} fill sizes="(min-width: 640px) 140px, 30vw" /></span><strong>{materialOptions[id].label}</strong><small>{formatPrice(customCasePricing[id].discounted)}</small></span></label>)}
           </div><p className="pdp-material-note" aria-live="polite">{materialOptions[material].note}</p>{material === "acrylic" ? <p className="pdp-compatibility-note">Acrylic cases are currently available for iPhone models only.</p> : null}</fieldset>
@@ -109,9 +128,11 @@ export function CustomCaseBuilder() {
             <label>Phone model<select value={model} onChange={(event) => { setModel(event.target.value); setNetwork(""); setFeedback(""); }}><option value="" disabled>Select your model</option>{phoneModels[brand].map((item) => <option key={item}>{item}</option>)}</select></label>
           </div></fieldset>
           <fieldset className="pdp-network"><legend>04 <span>Network version</span></legend><div className="pdp-network-options">{(["4G", "5G"] as const).map((value) => <label key={value}><input type="radio" name="custom-network" value={value} checked={network === value} onChange={() => { setNetwork(value); setFeedback(""); }} /><span>{value}</span></label>)}</div></fieldset>
-          <div className="pdp-bag-row"><div className="pdp-quantity" role="group" aria-label="Quantity"><button type="button" aria-label="Decrease quantity" disabled={quantity === 1} onClick={() => setQuantity((value) => value - 1)}><Minus size={16} /></button><output aria-label="Selected quantity">{quantity}</output><button type="button" aria-label="Increase quantity" disabled={quantity === 99} onClick={() => setQuantity((value) => value + 1)}><Plus size={16} /></button></div>
-            <button type="submit" className="pdp-add">Add to Cart <span>{formatPrice(quantity * pricing.discounted)}</span><ArrowRight size={18} aria-hidden="true" /></button></div>
-          <p className="pdp-feedback pdp-feedback-error" role="alert">{error}</p><p className="pdp-feedback" role="status">{feedback}</p>
+          {(!preview || !model || !network) && <p className="cc-helper" role="status">{!preview ? "Upload your image to begin." : !model ? "Choose your phone model to continue." : "Choose your network version to continue."}</p>}
+          <fieldset><legend>05 <span>Quantity</span></legend><div className="pdp-bag-row"><div className="pdp-quantity" role="group" aria-label="Quantity"><button type="button" aria-label="Decrease quantity" disabled={quantity === 1} onClick={() => setQuantity((value) => value - 1)}><Minus size={16} /></button><output aria-label="Selected quantity">{quantity}</output><button type="button" aria-label="Increase quantity" disabled={quantity === 99} onClick={() => setQuantity((value) => value + 1)}><Plus size={16} /></button></div>
+            <button type="submit" className="pdp-add" disabled={processing || !preview || !model || !network}>Add to Cart <span>{formatPrice(quantity * pricing.discounted)}</span><ArrowRight size={18} aria-hidden="true" /></button></div></fieldset>
+          <button type="button" className="pdp-buy-now" disabled={!preview || !model || !network} onClick={buyNow}>Buy It Now</button>
+          <p className="pdp-feedback pdp-feedback-error" role="alert">{error}</p><p className="pdp-feedback" role="status">{feedback} {feedback && <Link href="/cart">View Cart →</Link>}</p>
         </form>
         <DeliveryTimeline custom />
         <section className="custom-how-it-works"><p className="pdp-eyebrow">Your image. Your case.</p><h2>How it works</h2><ol><li>Upload your image</li><li>Choose material and phone</li><li>Add it to your cart</li><li>We prepare your custom case</li></ol></section>

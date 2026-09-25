@@ -7,6 +7,12 @@ import "./cart.css";
 
 export const metadata: Metadata = { title: "Your Cart", description: "Review your Coolcase selections." };
 
-export default function CartPage() {
-  return <div id="top"><a href="#main-content" className="skip-link">Skip to content</a><SiteHeader /><main id="main-content" className="cart-page"><SiteContainer><CartPageContent /></SiteContainer></main><SiteFooter /></div>;
+import { createAdminClient } from "@/lib/supabase/server";
+
+export default async function CartPage() {
+  const supabase = createAdminClient();
+  const { data: shippingSetting } = await supabase.from('store_settings').select('value').eq('key', 'shipping_fee').single();
+  const shippingFee = Number(shippingSetting?.value) || 50;
+
+  return <div id="top"><a href="#main-content" className="skip-link">Skip to content</a><SiteHeader /><main id="main-content" className="cart-page"><SiteContainer><CartPageContent shippingFee={shippingFee} /></SiteContainer></main><SiteFooter /></div>;
 }

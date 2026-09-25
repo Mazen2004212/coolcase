@@ -31,11 +31,12 @@ export async function signupAction(_previous: AuthActionState, formData: FormDat
   const parsed = signupSchema.safeParse(formValues(formData));
   if (!parsed.success) return validationState(parsed.error);
   const { fullName, phone, email, password, governorate, city, area, street, building, floor, apartment, landmark } = parsed.data;
+  const next = safeNextPath(formData.get("next"));
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${await requestOrigin()}/auth/callback?next=/account`, data: { full_name: fullName, phone, governorate, city, area, street, building, floor, apartment, landmark } } });
+    const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${await requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}`, data: { full_name: fullName, phone, governorate, city, area, street, building, floor, apartment, landmark } } });
     if (error) return { status: "error", message: signupErrorMessage(error.code) };
-    if (data.session) redirect("/account");
+    if (data.session) redirect(next);
     return { status: "success", email };
   } catch (error) {
     if (typeof error === "object" && error !== null && "digest" in error) throw error;
@@ -46,12 +47,22 @@ export async function signupAction(_previous: AuthActionState, formData: FormDat
 export async function loginAction(_previous: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const parsed = loginSchema.safeParse(formValues(formData));
   if (!parsed.success) return validationState(parsed.error);
-  const next = safeNextPath(formData.get("next"));
+  let next = safeNextPath(formData.get("next"));
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    const { error, data } = await supabase.auth.signInWithPassword(parsed.data);
     if (error) return { status: "error", message: error.code === "email_not_confirmed" ? "Confirm your email before logging in." : "Email or password is incorrect." };
-  } catch { return { status: "error", message: "Login is temporarily unavailable. Please try again." }; }
+
+    if (data?.user) {
+      const { data: staff } = await supabase.from('admin_staff').select('is_active').eq('user_id', data.user.id).maybeSingle();
+      if (staff?.is_active && next === '/') {
+        next = '/admin';
+      }
+    }
+  } catch (err) { 
+    if (err instanceof Error && err.message === 'NEXT_REDIRECT') throw err; // rethrow nextjs redirect if we somehow use it inside try
+    return { status: "error", message: "Login is temporarily unavailable. Please try again." }; 
+  }
   redirect(next);
 }
 
@@ -81,5 +92,5 @@ export async function resetPasswordAction(_previous: AuthActionState, formData: 
 export async function logoutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/");
+  return { success: true };
 }

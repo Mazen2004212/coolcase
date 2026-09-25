@@ -1,15 +1,25 @@
 import Image from "next/image";
-import { Search, UserRound } from "lucide-react";
+import { Search } from "lucide-react";
 import Link from "next/link";
 import { CartBadgeLink } from "@/components/cart/cart-badge-link";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { SiteContainer } from "@/components/layout/site-container";
 import { siteNavigation } from "@/lib/data/homepage";
 import { getCustomer } from "@/lib/auth/user";
+import { getStaffProfile } from "@/lib/admin/user";
+import { UserDropdown } from "@/components/layout/user-dropdown";
 
 export async function SiteHeader() {
   const customer = await getCustomer();
+  const staff = await getStaffProfile();
+  const dropdownCustomer = customer ? {
+    email: customer.profile?.email || customer.user?.email || '',
+    fullName: customer.profile?.full_name || '',
+  } : null;
+
+  const isStaff = Boolean(staff?.isActive);
   const accountHref = customer ? "/account" : "/login";
+
   return (
     <header className="sticky top-0 z-50 h-[var(--header-height)] bg-surface-black text-white">
       <SiteContainer className="relative flex h-full items-center justify-between gap-4">
@@ -43,14 +53,10 @@ export async function SiteHeader() {
           >
             <Search size={20} strokeWidth={1.6} aria-hidden="true" />
           </Link>
-          <Link
-            href={accountHref}
-            prefetch={false}
-            className="icon-button hidden hover:bg-white/10 lg:inline-flex"
-            aria-label="Account"
-          >
-            <UserRound size={20} strokeWidth={1.6} aria-hidden="true" />
-          </Link>
+          <UserDropdown 
+            customer={dropdownCustomer} 
+            isStaff={isStaff} 
+          />
           <CartBadgeLink />
           <MobileNav items={siteNavigation} accountHref={accountHref} />
         </div>

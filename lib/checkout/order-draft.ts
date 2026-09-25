@@ -70,7 +70,12 @@ export function createCheckoutSubmissionDraft(values: CheckoutFormValues, items:
   };
 }
 
-export function getWhatsAppUrl(total: number) {
+export function getWhatsAppUrl(total: number, whatsappNumber?: string | null) {
   const message = `Hello Coolcase, I have completed my InstaPay payment of ${total} EGP and I want to send the transaction screenshot for verification.`;
-  return `https://wa.me/${WHATSAPP_INTERNATIONAL_NUMBER}?text=${encodeURIComponent(message)}`;
+  let num = whatsappNumber ? whatsappNumber.replace(/\D/g, '') : '';
+  if (num.startsWith('01') && num.length === 11) {
+    num = '20' + num.slice(1);
+  }
+  if (!num) num = WHATSAPP_INTERNATIONAL_NUMBER;
+  return `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
 }

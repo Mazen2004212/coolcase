@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNetworkType } from '@/lib/utils/network-label';
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { ArrowRight, Package, MapPin, Truck } from "lucide-react";
@@ -84,7 +85,7 @@ function TrackingResult({ order }: { order: TrackingResult }) {
             <div key={i} className="track-item">
               <div>
                 <strong>{item.product_name_snapshot}</strong>
-                <span>{item.phone_model} &middot; {readable(item.material)} &middot; {readable(item.network_type)}</span>
+                <span>{item.phone_model} &middot; {readable(item.material)} &middot; {formatNetworkType(item.network_type)}</span>
               </div>
               <span>{item.quantity} &times; {money(item.unit_price)}</span>
             </div>

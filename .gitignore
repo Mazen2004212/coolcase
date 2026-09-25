@@ -12,6 +12,8 @@ build/
 # Environment files
 .env
 .env.local
+.env.*.local
+.env.production
 .env.development.local
 .env.test.local
 .env.production.local
@@ -30,6 +32,7 @@ pnpm-debug.log*
 coverage/
 playwright-report/
 test-results/
+*.lcov
 
 # Vercel
 .vercel/
@@ -52,9 +55,16 @@ desktop.ini
 tmp/
 temp/
 *.tmp
+*.bak
+*.dump
+*.sql.gz
+screenshots/
+uat-artifacts/
 
 # Supabase
 supabase/.temp/
+supabase/.branches/
+supabase/.env
 
 # Local uploads / generated private data
 private/

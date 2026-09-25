@@ -2,6 +2,7 @@
 // Keeps all pricing logic in one place.
 
 import { defaultMaterialPricing } from '@/lib/data/product-options';
+import { parseStoredBoolean } from '@/lib/settings/parsers';
 import type { CatalogProduct, StoreSettings } from './types';
 
 // ─── DB row shape (what Supabase returns from our select) ─────────────────────
@@ -16,9 +17,15 @@ type RawProductRow = {
   is_active: boolean;
   is_featured: boolean;
   display_order: number;
+  silicone_original_price_override?: number | null;
+  acrylic_original_price_override?: number | null;
+  double_layer_original_price_override?: number | null;
   silicone_price_override: number | null;
   acrylic_price_override: number | null;
   double_layer_price_override: number | null;
+  silicone_enabled?: boolean;
+  acrylic_enabled?: boolean;
+  double_layer_enabled?: boolean;
   categories: { id: string; name: string; slug: string } | null;
   product_images: Array<{
     id: string;
@@ -45,7 +52,7 @@ function numSetting(rows: SettingsRow[], key: string, fallback: number): number 
 function boolSetting(rows: SettingsRow[], key: string, fallback: boolean): boolean {
   const row = rows.find(r => r.key === key);
   if (!row) return fallback;
-  return Boolean(row.value);
+  return parseStoredBoolean(row.value, fallback);
 }
 
 function strSetting(rows: SettingsRow[], key: string, fallback: string): string {
@@ -99,15 +106,15 @@ export function mapProduct(row: RawProductRow, settings: StoreSettings, supabase
   // Build per-material pricing (product overrides take precedence)
   const pricing = {
     silicon: {
-      original:   settings.siliconOriginalPrice,
+      original:   row.silicone_original_price_override ?? settings.siliconOriginalPrice,
       discounted: row.silicone_price_override ?? settings.siliconSellingPrice,
     },
     acrylic: {
-      original:   settings.acrylicOriginalPrice,
+      original:   row.acrylic_original_price_override ?? settings.acrylicOriginalPrice,
       discounted: row.acrylic_price_override ?? settings.acrylicSellingPrice,
     },
     'double-layer': {
-      original:   settings.doubleLayerOriginalPrice,
+      original:   row.double_layer_original_price_override ?? settings.doubleLayerOriginalPrice,
       discounted: row.double_layer_price_override ?? settings.doubleLayerSellingPrice,
     },
   } as const;
@@ -124,6 +131,11 @@ export function mapProduct(row: RawProductRow, settings: StoreSettings, supabase
     isActive:        row.is_active,
     isFeatured:      row.is_featured,
     displayOrder:    row.display_order,
+    materialsEnabled: {
+      silicon: row.silicone_enabled ?? true,
+      acrylic: row.acrylic_enabled ?? true,
+      'double-layer': row.double_layer_enabled ?? true,
+    },
     images,
     pricing,
     coverImage,

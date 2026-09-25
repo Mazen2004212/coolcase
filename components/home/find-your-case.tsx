@@ -4,9 +4,9 @@ import Link from "next/link";
 import { SiteContainer } from "@/components/layout/site-container";
 
 const discoveryLinks = [
-  { label: "Device", href: "/shop" },
-  { label: "Style", href: "/shop" },
-  { label: "Collection", href: "/shop" },
+  { label: "All Cases", href: "/shop" },
+  { label: "Custom Cases", href: "/custom-cases" },
+  { label: "Collections", href: "/collections" },
 ] as const;
 
 export function FindYourCase() {

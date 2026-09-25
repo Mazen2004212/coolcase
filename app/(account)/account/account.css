@@ -63,6 +63,20 @@
 .orders-list dl { display: grid; grid-template-columns: repeat(3, auto); gap: 22px; }
 .orders-list dt { color: #777; font-size: 8px; }
 .orders-list dd { margin-top: 4px; font-size: 10px; font-weight: 600; text-transform: capitalize; }
+.account-test-badge { display: inline-flex; margin-top: 7px; border-radius: 999px; background: #fff0ad; padding: 5px 8px; color: #4e3d00; font-size: 8px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.account-payment-proof { margin-top: 24px; border: 1px solid #ccc; padding: 22px; }
+.account-payment-proof h3 { margin-top: 7px; font-size: 22px; }
+.account-payment-proof > p:not(.account-eyebrow) { margin-top: 8px; color: #555; font-size: 11px; line-height: 1.55; }
+.account-payment-rejection, .payment-proof-error { color: #8b2e26 !important; }
+.payment-proof-upload { display: grid; gap: 9px; margin-top: 17px; }
+.payment-proof-upload label { display: grid; gap: 8px; font-size: 10px; font-weight: 650; text-transform: uppercase; }
+.payment-proof-upload input { width: 100%; border: 1px solid #bbb; border-radius: 3px; background: #fff; padding: 10px; font-size: 11px; text-transform: none; }
+.payment-proof-upload small { color: #777; font-size: 9px; }
+.payment-proof-upload button { display: inline-flex; width: fit-content; min-height: 44px; align-items: center; gap: 8px; border-radius: 3px; background: #080808; color: #fff; padding: 0 16px; font-size: 10px; font-weight: 650; cursor: pointer; text-transform: uppercase; }
+.payment-proof-upload button:disabled { cursor: wait; opacity: .6; }
+.payment-proof-upload button svg { width: 15px; }
+.payment-proof-state { margin-top: 15px; border: 1px solid #bcd2bf; background: #f5fff6; padding: 12px; color: #265c2d; font-size: 10px; }
+.payment-proof-error { font-size: 10px; }
 @media (max-width: 767px) {
   .account-page { padding: 29px 0 58px; }
   .account-layout { grid-template-columns: 1fr; gap: 29px; }

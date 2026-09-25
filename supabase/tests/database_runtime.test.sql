@@ -111,11 +111,11 @@ select pg_temp.assert_true(
   'all seven approved seed categories exist'
 );
 select pg_temp.assert_true(
-  (select value = '150'::jsonb from public.store_settings where key = 'silicone_price')
-  and (select value = '200'::jsonb from public.store_settings where key = 'acrylic_price')
-  and (select value = '50'::jsonb from public.store_settings where key = 'shipping_fee')
+  (select jsonb_typeof(value) = 'number' and (value #>> '{}')::numeric > 0 from public.store_settings where key = 'silicone_price')
+  and (select jsonb_typeof(value) = 'number' and (value #>> '{}')::numeric > 0 from public.store_settings where key = 'acrylic_price')
+  and (select jsonb_typeof(value) = 'number' and (value #>> '{}')::numeric >= 0 from public.store_settings where key = 'shipping_fee')
   and (select value = '"EGP"'::jsonb from public.store_settings where key = 'currency'),
-  'approved seed settings have exact values'
+  'current authoritative price, shipping, and currency settings have valid values'
 );
 
 insert into public.customer_uploads (
@@ -143,14 +143,14 @@ from phase2b_context;
 
 insert into public.orders (
   id, order_number, customer_id, customer_name, customer_phone,
-  governorate, city_area, street_name, building_number,
+  customer_email, governorate, city_area, street_name, building_number,
   subtotal_amount, shipping_amount, total_amount, currency, payment_method
 )
 select
   order_valid_id,
   'CC-P2B-V-' || left(order_valid_id::text, 8),
   customer_a_id,
-  'Valid Deferred Order', '01000000003',
+  'Valid Deferred Order', '01000000003', 'valid-deferred@example.com',
   'Cairo', 'Maadi', 'Test Street', '3',
   300, 50, 350, 'EGP', 'CASH_ON_DELIVERY'
 from phase2b_context;
@@ -168,7 +168,7 @@ set constraints all deferred;
 
 insert into public.orders (
   id, order_number, customer_id, customer_name, customer_phone,
-  governorate, city_area, street_name, building_number,
+  customer_email, governorate, city_area, street_name, building_number,
   subtotal_amount, shipping_amount, total_amount, currency, payment_method
 )
 select
@@ -177,6 +177,7 @@ select
   customer_a_id,
   'Phase 2B Customer A',
   '01000000001',
+  'customer-a@example.com',
   'Cairo', 'Nasr City', 'Test Street', '1',
   150, 50, 200, 'EGP', 'CASH_ON_DELIVERY'::public.payment_method
 from phase2b_context
@@ -187,6 +188,7 @@ select
   customer_b_id,
   'Phase 2B Customer B',
   '01000000002',
+  'customer-b@example.com',
   'Giza', 'Dokki', 'Test Street', '2',
   200, 50, 250, 'EGP', 'CASH_ON_DELIVERY'::public.payment_method
 from phase2b_context
@@ -197,6 +199,7 @@ select
   customer_a_id,
   'Phase 2B Customer A',
   '01000000001',
+  'customer-a@example.com',
   'Cairo', 'Nasr City', 'Test Street', '1',
   150, 50, 200, 'EGP', 'INSTAPAY'::public.payment_method
 from phase2b_context;
@@ -315,14 +318,14 @@ from phase2b_context;
 
 insert into public.orders (
   id, order_number, customer_id, customer_name, customer_phone,
-  governorate, city_area, street_name, building_number,
+  customer_email, governorate, city_area, street_name, building_number,
   subtotal_amount, shipping_amount, total_amount, currency, payment_method
 )
 select
   order_bad_total_id,
   'CC-P2B-X-' || left(order_bad_total_id::text, 8),
   customer_a_id,
-  'Invalid Deferred Order', '01000000004',
+  'Invalid Deferred Order', '01000000004', 'invalid-deferred@example.com',
   'Cairo', 'Maadi', 'Test Street', '4',
   301, 50, 351, 'EGP', 'CASH_ON_DELIVERY'
 from phase2b_context;
@@ -347,14 +350,14 @@ set constraints all deferred;
 
 insert into public.orders (
   id, order_number, customer_id, customer_name, customer_phone,
-  governorate, city_area, street_name, building_number,
+  customer_email, governorate, city_area, street_name, building_number,
   subtotal_amount, shipping_amount, total_amount, currency, payment_method
 )
 select
   order_zero_items_id,
   'CC-P2B-Z-' || left(order_zero_items_id::text, 8),
   customer_a_id,
-  'Zero Item Order', '01000000005',
+  'Zero Item Order', '01000000005', 'zero-item@example.com',
   'Cairo', 'Maadi', 'Test Street', '5',
   0, 50, 50, 'EGP', 'CASH_ON_DELIVERY'
 from phase2b_context;

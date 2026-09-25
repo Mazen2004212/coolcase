@@ -3,7 +3,65 @@ import 'server-only';
 import nodemailer from 'nodemailer';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getOrderStatusEmail } from '@/lib/admin/email-templates';
-import type { OrderEmailInput } from '@/lib/admin/email-templates';
+import type { OrderEmailInput, OrderEmailItem } from '@/lib/admin/email-templates';
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+async function loadEmailPresentation(
+  supabase: ReturnType<typeof createAdminClient>,
+  orderId: string,
+): Promise<Partial<OrderEmailInput>> {
+  try {
+    const [{ data: order }, { data: rows }, { data: settings }, { data: payment }] = await Promise.all([
+      supabase.from('orders').select('subtotal_amount, discount_amount, shipping_amount, total_amount, payment_method').eq('id', orderId).maybeSingle(),
+      supabase.from('order_items').select('product_name_snapshot, phone_model, material, network_type, quantity, unit_price, line_total, customization_type, customization_snapshot').eq('order_id', orderId).order('created_at'),
+      supabase.from('store_settings').select('key, value').in('key', ['support_email', 'whatsapp_number']),
+      supabase.from('payments').select('expected_amount, status').eq('order_id', orderId).maybeSingle(),
+    ]);
+
+    const setting = new Map((settings ?? []).map(row => [row.key, typeof row.value === 'string' ? row.value.trim() : '']));
+    const whatsapp = setting.get('whatsapp_number')?.replace(/\D/g, '') ?? '';
+    const supportEmail = setting.get('support_email') ?? '';
+    const items: OrderEmailItem[] = (rows ?? []).map(item => ({
+      productName: item.product_name_snapshot,
+      phoneModel: item.phone_model,
+      material: item.material,
+      networkType: item.network_type,
+      quantity: item.quantity,
+      unitPrice: item.unit_price,
+      lineTotal: item.line_total,
+      customizationType: item.customization_type,
+      customizationSnapshot: record(item.customization_snapshot),
+    }));
+
+    return {
+      ...(order ? {
+        subtotal: order.subtotal_amount,
+        discount: order.discount_amount ?? 0,
+        shipping: order.shipping_amount,
+        total: order.total_amount,
+        paymentMethod: order.payment_method === 'INSTAPAY' ? 'InstaPay' as const : 'COD' as const,
+        ...(order.payment_method === 'CASH_ON_DELIVERY' && payment?.status !== 'NOT_REQUIRED' ? {
+          paymentExpectedAmount: Number(payment?.expected_amount ?? 0),
+          remainingCodAmount: Number((order.total_amount - Number(payment?.expected_amount ?? 0)).toFixed(2)),
+          paymentStatus: payment?.status,
+        } : {}),
+      } : {}),
+      items,
+      siteUrl: process.env.NEXT_PUBLIC_APP_URL,
+      orderUrl: `/account/orders/${orderId}`,
+      supportLabel: whatsapp ? 'Contact Coolcase on WhatsApp' : supportEmail ? 'Contact Coolcase support' : undefined,
+      supportUrl: whatsapp ? `https://wa.me/${whatsapp}` : supportEmail ? `mailto:${supportEmail}` : undefined,
+    };
+  } catch (error) {
+    console.error('[email] could not load presentation details:', error);
+    return { siteUrl: process.env.NEXT_PUBLIC_APP_URL, orderUrl: `/account/orders/${orderId}` };
+  }
+}
 
 /** Email configuration from server-only environment variables. */
 function getTransporter() {
@@ -61,8 +119,10 @@ export async function sendOrderStatusEmail(
     };
   }
 
-  // Build template
-  const template = getOrderStatusEmail(emailInput);
+  // Enrich presentation from authoritative stored snapshots and amounts.
+  // A read failure falls back to the caller-provided values and never changes delivery rules.
+  const presentation = await loadEmailPresentation(supabase, orderId);
+  const template = getOrderStatusEmail({ ...emailInput, ...presentation });
   if (!template) {
     return {
       sent: false,
@@ -90,6 +150,7 @@ export async function sendOrderStatusEmail(
       to: recipientEmail,
       subject: template.subject,
       text: template.body,
+      html: template.html,
     });
 
     // Record success

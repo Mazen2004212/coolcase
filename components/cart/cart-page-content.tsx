@@ -14,12 +14,15 @@ import {
   type StoredCartItem,
 } from "@/lib/cart/local-cart";
 import { formatPrice, materialOptions } from "@/lib/data/product-options";
+import { TotalsSummary, PriceDisplay } from "@/components/ui/price-display";
+import { namedCaseColorLabel } from "@/lib/custom-cases/templates";
 
-const SHIPPING_FEE = 50;
+
 
 function CartImage({ item }: { item: StoredCartItem }) {
   const [failed, setFailed] = useState(false);
-  const href = item.kind === "custom" ? "/custom-cases" : `/products/${item.slug}`;
+  const href = item.kind === "custom" ? (item.customizationType === "NAMED_TEMPLATE" ? "/custom-cases/named" : "/custom-cases/upload") : `/products/${item.slug}`;
+  const image = item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.templateImage : item.image;
 
   return (
     <Link href={href} prefetch={false} className="cart-item-image" aria-label={`View ${item.productName}`}>
@@ -27,11 +30,11 @@ function CartImage({ item }: { item: StoredCartItem }) {
         <span className="cart-image-fallback"><ImageIcon aria-hidden="true" /><small>Preview unavailable</small></span>
       ) : (
         <Image
-          src={item.image}
-          alt={item.kind === "custom" ? "Your uploaded custom case design" : `${item.productName} phone case`}
+          src={image}
+          alt={item.kind === "custom" ? (item.customizationType === "NAMED_TEMPLATE" ? "Named Custom Case design example" : "Your uploaded custom case design") : `${item.productName} phone case`}
           fill
           sizes="(max-width: 639px) 112px, 180px"
-          unoptimized={item.kind === "custom"}
+          unoptimized={item.kind === "custom" && item.customizationType === "UPLOAD_DESIGN"}
           onError={() => setFailed(true)}
         />
       )}
@@ -42,7 +45,7 @@ function CartImage({ item }: { item: StoredCartItem }) {
 function CartLine({ item }: { item: StoredCartItem }) {
   const itemKey = getCartItemKey(item);
   const soldOut = false; // Availability is validated at checkout. Cart items are assumed available until order submission.
-  const href = item.kind === "custom" ? "/custom-cases" : `/products/${item.slug}`;
+  const href = item.kind === "custom" ? (item.customizationType === "NAMED_TEMPLATE" ? "/custom-cases/named" : "/custom-cases/upload") : `/products/${item.slug}`;
 
   return (
     <article className="cart-line" data-kind={item.kind} data-sold-out={soldOut ? "true" : "false"}>
@@ -50,7 +53,7 @@ function CartLine({ item }: { item: StoredCartItem }) {
       <div className="cart-line-details">
         <div className="cart-line-heading">
           <div>
-            {item.kind === "custom" ? <span className="cart-custom-badge">Custom</span> : null}
+            {item.kind === "custom" ? <span className="cart-custom-badge">{item.customizationType === "NAMED_TEMPLATE" ? "Named custom case" : "Custom design"}</span> : null}
             <h2><Link href={href} prefetch={false}>{item.productName}</Link></h2>
           </div>
           <strong className="cart-line-total">{formatPrice(item.discountedUnitPrice * item.quantity)}</strong>
@@ -60,13 +63,11 @@ function CartLine({ item }: { item: StoredCartItem }) {
           <dt>Material</dt><dd>{materialOptions[item.material].label}</dd>
           <dt>Phone</dt><dd>{item.phoneBrand} — {item.phoneModel}</dd>
           <dt>Network</dt><dd>{item.networkType}</dd>
+          {item.kind === "custom" && item.customizationType === "UPLOAD_DESIGN" ? <><dt>Design</dt><dd>Your uploaded artwork</dd></> : null}
+          {item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? <><dt>Design</dt><dd>{item.templateName}</dd><dt>English Name</dt><dd><span lang="en">{item.englishName}</span></dd><dt>Arabic Name</dt><dd><span lang="ar" dir="rtl">{item.arabicName}</span></dd><dt>English Color</dt><dd><i className="named-color-dot" style={{backgroundColor:item.englishColor}} />{namedCaseColorLabel(item.englishColor)}</dd><dt>Arabic Color</dt><dd><i className="named-color-dot" style={{backgroundColor:item.arabicColor}} />{namedCaseColorLabel(item.arabicColor)}</dd></> : null}
         </dl>
 
-        <div className="cart-unit-price">
-          <del><span className="sr-only">Original unit price </span>{formatPrice(item.originalUnitPrice)}</del>
-          <strong><span className="sr-only">Current unit price </span>{formatPrice(item.discountedUnitPrice)}</strong>
-          <span>each</span>
-        </div>
+        <div className="cart-unit-price"><PriceDisplay current={item.discountedUnitPrice} original={item.originalUnitPrice}/><span>each</span></div>
 
         {soldOut ? <div className="cart-unavailable"><span>Sold Out</span><p>This item is currently unavailable.</p></div> : null}
 
@@ -83,10 +84,11 @@ function CartLine({ item }: { item: StoredCartItem }) {
   );
 }
 
-export function CartPageContent() {
+export function CartPageContent({ shippingFee }: { shippingFee: number }) {
   const cart = useSyncExternalStore(subscribeToLocalCart, getLocalCartSnapshot, getLocalCartServerSnapshot);
   const subtotal = cart.items.reduce((sum, item) => sum + item.discountedUnitPrice * item.quantity, 0);
-  const shipping = cart.items.length > 0 ? SHIPPING_FEE : 0;
+  const savings = cart.items.reduce((sum, item) => sum + Math.max(0, item.originalUnitPrice - item.discountedUnitPrice) * item.quantity, 0);
+  const shipping = cart.items.length > 0 ? shippingFee : 0;
   const total = subtotal + shipping;
   const hasUnavailableItem = false; // Validated server-side at checkout.
 
@@ -111,12 +113,13 @@ export function CartPageContent() {
         <aside className="cart-summary" aria-labelledby="order-summary-heading">
           <p>Order / Summary</p>
           <h2 id="order-summary-heading">ORDER SUMMARY</h2>
-          <dl><div><dt>Subtotal</dt><dd>{formatPrice(subtotal)}</dd></div><div><dt>Shipping</dt><dd>{formatPrice(shipping)}</dd></div><div className="cart-summary-total"><dt>Total</dt><dd>{formatPrice(total)}</dd></div></dl>
+          <TotalsSummary subtotal={subtotal} shipping={shipping} total={total} savings={savings}/>
+          <p className="cc-helper">Have a coupon? Apply it at checkout.</p>
           <p className="cart-delivery-note">Estimated delivery: 7–10 days</p>
           {hasUnavailableItem ? <p className="cart-checkout-warning" role="status">Remove unavailable items to continue to checkout.</p> : null}
           {hasUnavailableItem ? <button type="button" className="cart-checkout" disabled>Proceed to Checkout <ArrowRight aria-hidden="true" /></button> : <Link href="/checkout" prefetch={false} className="cart-checkout">Proceed to Checkout <ArrowRight aria-hidden="true" /></Link>}
           <Link href="/shop" prefetch={false} className="cart-summary-continue">Continue Shopping</Link>
-          <small>Prices in this cart are stored locally for review. Checkout will validate pricing in a later phase.</small>
+          <small>Your final total is confirmed when you place your order.</small>
         </aside>
       </div>
     </>

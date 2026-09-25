@@ -1,174 +1,76 @@
-**# Coolcase**
+# Coolcase
 
+Production e-commerce platform for customizable phone cases in Egypt. The repository contains the customer storefront, account and checkout flows, custom-case builders, the staff administration interface, and the Supabase database foundation.
 
+## Stack
 
-**Production e-commerce platform for customizable phone cases.**
+- Next.js 16 with the App Router
+- React 19 and TypeScript
+- Tailwind CSS 4
+- Supabase PostgreSQL, Auth, and Storage
+- Zod and React Hook Form
 
+## Local setup
 
+Requirements:
 
-**## Project Status**
+- Node.js 20.9 or newer
+- npm 11
+- A configured Supabase project
 
+Copy `.env.example` to `.env.local` and provide the required local values. Never commit `.env.local` or production credentials.
 
+```bash
+npm install
+npm run dev
+```
 
-**Currently under active development.**
+The development server starts on `http://localhost:3000` by default.
 
+## Environment variables
 
+The application requires:
 
-**The application will include:**
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (server only)
+- `NEXT_PUBLIC_APP_URL`
 
+Transactional email uses `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_APP_PASSWORD`, and `EMAIL_FROM`. See `.env.example` for safe placeholders and defaults.
 
+The Supabase verification and seed scripts use separate `COOLCASE_SUPABASE_*` variables so production credentials do not need to be exposed as public application variables.
 
-**- Storefront**
+## Validation
 
-**- Product catalog**
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
 
-**- Custom case ordering**
+Linked Supabase runtime verification is available when its dedicated environment variables are configured:
 
-**- Shopping cart**
+```bash
+npm run test:supabase:runtime
+```
 
-**- Customer authentication**
+## Project structure
 
-**- Checkout**
+- `app/` — storefront, customer account, checkout, and admin routes
+- `components/` — shared storefront, builder, and admin UI
+- `lib/` — catalog, checkout, authentication, settings, email, and Supabase utilities
+- `public/assets/` — production storefront and email assets
+- `supabase/migrations/` — immutable database migrations
+- `supabase/tests/` — SQL and runtime database tests
+- `docs/` — product specification, schema, flows, and setup notes
 
-**- Address management**
+## Documentation
 
-**- InstaPay payment proof workflow**
+- [Project specification](docs/PROJECT_SPEC.md)
+- [Database schema](docs/DATABASE_SCHEMA.md)
+- [User flows](docs/USER_FLOWS.md)
+- [Supabase setup](docs/SUPABASE_SETUP.md)
 
-**- Cash on Delivery**
+## Security
 
-**- Customer order history**
-
-**- Order tracking**
-
-**- Admin dashboard**
-
-**- Order management**
-
-**- Payment verification**
-
-**- Product management**
-
-**- Store settings**
-
-
-
-**---**
-
-
-
-**## Technology**
-
-
-
-**Planned stack:**
-
-
-
-**- Next.js**
-
-**- React**
-
-**- TypeScript**
-
-**- Tailwind CSS**
-
-**- Supabase PostgreSQL**
-
-**- Supabase Auth**
-
-**- Supabase Storage**
-
-**- Zod**
-
-**- React Hook Form**
-
-**- Playwright**
-
-
-
-**---**
-
-
-
-**## Documentation**
-
-
-
-**Project specification:**
-
-
-
-**`docs/PROJECT\_SPEC.md`**
-
-
-
-**Database architecture:**
-
-
-
-**`docs/DATABASE\_SCHEMA.md`**
-
-
-
-**Customer and admin flows:**
-
-
-
-**`docs/USER\_FLOWS.md`**
-
-
-
-**Supabase setup and security:**
-
-
-
-**`docs/SUPABASE\_SETUP.md`**
-
-
-
-**Homepage visual reference:**
-
-
-
-**`docs/reference/homepage-reference.png`**
-
-
-
-**---**
-
-
-
-**## Assets**
-
-
-
-**Static assets are stored under:**
-
-
-
-**`public/assets`**
-
-
-
-**Structure:**
-
-
-
-**```text**
-
-**assets/**
-
-**├── banners/**
-
-**├── categories/**
-
-**├── hero/**
-
-**├── icons/**
-
-**├── logo/**
-
-**├── payment/**
-
-**└── products/**
-
+All privileged Supabase and email credentials are server-only. Storage access, staff permissions, order transitions, payment verification, and authoritative checkout pricing are enforced by the application and database policies. Keep secrets in local or deployment environment configuration; do not add them to source control.

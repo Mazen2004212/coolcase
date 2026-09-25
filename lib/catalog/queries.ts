@@ -23,7 +23,9 @@ export const getPublishedProducts = cache(async (): Promise<CatalogProduct[]> =>
     .select(`
       id, slug, name, short_description, description,
       is_available, is_active, is_featured, display_order,
+      silicone_original_price_override, acrylic_original_price_override, double_layer_original_price_override,
       silicone_price_override, acrylic_price_override, double_layer_price_override,
+      silicone_enabled, acrylic_enabled, double_layer_enabled,
       categories ( id, name, slug ),
       product_images (
         id, storage_path, alt_text, display_order, is_primary
@@ -49,7 +51,9 @@ export const getProductBySlug = cache(async (slug: string): Promise<CatalogProdu
     .select(`
       id, slug, name, short_description, description,
       is_available, is_active, is_featured, display_order,
+      silicone_original_price_override, acrylic_original_price_override, double_layer_original_price_override,
       silicone_price_override, acrylic_price_override, double_layer_price_override,
+      silicone_enabled, acrylic_enabled, double_layer_enabled,
       categories ( id, name, slug ),
       product_images (
         id, storage_path, alt_text, display_order, is_primary
@@ -77,7 +81,9 @@ export const getFeaturedProducts = cache(async (): Promise<CatalogProduct[]> => 
     .select(`
       id, slug, name, short_description, description,
       is_available, is_active, is_featured, display_order,
+      silicone_original_price_override, acrylic_original_price_override, double_layer_original_price_override,
       silicone_price_override, acrylic_price_override, double_layer_price_override,
+      silicone_enabled, acrylic_enabled, double_layer_enabled,
       categories ( id, name, slug ),
       product_images (
         id, storage_path, alt_text, display_order, is_primary

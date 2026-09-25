@@ -189,6 +189,16 @@ async function verifyProfiles(customerA, customerB, adminTest) {
   );
   ensure(promoted.role === "ADMIN", "ADMIN_TEST has ADMIN after trusted promotion");
 
+  ensureNoError(
+    await service.from("admin_staff").insert({
+      user_id: adminTest.id,
+      role: "OWNER",
+      permissions: [],
+      is_active: true,
+    }),
+    "trusted test setup registered ADMIN_TEST in the current admin_staff authorization model",
+  );
+
   const ownProfile = ensureNoError(
     await customerA.client.from("profiles").select("id, full_name, email, phone, role").eq("id", customerA.id).single(),
     "CUSTOMER_A can select their own profile",
@@ -447,6 +457,11 @@ async function verifyCatalogAndSettings(customerA, adminTest) {
     "anonymous user cannot select settings updated_by",
   );
 
+  const protectedSettingsBefore = ensureNoError(
+    await service.from("store_settings").select("key, value").in("key", ["silicone_price", "currency"]),
+    "authoritative settings are readable before rejected mutation checks",
+  );
+
   const customerSettingMutation = ensureNoError(
     await customerA.client.from("store_settings").update({ value: 1 }).eq("key", "silicone_price").select("id"),
     "customer settings mutation is filtered by RLS",
@@ -466,13 +481,14 @@ async function verifyCatalogAndSettings(customerA, adminTest) {
     "invalid currency format is rejected",
   );
 
-  const authoritativeSettings = ensureNoError(
+  const protectedSettingsAfter = ensureNoError(
     await service.from("store_settings").select("key, value").in("key", ["silicone_price", "currency"]),
     "authoritative settings remain readable after rejected mutations",
   );
-  const silicone = authoritativeSettings.find((setting) => setting.key === "silicone_price");
-  const currency = authoritativeSettings.find((setting) => setting.key === "currency");
-  ensure(silicone?.value === 150 && currency?.value === "EGP", "rejected mutations left approved settings unchanged");
+  ensure(
+    JSON.stringify(protectedSettingsAfter) === JSON.stringify(protectedSettingsBefore),
+    "rejected mutations left the current approved settings unchanged",
+  );
 }
 
 async function verifyStorage(customerA, customerB, adminTest) {
@@ -594,41 +610,9 @@ async function verifyStorage(customerA, customerB, adminTest) {
   );
 
   const proofPath = `${customerA.id}/phase2b-proof-${runId}.png`;
-  ensureNoError(
+  ensureDenied(
     await customerA.client.storage.from("payment-proofs").upload(proofPath, png, { contentType: "image/png", upsert: false }),
-    "CUSTOMER_A can upload their own payment proof",
-  );
-  rememberObject("payment-proofs", proofPath);
-  ensureNoError(
-    await customerA.client.storage.from("payment-proofs").download(proofPath),
-    "CUSTOMER_A can read their own payment proof",
-  );
-  ensureDenied(
-    await customerB.client.storage.from("payment-proofs").download(proofPath),
-    "CUSTOMER_B cannot read CUSTOMER_A payment proof",
-  );
-  ensureDenied(
-    await customerA.client.storage
-      .from("payment-proofs")
-      .upload(`${customerB.id}/forbidden-proof-${runId}.png`, png, { contentType: "image/png" }),
-    "CUSTOMER_A cannot upload a proof under CUSTOMER_B path",
-  );
-  ensureDenied(
-    await customerA.client.storage.from("payment-proofs").update(proofPath, png, { contentType: "image/png" }),
-    "customer cannot overwrite an existing payment proof",
-  );
-  const proofDeleteAttempt = ensureNoError(
-    await customerA.client.storage.from("payment-proofs").remove([proofPath]),
-    "customer payment-proof delete request is safely filtered",
-  );
-  ensure(proofDeleteAttempt.length === 0, "customer cannot delete payment proof evidence");
-  ensureNoError(
-    await customerA.client.storage.from("payment-proofs").download(proofPath),
-    "payment proof remains readable after unauthorized delete attempt",
-  );
-  ensureNoError(
-    await adminTest.client.storage.from("payment-proofs").download(proofPath),
-    "administrator can review a private payment proof",
+    "direct customer payment-proof storage writes are blocked in favor of the validated server workflow",
   );
 
   const allowedMimes = new Set(designBucket.allowed_mime_types ?? designBucket.allowedMimeTypes ?? []);
@@ -642,15 +626,13 @@ async function verifyStorage(customerA, customerB, adminTest) {
 }
 
 function runDatabaseTests(customerA, customerB, adminTest) {
-  const command = process.platform === "win32" ? "cmd.exe" : "npx";
-  const commandArguments =
-    process.platform === "win32"
-      ? ["/d", "/s", "/c", "npx --yes supabase@2 db query --linked --file supabase\\tests\\database_runtime.test.sql"]
-      : ["--yes", "supabase@2", "db", "query", "--linked", "--file", "supabase/tests/database_runtime.test.sql"];
-  const result = spawnSync(
-    command,
-    commandArguments,
-    {
+  for (const file of ["database_runtime.test.sql", "payment_workflow_runtime.test.sql", "custom_cases_v2_runtime.test.sql", "checkout_item_shapes_runtime.test.sql", "cod_deposit_runtime.test.sql"]) {
+    const command = process.platform === "win32" ? "cmd.exe" : "npx";
+    const filePath = process.platform === "win32" ? `supabase\\tests\\${file}` : `supabase/tests/${file}`;
+    const commandArguments = process.platform === "win32"
+      ? ["/d", "/s", "/c", `npx --yes supabase@2 db query --linked --file ${filePath}`]
+      : ["--yes", "supabase@2", "db", "query", "--linked", "--file", filePath];
+    const result = spawnSync(command, commandArguments, {
       cwd: process.cwd(),
       env: {
         ...process.env,
@@ -660,11 +642,11 @@ function runDatabaseTests(customerA, customerB, adminTest) {
         COOLCASE_TEST_RUN_ID: runId,
       },
       stdio: "inherit",
-    },
-  );
+    });
 
-  if (result.error) throw result.error;
-  ensure(result.status === 0, "linked SQL constraint, commerce, payment, tracking, and audit suite passed");
+    if (result.error) throw result.error;
+    ensure(result.status === 0, `${file} assertions passed`);
+  }
 }
 
 async function cleanup() {

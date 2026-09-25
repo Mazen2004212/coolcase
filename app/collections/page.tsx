@@ -15,7 +15,7 @@ export default async function CollectionsPage() {
     <CustomerPageShell>
       <section className="customer-page">
         <SiteContainer>
-          <header className="customer-page-heading"><p>Find your style</p><h1>COLLECTIONS</h1><span>Five ways to make your phone feel more like you.</span></header>
+          <header className="customer-page-heading"><p>Find your style</p><h1>COLLECTIONS</h1><span>Find a style that makes your phone feel more like you.</span></header>
           <div className="collection-grid">
             {collections.map((collection, index) => (
               <article key={collection.slug} className="collection-card">

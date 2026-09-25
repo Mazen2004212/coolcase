@@ -19,7 +19,15 @@ export const orderStatuses = [
 ] as const;
 
 export const paymentStatuses = ['Pending', 'Awaiting Verification', 'Paid', 'Failed', 'Refunded'] as const;
-export type AdminRole = 'Owner' | 'Manager' | 'Order Staff';
+export type AdminRole = 'OWNER' | 'MANAGER' | 'ORDER_STAFF';
+
+export type StaffProfile = {
+  userId: string;
+  role: AdminRole;
+  permissions: string[];
+  isActive: boolean;
+};
+
 export type ProductStatus = typeof productStatuses[number];
 export type OrderStatus = typeof orderStatuses[number];
 export type PaymentStatus = typeof paymentStatuses[number];

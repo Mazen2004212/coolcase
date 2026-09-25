@@ -3,9 +3,9 @@
 import 'server-only';
 
 import { revalidatePath } from 'next/cache';
-import { createAdminClient } from '@/lib/supabase/server';
-import { getCustomer } from '@/lib/auth/user';
-import { validateTransition, dbStatusToLabel, getStatusTimestampColumn } from '@/lib/orders/transitions';
+import { z } from 'zod';
+import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { dbStatusToLabel } from '@/lib/orders/transitions';
 import type { DbOrderStatus } from '@/lib/orders/transitions';
 import { sendOrderStatusEmail } from '@/lib/orders/email';
 import type { AdminOrderShipping } from '@/lib/admin/types';
@@ -13,17 +13,18 @@ import type { Database } from '@/lib/supabase/database.types';
 
 // ─── Admin authorization ─────────────────────────────────────────────────────
 
-async function requireAdmin(): Promise<{ adminId: string }> {
-  const demoMode = process.env.ADMIN_DEMO_MODE === 'true';
-  if (demoMode) {
-    return { adminId: '00000000-0000-0000-0000-000000000000' };
-  }
+import { getStaffProfile } from '@/lib/admin/user';
+import { requirePermission } from '@/lib/admin/permissions';
 
-  const customer = await getCustomer();
-  if (!customer || customer.profile?.role !== 'ADMIN') {
-    throw new Error('Admin access required');
+async function requireAdmin(permission: string = 'orders.view'): Promise<{ adminId: string; canManageOrders: boolean }> {
+  const staff = await getStaffProfile();
+  if (!staff || !requirePermission(staff, permission)) {
+    throw new Error(`Unauthorized: missing ${permission}`);
   }
-  return { adminId: customer.user.id };
+  return {
+    adminId: staff.userId,
+    canManageOrders: requirePermission(staff, 'orders.manage'),
+  };
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -40,13 +41,16 @@ export type LiveOrderSummary = {
   paymentStatus: string;
   totalAmount: number;
   subtotalAmount: number;
+  discountAmount: number;
   shippingAmount: number;
   governorate: string;
   cityArea: string;
   itemCount: number;
+  isTest: boolean;
 };
 
 export type LiveOrderDetail = LiveOrderSummary & {
+  canManageOrders: boolean;
   streetName: string;
   buildingNumber: string;
   floor: string | null;
@@ -57,6 +61,7 @@ export type LiveOrderDetail = LiveOrderSummary & {
   shippingTrackingNumber: string;
   shippingCurrentLocation: string;
   shippingNotes: string; // ADMIN-ONLY
+  couponCodeSnapshot: string | null;
   items: LiveOrderItem[];
   history: LiveOrderHistoryEvent[];
   payment: LivePayment | null;
@@ -74,6 +79,8 @@ export type LiveOrderItem = {
   lineTotal: number;
   hasCustomDesign: boolean;
   customDesignUrl: string | null;
+  customizationType: string | null;
+  customizationSnapshot: Record<string, unknown> | null;
 };
 
 export type LiveOrderHistoryEvent = {
@@ -92,7 +99,41 @@ export type LivePayment = {
   expectedAmount: number;
   verifiedAt: string | null;
   rejectionReason: string | null;
+  verificationSource: string | null;
+  proof: {
+    uploadId: string;
+    signedUrl: string;
+    originalFilename: string | null;
+    mimeType: string;
+    fileSize: number;
+    uploadedAt: string;
+  } | null;
 };
+
+const orderIdSchema = z.string().uuid();
+const transitionStatusSchema = z.enum([
+  'PENDING_ADMIN_APPROVAL', 'PENDING_CONFIRMATION', 'CONFIRMED', 'PREPARING',
+  'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'REJECTED',
+]);
+const transitionResultSchema = z.object({
+  order_id: z.string().uuid(),
+  order_number: z.string().min(1),
+  status: transitionStatusSchema,
+  customer_name: z.string(),
+  customer_email: z.string().nullable(),
+  total_amount: z.number().nonnegative(),
+  payment_method: z.enum(['INSTAPAY', 'CASH_ON_DELIVERY']),
+  shipping_courier: z.string().nullable(),
+  shipping_tracking_number: z.string().nullable(),
+  shipping_current_location: z.string().nullable(),
+});
+const paymentReviewResultSchema = z.object({
+  payment_id: z.string().uuid(),
+  order_id: z.string().uuid(),
+  status: z.enum(['VERIFIED', 'REJECTED']),
+  proof_upload_id: z.string().uuid(),
+  verification_source: z.string().nullable(),
+});
 
 // ─── Fetch orders list ────────────────────────────────────────────────────────
 
@@ -106,9 +147,9 @@ export async function fetchAdminOrders(filters?: {
   let query = supabase
     .from('orders')
     .select(`
-      id, order_number, created_at,
+      id, order_number, created_at, is_test,
       customer_name, customer_email, customer_phone,
-      status, payment_method, subtotal_amount, shipping_amount, total_amount,
+      status, payment_method, subtotal_amount, discount_amount, shipping_amount, total_amount,
       governorate, city_area,
       payments ( status ),
       order_items ( id )
@@ -135,26 +176,28 @@ export async function fetchAdminOrders(filters?: {
     paymentStatus: ((row.payments as unknown as { status: string } | null)?.status ?? 'UNKNOWN'),
     totalAmount: row.total_amount,
     subtotalAmount: row.subtotal_amount,
+    discountAmount: row.discount_amount ?? 0,
     shippingAmount: row.shipping_amount,
     governorate: row.governorate,
     cityArea: row.city_area,
     itemCount: (row.order_items as { id: string }[])?.length ?? 0,
+    isTest: row.is_test,
   }));
 }
 
 // ─── Fetch single order detail ────────────────────────────────────────────────
 
 export async function fetchAdminOrder(id: string): Promise<LiveOrderDetail | null> {
-  await requireAdmin();
+  const { canManageOrders } = await requireAdmin();
   const supabase = createAdminClient();
 
   const { data: row, error } = await supabase
     .from('orders')
     .select(`
-      id, order_number, created_at,
+      id, order_number, created_at, is_test,
       customer_name, customer_email, customer_phone,
       status, payment_method,
-      subtotal_amount, shipping_amount, total_amount,
+      subtotal_amount, discount_amount, coupon_code_snapshot, shipping_amount, total_amount,
       governorate, city_area, street_name, building_number,
       floor, apartment, landmark, delivery_notes,
       shipping_courier, shipping_tracking_number,
@@ -163,7 +206,7 @@ export async function fetchAdminOrder(id: string): Promise<LiveOrderDetail | nul
         id, product_name_snapshot, product_image_snapshot,
         material, phone_model, network_type,
         quantity, unit_price, line_total,
-        custom_design_upload_id
+        custom_design_upload_id, customization_type, customization_snapshot
       ),
       order_status_history (
         id, status, previous_status,
@@ -171,7 +214,8 @@ export async function fetchAdminOrder(id: string): Promise<LiveOrderDetail | nul
       ),
       payments (
         id, method, status, expected_amount,
-        verified_at, rejection_reason
+        verified_at, rejection_reason, verification_source,
+        payment_proof_upload_id
       )
     `)
     .eq('id', id)
@@ -276,6 +320,8 @@ export async function fetchAdminOrder(id: string): Promise<LiveOrderDetail | nul
               customDesignUploadId
             ) ?? null
             : null,
+        customizationType: item.customization_type as string | null,
+        customizationSnapshot: item.customization_snapshot && typeof item.customization_snapshot === 'object' && !Array.isArray(item.customization_snapshot) ? item.customization_snapshot as Record<string, unknown> : null,
       };
     });
 
@@ -300,16 +346,46 @@ export async function fetchAdminOrder(id: string): Promise<LiveOrderDetail | nul
     expectedAmount: paymentRow.expected_amount as number,
     verifiedAt: paymentRow.verified_at as string | null,
     rejectionReason: paymentRow.rejection_reason as string | null,
+    verificationSource: paymentRow.verification_source as string | null,
+    proof: null,
   } : null;
 
   const { data: paymentsData } = await supabase
     .from('payments')
-    .select('id, method, status, expected_amount, verified_at, rejection_reason')
+    .select('id, method, status, expected_amount, verified_at, rejection_reason, verification_source, payment_proof_upload_id')
     .eq('order_id', id)
     .maybeSingle();
 
+  let proof: LivePayment['proof'] = null;
+  if (paymentsData?.payment_proof_upload_id) {
+    const { data: upload } = await supabase
+      .from('customer_uploads')
+      .select('id, storage_path, original_filename, mime_type, file_size_bytes, created_at')
+      .eq('id', paymentsData.payment_proof_upload_id)
+      .eq('upload_type', 'PAYMENT_PROOF')
+      .maybeSingle();
+
+    if (upload?.mime_type && upload.file_size_bytes) {
+      const { data: signed } = await supabase.storage
+        .from('payment-proofs')
+        .createSignedUrl(upload.storage_path, 300);
+
+      if (signed?.signedUrl) {
+        proof = {
+          uploadId: upload.id,
+          signedUrl: signed.signedUrl,
+          originalFilename: upload.original_filename,
+          mimeType: upload.mime_type,
+          fileSize: upload.file_size_bytes,
+          uploadedAt: upload.created_at,
+        };
+      }
+    }
+  }
+
   return {
     id: row.id,
+    canManageOrders,
     orderNumber: row.order_number,
     createdAt: row.created_at,
     customerName: row.customer_name,
@@ -320,6 +396,8 @@ export async function fetchAdminOrder(id: string): Promise<LiveOrderDetail | nul
     paymentStatus: paymentsData?.status ?? payment?.status ?? 'UNKNOWN',
     totalAmount: row.total_amount,
     subtotalAmount: row.subtotal_amount,
+    discountAmount: row.discount_amount ?? 0,
+    couponCodeSnapshot: row.coupon_code_snapshot ?? null,
     shippingAmount: row.shipping_amount,
     governorate: row.governorate,
     cityArea: row.city_area,
@@ -334,6 +412,7 @@ export async function fetchAdminOrder(id: string): Promise<LiveOrderDetail | nul
     shippingCurrentLocation: row.shipping_current_location ?? '',
     shippingNotes: row.shipping_notes ?? '', // admin-only
     itemCount: items.length,
+    isTest: row.is_test,
     items,
     history,
     payment: paymentsData ? {
@@ -343,6 +422,8 @@ export async function fetchAdminOrder(id: string): Promise<LiveOrderDetail | nul
       expectedAmount: paymentsData.expected_amount,
       verifiedAt: paymentsData.verified_at,
       rejectionReason: paymentsData.rejection_reason,
+      verificationSource: paymentsData.verification_source,
+      proof,
     } : payment,
   };
 }
@@ -359,66 +440,22 @@ export async function updateOrderStatus(
   }
 ): Promise<{ ok: boolean; error?: string; emailResult?: string }> {
   try {
-    const { adminId } = await requireAdmin();
-    const supabase = createAdminClient();
+    await requireAdmin('orders.manage');
+    const parsedOrderId = orderIdSchema.parse(orderId);
+    const parsedStatus = transitionStatusSchema.parse(newStatus);
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('transition_order_status', {
+      p_order_id: parsedOrderId,
+      p_new_status: parsedStatus,
+      p_customer_visible_note: options.customerVisibleNote?.trim() || undefined,
+      p_internal_note: options.internalNote?.trim() || undefined,
+      p_send_email: options.sendEmail,
+    });
+    if (error) return { ok: false, error: error.message };
 
-    // Load current order
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('id, order_number, status, customer_name, customer_email, total_amount, payment_method, shipping_courier, shipping_tracking_number, shipping_current_location')
-      .eq('id', orderId)
-      .single();
-
-    if (orderError || !order) return { ok: false, error: 'Order not found.' };
-
-    const currentStatus = order.status as DbOrderStatus;
-
-    // Validate transition server-side
-    validateTransition(currentStatus, newStatus);
-
-    // Update order status — typed payload to satisfy strict Supabase types
-    const timestampCol = getStatusTimestampColumn(newStatus);
-    const now = new Date().toISOString();
-    type OrderUpdate = Database['public']['Tables']['orders']['Update'];
-    const updatePayload: OrderUpdate = { status: newStatus };
-    if (timestampCol === 'confirmed_at') updatePayload.confirmed_at = now;
-    else if (timestampCol === 'shipped_at') updatePayload.shipped_at = now;
-    else if (timestampCol === 'delivered_at') updatePayload.delivered_at = now;
-    else if (timestampCol === 'cancelled_at') updatePayload.cancelled_at = now;
-    else if (timestampCol === 'rejected_at') updatePayload.rejected_at = now;
-
-    // Update order status
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update(updatePayload)
-      .eq('id', orderId);
-
-    if (updateError) return { ok: false, error: updateError.message };
-
-    // Insert status history
-    const { error: historyError } = await supabase
-      .from('order_status_history')
-      .insert({
-        order_id: orderId,
-        status: newStatus,
-        previous_status: currentStatus,
-        changed_by: adminId === '00000000-0000-0000-0000-000000000000' ? null : adminId,
-        customer_visible_note: options.customerVisibleNote?.trim() || null,
-        internal_note: options.internalNote?.trim() || null,
-      });
-
-    if (historyError) {
-      console.error('[admin/orders] history insert error:', historyError);
-    }
-
-    // Audit log
-    await Promise.resolve(supabase.from('admin_audit_logs').insert({
-      admin_id: adminId === '00000000-0000-0000-0000-000000000000' ? null : adminId,
-      action: 'ORDER_STATUS_CHANGED',
-      entity_type: 'orders',
-      entity_id: orderId,
-      metadata: { from: currentStatus, to: newStatus, with_email: options.sendEmail },
-    })).catch(() => {/* non-critical */ });
+    const parsed = transitionResultSchema.safeParse(data);
+    if (!parsed.success) return { ok: false, error: 'Order updated, but the result could not be read.' };
+    const order = parsed.data;
 
     revalidatePath('/admin/orders');
     revalidatePath(`/admin/orders/${orderId}`);
@@ -434,6 +471,7 @@ export async function updateOrderStatus(
         orderReference: order.order_number,
         total: order.total_amount,
         paymentMethod: order.payment_method === 'INSTAPAY' ? 'InstaPay' as const : 'COD' as const,
+        customerVisibleNote: options.customerVisibleNote?.trim() || undefined,
         shippingInfo: ['SHIPPED', 'OUT_FOR_DELIVERY'].includes(newStatus) ? {
           courier: order.shipping_courier ?? '',
           trackingNumber: order.shipping_tracking_number ?? '',
@@ -442,10 +480,15 @@ export async function updateOrderStatus(
         } : undefined,
       };
 
-      const result = await sendOrderStatusEmail(emailInput);
-      emailResult = result.sent
-        ? `Email sent to ${order.customer_email}.`
-        : `Email not sent: ${result.message}`;
+      try {
+        const result = await sendOrderStatusEmail(emailInput);
+        emailResult = result.sent
+          ? `Email sent to ${order.customer_email}.`
+          : `Status updated. Email not sent: ${result.message}`;
+      } catch (emailError) {
+        console.error('[admin/orders] status email failed after transition:', emailError);
+        emailResult = 'Status updated. Email could not be sent.';
+      }
     }
 
     return { ok: true, emailResult };
@@ -461,7 +504,7 @@ export async function saveShippingInfo(
   shipping: AdminOrderShipping
 ): Promise<{ ok: boolean; error?: string }> {
   try {
-    const { adminId } = await requireAdmin();
+    const { adminId } = await requireAdmin('orders.manage');
     const supabase = createAdminClient();
 
     const { error } = await supabase
@@ -495,32 +538,21 @@ export async function saveShippingInfo(
 // ─── Verify InstaPay payment ──────────────────────────────────────────────────
 
 export async function verifyPayment(
-  orderId: string
+  orderId: string,
+  expectedProofUploadId: string
 ): Promise<{ ok: boolean; error?: string }> {
   try {
-    const { adminId } = await requireAdmin();
-    const supabase = createAdminClient();
-
-    const now = new Date().toISOString();
-    const adminDbId = adminId === '00000000-0000-0000-0000-000000000000' ? null : adminId;
-
-    const { error } = await supabase
-      .from('payments')
-      .update({
-        status: 'VERIFIED',
-        verified_by: adminDbId,
-        verified_at: now,
-      })
-      .eq('order_id', orderId);
-
+    await requireAdmin('orders.manage');
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('review_payment_proof', {
+      p_order_id: orderIdSchema.parse(orderId),
+      p_expected_proof_upload_id: z.string().uuid().parse(expectedProofUploadId),
+      p_decision: 'VERIFIED',
+    });
     if (error) return { ok: false, error: error.message };
-
-    await Promise.resolve(supabase.from('admin_audit_logs').insert({
-      admin_id: adminDbId,
-      action: 'PAYMENT_VERIFIED',
-      entity_type: 'payments',
-      metadata: { order_id: orderId },
-    })).catch(() => {/* non-critical */ });
+    if (!paymentReviewResultSchema.safeParse(data).success) {
+      return { ok: false, error: 'Payment updated, but the result could not be read.' };
+    }
 
     revalidatePath(`/admin/orders/${orderId}`);
     return { ok: true };
@@ -533,6 +565,7 @@ export async function verifyPayment(
 
 export async function rejectPayment(
   orderId: string,
+  expectedProofUploadId: string,
   rejectionReason: string
 ): Promise<{ ok: boolean; error?: string }> {
   try {
@@ -540,25 +573,18 @@ export async function rejectPayment(
       return { ok: false, error: 'Rejection reason is required.' };
     }
 
-    const { adminId } = await requireAdmin();
-    const supabase = createAdminClient();
-
-    const { error } = await supabase
-      .from('payments')
-      .update({
-        status: 'REJECTED',
-        rejection_reason: rejectionReason.trim(),
-      })
-      .eq('order_id', orderId);
-
+    await requireAdmin('orders.manage');
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('review_payment_proof', {
+      p_order_id: orderIdSchema.parse(orderId),
+      p_expected_proof_upload_id: z.string().uuid().parse(expectedProofUploadId),
+      p_decision: 'REJECTED',
+      p_rejection_reason: rejectionReason.trim(),
+    });
     if (error) return { ok: false, error: error.message };
-
-    await Promise.resolve(supabase.from('admin_audit_logs').insert({
-      admin_id: adminId === '00000000-0000-0000-0000-000000000000' ? null : adminId,
-      action: 'PAYMENT_REJECTED',
-      entity_type: 'payments',
-      metadata: { order_id: orderId, reason: rejectionReason },
-    })).catch(() => {/* non-critical */ });
+    if (!paymentReviewResultSchema.safeParse(data).success) {
+      return { ok: false, error: 'Payment updated, but the result could not be read.' };
+    }
 
     revalidatePath(`/admin/orders/${orderId}`);
     return { ok: true };

@@ -8,7 +8,7 @@ import type { CSSProperties } from "react";
 import { heroSlides, type HeroSlide } from "@/lib/data/homepage";
 
 const AUTOPLAY_DELAY = 6000;
-const HERO_ASSET_VERSION = "20260914-0518";
+const HERO_ASSET_VERSION = "20260924-hero-cases-2";
 
 type SlideStyle = CSSProperties & {
   "--hero-desktop-position": string;
@@ -83,7 +83,7 @@ export function HeroGallery() {
   }, []);
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || heroSlides.length < 2) return;
 
     const timer = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % heroSlides.length);

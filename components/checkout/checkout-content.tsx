@@ -1,14 +1,15 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, Copy, ImageIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import {
   submitCheckout,
   uploadCustomDesign,
+  validateCheckoutCoupon,
 } from "@/app/checkout/actions";
 
 import { saveCheckoutAddress } from "@/lib/account/actions";
@@ -16,18 +17,20 @@ import { splitCityArea } from "@/lib/account/address";
 import {
   LOCAL_CART_KEY,
   LOCAL_CART_CHANGE_EVENT,
+  LOCAL_BUY_NOW_KEY,
+  LOCAL_BUY_NOW_CHANGE_EVENT,
   getLocalCartServerSnapshot,
-  getLocalCartSnapshot,
+  getCartSnapshotDefault,
   subscribeToLocalCart,
+  getBuyNowSnapshot,
+  subscribeToBuyNow,
   type StoredCartItem,
 } from "@/lib/cart/local-cart";
 
 import {
-  CHECKOUT_SHIPPING_FEE,
   INSTAPAY_TRANSFER_NUMBER,
   WHATSAPP_DISPLAY_NUMBER,
   deliveryCities,
-  getWhatsAppUrl,
   type CheckoutFormValues,
   type CheckoutPaymentMethod,
 } from "@/lib/checkout/order-draft";
@@ -36,6 +39,10 @@ import {
   formatPrice,
   materialOptions,
 } from "@/lib/data/product-options";
+import { TransferDetails } from "@/components/payment/transfer-details";
+import { DiscountRow } from "@/components/ui/price-display";
+import { PaymentProofUpload } from "@/components/payment/payment-proof-upload";
+import { namedCaseColorLabel } from "@/lib/custom-cases/templates";
 
 export type CheckoutSavedAddress = {
   id: string;
@@ -99,6 +106,7 @@ function CheckoutItemImage({
   item: StoredCartItem;
 }) {
   const [failed, setFailed] = useState(false);
+  const image = item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.templateImage : item.image;
 
   return (
     <div className="checkout-item-image">
@@ -109,15 +117,15 @@ function CheckoutItemImage({
         </span>
       ) : (
         <Image
-          src={item.image}
+          src={image}
           alt={
             item.kind === "custom"
-              ? "Your uploaded custom case design"
+              ? (item.customizationType === "NAMED_TEMPLATE" ? "Named Custom Case design example" : "Your uploaded custom case design")
               : `${item.productName} phone case`
           }
           fill
           sizes="72px"
-          unoptimized={item.kind === "custom"}
+          unoptimized={item.kind === "custom" && item.customizationType === "UPLOAD_DESIGN"}
           onError={() => setFailed(true)}
         />
       )}
@@ -133,10 +141,26 @@ function CheckoutSummary({
   items,
   subtotal,
   total,
+  shippingFee,
+  appliedCoupon,
+  couponCode,
+  setCouponCode,
+  handleApplyCoupon,
+  validatingCoupon,
+  couponError,
+  setAppliedCoupon,
 }: {
   items: StoredCartItem[];
   subtotal: number;
   total: number;
+  shippingFee: number;
+  appliedCoupon: { code: string; discountAmount: number } | null;
+  couponCode: string;
+  setCouponCode: (v: string) => void;
+  handleApplyCoupon: () => void;
+  validatingCoupon: boolean;
+  couponError: string;
+  setAppliedCoupon: (v: null | { code: string; discountAmount: number }) => void;
 }) {
   return (
     <aside
@@ -149,7 +173,7 @@ function CheckoutSummary({
         YOUR ORDER
       </h2>
 
-      <div className="checkout-summary-items">
+      <details className="cc-summary-details"><summary>Order summary <strong>{formatPrice(total)}</strong></summary><div className="cc-summary-content"><div className="checkout-summary-items">
         {items.map((item, index) => (
           <article
             key={`${item.productId}-${item.material}-${item.phoneModel}-${item.networkType}-${index}`}
@@ -163,9 +187,14 @@ function CheckoutSummary({
                 {materialOptions[item.material].label}
               </p>
 
-              {item.kind === "custom" ? (
-                <span>Custom design</span>
-              ) : null}
+              {item.kind === "custom" ? item.customizationType === "NAMED_TEMPLATE" ? (
+                <dl className="checkout-named-details">
+                  <div><dt>English Name</dt><dd lang="en">{item.englishName}</dd></div>
+                  <div><dt>Arabic Name</dt><dd lang="ar" dir="rtl">{item.arabicName}</dd></div>
+                  <div><dt>English Color</dt><dd>{namedCaseColorLabel(item.englishColor)}</dd></div>
+                  <div><dt>Arabic Color</dt><dd>{namedCaseColorLabel(item.arabicColor)}</dd></div>
+                </dl>
+              ) : <span>Custom design</span> : null}
 
               <p>
                 {item.phoneModel} / {item.networkType}
@@ -181,15 +210,58 @@ function CheckoutSummary({
         ))}
       </div>
 
+      <section aria-labelledby="coupon-heading" className="checkout-coupon-section">
+        <h2 id="coupon-heading" className="sr-only">Coupon</h2>
+        {!appliedCoupon ? (
+          <div className="checkout-coupon-row">
+            <label className="sr-only" htmlFor="checkout-coupon">Coupon code</label><input
+              id="checkout-coupon" type="text"
+              placeholder="Coupon code"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              disabled={validatingCoupon}
+            />
+            <button
+              type="button"
+              onClick={handleApplyCoupon}
+              disabled={validatingCoupon || !couponCode.trim()}
+            >
+              {validatingCoupon ? "Applying…" : "Apply"}
+            </button>
+          </div>
+        ) : (
+          <div className="cc-feedback" data-tone="success" role="status">
+            <div>
+              <strong>{appliedCoupon.code}</strong> Applied
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setAppliedCoupon(null);
+                setCouponCode("");
+              }}
+              style={{ textDecoration: "underline", background: "none", border: "none", color: "inherit", cursor: "pointer", padding: 0 }}
+            >
+              Remove
+            </button>
+          </div>
+        )}
+        {couponError ? <p role="alert" style={{ color: "#ef4444", fontSize: "14px", marginTop: "8px", marginBottom: 0 }}>{couponError}</p> : null}
+      </section>
+
       <dl>
         <div>
           <dt>Subtotal</dt>
           <dd>{formatPrice(subtotal)}</dd>
         </div>
 
+        {appliedCoupon ? (
+          <DiscountRow label={`Coupon ${appliedCoupon.code}`} amount={appliedCoupon.discountAmount}/>
+        ) : null}
+
         <div>
           <dt>Shipping</dt>
-          <dd>{formatPrice(CHECKOUT_SHIPPING_FEE)}</dd>
+          <dd>{formatPrice(shippingFee)}</dd>
         </div>
 
         <div className="checkout-total">
@@ -203,26 +275,28 @@ function CheckoutSummary({
       </p>
 
       <small>
-        Final prices are validated server-side at order submission.
+        Your final total is confirmed when you place your order.
       </small>
+      </div></details>
     </aside>
   );
 }
 
 function WhatsAppButton({
-  total,
+
+  whatsappNumber,
 }: {
-  total: number;
+  whatsappNumber?: string;
 }) {
   return (
     <a
       className="checkout-whatsapp"
-      href={getWhatsAppUrl(total)}
+      href={`https://wa.me/${(whatsappNumber || WHATSAPP_DISPLAY_NUMBER).replace(/\D/g, "")}`}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Send InstaPay transaction screenshot to Coolcase on WhatsApp (opens in a new tab)"
+      aria-label="Contact Coolcase support on WhatsApp (opens in a new tab)"
     >
-      Send Screenshot on WhatsApp
+      Contact Support on WhatsApp
       <ArrowRight aria-hidden="true" />
     </a>
   );
@@ -232,14 +306,23 @@ function Completion({
   email,
   paymentMethod,
   total,
+  paymentExpectedAmount,
+  remainingCodAmount,
   orderNumber,
+  orderId,
+  storeSettings,
 }: {
   email: string;
   paymentMethod: CheckoutPaymentMethod;
   total: number;
+  paymentExpectedAmount: number;
+  remainingCodAmount: number;
   orderNumber: string;
+  orderId: string;
+  storeSettings?: CheckoutStoreSettings;
 }) {
   const instaPay = paymentMethod === "INSTAPAY";
+  const codDeposit = paymentMethod === "COD";
 
   return (
     <section
@@ -266,26 +349,22 @@ function Completion({
       <h2>
         {instaPay
           ? "Your order has been received and is pending payment verification and approval."
-          : "Your order has been received and is pending approval."}
+          : "Your order has been received. Upload the 50% deposit proof for verification and approval."}
       </h2>
 
-      {instaPay ? (
+      {instaPay || codDeposit ? (
         <div className="checkout-success-whatsapp">
-          <h3>Transfer completed?</h3>
+          <h3>{instaPay ? "Complete your InstaPay payment" : "Pay your 50% COD deposit"}</h3>
 
           <p>
-            Send your transaction screenshot to us on WhatsApp:
+            Transfer the exact amount below, then upload your proof securely.
           </p>
-
-          <a
-            href={getWhatsAppUrl(total)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {WHATSAPP_DISPLAY_NUMBER}
-          </a>
-
-          <WhatsAppButton total={total} />
+          {codDeposit ? <><p>Order total: <strong>{formatPrice(total)}</strong></p><p>Remaining on delivery: <strong>{formatPrice(remainingCodAmount)}</strong></p></> : null}
+          <TransferDetails amount={paymentExpectedAmount} recipient={storeSettings?.instapayNumber || INSTAPAY_TRANSFER_NUMBER} />
+          <p>Upload the transaction screenshot below. Your order will not be confirmed until Coolcase verifies the payment.</p>
+          <PaymentProofUpload orderId={orderId} initialStatus="PENDING" />
+          <p>Need help? WhatsApp support remains available.</p>
+          <WhatsAppButton whatsappNumber={storeSettings?.whatsapp} />
         </div>
       ) : null}
 
@@ -293,7 +372,7 @@ function Completion({
         Once Coolcase{" "}
         {instaPay
           ? "verifies the transaction and approves your order"
-          : "approves your order"}
+          : "verifies the deposit and approves your order"}
         , we&apos;ll send a confirmation email to:
       </p>
 
@@ -383,14 +462,31 @@ function SavedAddressCard({
   );
 }
 
+export type CheckoutStoreSettings = {
+  instapayNumber: string;
+  whatsapp: string;
+  codEnabled: boolean;
+  instapayEnabled: boolean;
+};
+
+export type CheckoutContentProps = {
+  customer?: CheckoutCustomer;
+  shippingFee: number;
+  mode?: string;
+  storeSettings?: CheckoutStoreSettings;
+};
+
 export function CheckoutContent({
   customer,
-}: {
-  customer?: CheckoutCustomer;
-}) {
+  shippingFee,
+  storeSettings,
+  mode,
+}: CheckoutContentProps) {
+  const isBuyNow = mode === "buy-now";
+  
   const cart = useSyncExternalStore(
-    subscribeToLocalCart,
-    getLocalCartSnapshot,
+    isBuyNow ? subscribeToBuyNow : subscribeToLocalCart,
+    isBuyNow ? getBuyNowSnapshot : getCartSnapshotDefault,
     getLocalCartServerSnapshot
   );
 
@@ -417,10 +513,13 @@ export function CheckoutContent({
       email: string;
       paymentMethod: CheckoutPaymentMethod;
       orderNumber: string;
+      orderId: string;
+      total: number;
+      paymentExpectedAmount: number;
+      remainingCodAmount: number;
     } | null>(null);
 
-  const [copied, setCopied] =
-    useState(false);
+
 
   const [
     submissionError,
@@ -431,6 +530,67 @@ export function CheckoutContent({
     submitting,
     setSubmitting,
   ] = useState(false);
+
+  const [couponCode, setCouponCode] = useState("");
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountAmount: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const handleCartChange = () => {
+      setAppliedCoupon(null);
+      setCouponCode("");
+    };
+
+    window.addEventListener(LOCAL_CART_CHANGE_EVENT, handleCartChange);
+
+    return () => {
+      window.removeEventListener(LOCAL_CART_CHANGE_EVENT, handleCartChange);
+    };
+  }, []);
+
+  async function handleApplyCoupon() {
+    setCouponError("");
+    if (!couponCode.trim()) return;
+    setValidatingCoupon(true);
+    try {
+      const res = await validateCheckoutCoupon(
+        couponCode,
+        cart.items.map((item) => ({
+          productId: item.productId,
+          material: item.material,
+          phoneBrand: item.phoneBrand,
+          phoneModel: item.phoneModel,
+          networkType: item.networkType,
+          quantity: item.quantity,
+          isCustom: item.kind === "custom",
+          customizationType: item.kind === "custom" ? item.customizationType : undefined,
+          customTemplateId: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.templateId : undefined,
+          englishName: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.englishName : undefined,
+          arabicName: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.arabicName : undefined,
+          englishColor: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.englishColor : undefined,
+          arabicColor: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.arabicColor : undefined,
+        }))
+      );
+      if (!res.ok) {
+        setCouponError(res.error);
+        setAppliedCoupon(null);
+      } else {
+        setAppliedCoupon({
+          code: res.code,
+          discountAmount: res.discountAmount,
+        });
+        setCouponCode(res.code);
+      }
+    } catch {
+      setCouponError("Failed to apply coupon.");
+    } finally {
+      setValidatingCoupon(false);
+    }
+  }
 
   const {
     register,
@@ -470,10 +630,18 @@ export function CheckoutContent({
       0
     );
 
+  let finalDiscount = 0;
+  if (appliedCoupon) {
+    finalDiscount = appliedCoupon.discountAmount;
+    if (finalDiscount > subtotal) {
+      finalDiscount = subtotal;
+    }
+  }
+
   const total =
-    subtotal +
+    subtotal - finalDiscount +
     (cart.items.length
-      ? CHECKOUT_SHIPPING_FEE
+      ? shippingFee
       : 0);
 
   const hasUnavailableItem = false;
@@ -492,12 +660,28 @@ export function CheckoutContent({
     return (
       <Completion
         {...completion}
-        total={total}
+        total={completion.total}
+        storeSettings={storeSettings}
       />
     );
   }
 
   if (!cart.items.length) {
+    if (isBuyNow) {
+      return (
+        <section className="checkout-blocked">
+          <p>Checkout</p>
+          <h1>BUY NOW SESSION EXPIRED</h1>
+          <span>
+            The selected product is no longer available for immediate checkout.
+          </span>
+          <Link href="/">
+            <ArrowLeft aria-hidden="true" />
+            Return to Shop
+          </Link>
+        </section>
+      );
+    }
     return (
       <section className="checkout-blocked">
         <p>Checkout</p>
@@ -661,7 +845,7 @@ export function CheckoutContent({
           | string
           | undefined;
 
-        if (item.kind === "custom") {
+        if (item.kind === "custom" && item.customizationType === "UPLOAD_DESIGN") {
           let file: File;
 
           try {
@@ -707,6 +891,12 @@ export function CheckoutContent({
             item.quantity,
           isCustom:
             item.kind === "custom",
+          customizationType: item.kind === "custom" ? item.customizationType : undefined,
+          customTemplateId: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.templateId : undefined,
+          englishName: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.englishName : undefined,
+          arabicName: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.arabicName : undefined,
+          englishColor: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.englishColor : undefined,
+          arabicColor: item.kind === "custom" && item.customizationType === "NAMED_TEMPLATE" ? item.arabicColor : undefined,
           customDesignUploadId,
         });
       }
@@ -765,6 +955,9 @@ export function CheckoutContent({
             checkoutItems,
 
           savedAddressId,
+
+          couponCode:
+            appliedCoupon?.code,
         });
 
       if (!result.ok) {
@@ -777,12 +970,12 @@ export function CheckoutContent({
       // Clear cart only after confirmed server-side order creation.
       try {
         window.localStorage.removeItem(
-          LOCAL_CART_KEY
+          isBuyNow ? LOCAL_BUY_NOW_KEY : LOCAL_CART_KEY
         );
 
         window.dispatchEvent(
           new Event(
-            LOCAL_CART_CHANGE_EVENT
+            isBuyNow ? LOCAL_BUY_NOW_CHANGE_EVENT : LOCAL_CART_CHANGE_EVENT
           )
         );
       } catch {
@@ -798,6 +991,11 @@ export function CheckoutContent({
 
         orderNumber:
           result.orderNumber,
+        orderId:
+          result.orderId,
+        total: result.totalAmount,
+        paymentExpectedAmount: result.paymentExpectedAmount,
+        remainingCodAmount: result.remainingCodAmount,
       });
 
       window.scrollTo({
@@ -817,23 +1015,6 @@ export function CheckoutContent({
       );
     } finally {
       setSubmitting(false);
-    }
-  }
-
-  async function copyTransferNumber() {
-    try {
-      await navigator.clipboard.writeText(
-        INSTAPAY_TRANSFER_NUMBER
-      );
-
-      setCopied(true);
-
-      window.setTimeout(
-        () => setCopied(false),
-        1800
-      );
-    } catch {
-      setCopied(false);
     }
   }
 
@@ -900,11 +1081,7 @@ export function CheckoutContent({
 
                 <input
                   autoComplete="name"
-                  aria-invalid={
-                    Boolean(
-                      errors.fullName
-                    )
-                  }
+                  aria-invalid={Boolean(errors.fullName)} aria-describedby={errors.fullName ? "checkout-error-fullName" : undefined}
                   {...register(
                     "fullName",
                     {
@@ -915,7 +1092,7 @@ export function CheckoutContent({
                 />
 
                 {errors.fullName ? (
-                  <small role="alert">
+                  <small id="checkout-error-fullName" role="alert">
                     {
                       errors.fullName
                         .message
@@ -930,11 +1107,7 @@ export function CheckoutContent({
                 <input
                   type="tel"
                   autoComplete="tel"
-                  aria-invalid={
-                    Boolean(
-                      errors.phone
-                    )
-                  }
+                  aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "checkout-error-phone" : undefined}
                   {...register(
                     "phone",
                     {
@@ -945,7 +1118,7 @@ export function CheckoutContent({
                 />
 
                 {errors.phone ? (
-                  <small role="alert">
+                  <small id="checkout-error-phone" role="alert">
                     {
                       errors.phone
                         .message
@@ -960,11 +1133,7 @@ export function CheckoutContent({
                 <input
                   type="email"
                   autoComplete="email"
-                  aria-invalid={
-                    Boolean(
-                      errors.email
-                    )
-                  }
+                  aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "checkout-error-email" : undefined}
                   {...register(
                     "email",
                     {
@@ -981,7 +1150,7 @@ export function CheckoutContent({
                 />
 
                 {errors.email ? (
-                  <small role="alert">
+                  <small id="checkout-error-email" role="alert">
                     {
                       errors.email
                         .message
@@ -1118,11 +1287,7 @@ export function CheckoutContent({
 
                       <select
                         defaultValue=""
-                        aria-invalid={
-                          Boolean(
-                            errors.governorate
-                          )
-                        }
+                        aria-invalid={Boolean(errors.governorate)} aria-describedby={errors.governorate ? "checkout-error-governorate" : undefined}
                         {...register(
                           "governorate",
                           required(
@@ -1142,7 +1307,7 @@ export function CheckoutContent({
                       </select>
 
                       {errors.governorate ? (
-                        <small role="alert">
+                  <small id="checkout-error-governorate" role="alert">
                           {
                             errors
                               .governorate
@@ -1157,11 +1322,7 @@ export function CheckoutContent({
 
                       <input
                         autoComplete="address-level2"
-                        aria-invalid={
-                          Boolean(
-                            errors.city
-                          )
-                        }
+                        aria-invalid={Boolean(errors.city)} aria-describedby={errors.city ? "checkout-error-city" : undefined}
                         {...register(
                           "city",
                           required(
@@ -1171,7 +1332,7 @@ export function CheckoutContent({
                       />
 
                       {errors.city ? (
-                        <small role="alert">
+                  <small id="checkout-error-city" role="alert">
                           {
                             errors.city
                               .message
@@ -1186,11 +1347,7 @@ export function CheckoutContent({
 
                     <select
                       autoComplete="address-level2"
-                      aria-invalid={
-                        Boolean(
-                          errors.city
-                        )
-                      }
+                      aria-invalid={Boolean(errors.city)} aria-describedby={errors.city ? "checkout-error-city" : undefined}
                       {...register(
                         "city",
                         required(
@@ -1216,7 +1373,7 @@ export function CheckoutContent({
                     </select>
 
                     {errors.city ? (
-                      <small role="alert">
+                  <small id="checkout-error-city" role="alert">
                         {
                           errors.city
                             .message
@@ -1231,11 +1388,7 @@ export function CheckoutContent({
 
                   <input
                     autoComplete="address-level3"
-                    aria-invalid={
-                      Boolean(
-                        errors.area
-                      )
-                    }
+                    aria-invalid={Boolean(errors.area)} aria-describedby={errors.area ? "checkout-error-area" : undefined}
                     {...register(
                       "area",
                       required(
@@ -1245,7 +1398,7 @@ export function CheckoutContent({
                   />
 
                   {errors.area ? (
-                    <small role="alert">
+                  <small id="checkout-error-area" role="alert">
                       {
                         errors.area
                           .message
@@ -1259,11 +1412,7 @@ export function CheckoutContent({
 
                   <input
                     autoComplete="street-address"
-                    aria-invalid={
-                      Boolean(
-                        errors.street
-                      )
-                    }
+                    aria-invalid={Boolean(errors.street)} aria-describedby={errors.street ? "checkout-error-street" : undefined}
                     {...register(
                       "street",
                       required(
@@ -1273,7 +1422,7 @@ export function CheckoutContent({
                   />
 
                   {errors.street ? (
-                    <small role="alert">
+                  <small id="checkout-error-street" role="alert">
                       {
                         errors.street
                           .message
@@ -1286,11 +1435,7 @@ export function CheckoutContent({
                   Building Number
 
                   <input
-                    aria-invalid={
-                      Boolean(
-                        errors.building
-                      )
-                    }
+                    aria-invalid={Boolean(errors.building)} aria-describedby={errors.building ? "checkout-error-building" : undefined}
                     {...register(
                       "building",
                       required(
@@ -1300,7 +1445,7 @@ export function CheckoutContent({
                   />
 
                   {errors.building ? (
-                    <small role="alert">
+                  <small id="checkout-error-building" role="alert">
                       {
                         errors.building
                           .message
@@ -1400,53 +1545,57 @@ export function CheckoutContent({
                 Payment method
               </legend>
 
-              <label>
-                <input
-                  type="radio"
-                  value="COD"
-                  {...register(
-                    "paymentMethod",
-                    {
-                      required:
-                        "Choose a payment method",
-                    }
-                  )}
-                />
+              {storeSettings?.codEnabled !== false && (
+                <label>
+                  <input
+                    type="radio"
+                    value="COD"
+                    {...register(
+                      "paymentMethod",
+                      {
+                        required:
+                          "Choose a payment method",
+                      }
+                    )}
+                  />
 
-                <span>
-                  <b>
-                    Cash on Delivery
-                  </b>
+                  <span>
+                    <b>
+                      Cash on Delivery
+                    </b>
 
-                  <small>
-                    Pay when your order is delivered.
-                  </small>
-                </span>
-              </label>
+                    <small>
+                      50% deposit now, remaining balance on delivery.
+                    </small>
+                  </span>
+                </label>
+              )}
 
-              <label>
-                <input
-                  type="radio"
-                  value="INSTAPAY"
-                  {...register(
-                    "paymentMethod",
-                    {
-                      required:
-                        "Choose a payment method",
-                    }
-                  )}
-                />
+              {storeSettings?.instapayEnabled !== false && (
+                <label>
+                  <input
+                    type="radio"
+                    value="INSTAPAY"
+                    {...register(
+                      "paymentMethod",
+                      {
+                        required:
+                          "Choose a payment method",
+                      }
+                    )}
+                  />
 
-                <span>
-                  <b>
-                    InstaPay
-                  </b>
+                  <span>
+                    <b>
+                      InstaPay
+                    </b>
 
-                  <small>
-                    Transfer now, then verify via WhatsApp.
-                  </small>
-                </span>
-              </label>
+                    <small>
+                      Place your order first, then transfer and upload proof.
+                    </small>
+                  </span>
+                </label>
+              )}
             </fieldset>
 
             {errors.paymentMethod ? (
@@ -1469,98 +1618,24 @@ export function CheckoutContent({
                 </p>
 
                 <h3>
-                  Pay when your order is delivered.
+                  Cash on Delivery requires a 50% deposit.
                 </h3>
 
                 <span>
-                  Your order remains pending until reviewed and approved by Coolcase.
+                  To confirm your Cash on Delivery order, transfer the deposit and upload the payment proof.
                 </span>
+                <p>Order total: <strong>{formatPrice(total)}</strong></p>
+                <p>50% deposit: <strong>{formatPrice(Number((total * 0.5).toFixed(2)))}</strong></p>
+                <p>Pay on delivery: <strong>{formatPrice(Number((total - Number((total * 0.5).toFixed(2))).toFixed(2)))}</strong></p>
               </div>
             ) : null}
 
             {paymentMethod ===
               "INSTAPAY" ? (
               <div className="checkout-payment-panel checkout-instapay">
-                <p>
-                  InstaPay payment
-                </p>
-
-                <h3>
-                  Transfer{" "}
-                  {formatPrice(
-                    total
-                  )}{" "}
-                  to:
-                </h3>
-
-                <div className="checkout-transfer">
-                  <strong>
-                    {
-                      INSTAPAY_TRANSFER_NUMBER
-                    }
-                  </strong>
-
-                  <button
-                    type="button"
-                    onClick={
-                      copyTransferNumber
-                    }
-                  >
-                    <Copy aria-hidden="true" />
-                    {copied
-                      ? "Copied"
-                      : "Copy Number"}
-                  </button>
-                </div>
-
-                <ol>
-                  <li>
-                    Transfer the full total to{" "}
-                    {
-                      INSTAPAY_TRANSFER_NUMBER
-                    }
-                  </li>
-
-                  <li>
-                    Place your order
-                  </li>
-
-                  <li>
-                    Send the transaction screenshot on WhatsApp
-                  </li>
-
-                  <li>
-                    Coolcase admin reviews the payment
-                  </li>
-
-                  <li>
-                    Once approved, your order becomes Confirmed
-                  </li>
-
-                  <li>
-                    You receive a confirmation email
-                  </li>
-                </ol>
-
-                <p>
-                  Send the screenshot to{" "}
-                  <a
-                    href={getWhatsAppUrl(
-                      total
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {
-                      WHATSAPP_DISPLAY_NUMBER
-                    }
-                  </a>
-                  . Verification is manual.
-                </p>
-
-                <WhatsAppButton
-                  total={total}
-                />
+                <h3>Pay after placing your order</h3>
+                <ol><li>Place your order.</li><li>We will show the final payable amount and official InstaPay number.</li><li>Transfer that exact amount.</li><li>Upload your payment proof securely.</li><li>Wait for payment review.</li></ol>
+                <p>No transfer is needed before your order is created.</p>
               </div>
             ) : null}
           </section>
@@ -1591,6 +1666,14 @@ export function CheckoutContent({
           items={cart.items}
           subtotal={subtotal}
           total={total}
+          shippingFee={shippingFee}
+          appliedCoupon={appliedCoupon}
+          couponCode={couponCode}
+          setCouponCode={setCouponCode}
+          handleApplyCoupon={handleApplyCoupon}
+          validatingCoupon={validatingCoupon}
+          couponError={couponError}
+          setAppliedCoupon={setAppliedCoupon}
         />
       </div>
     </>

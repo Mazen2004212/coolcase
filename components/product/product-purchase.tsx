@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Check, Minus, Plus } from "lucide-react";
+import { Check, Minus, Plus } from "lucide-react";
 import { useProductMaterial } from "@/components/product/product-material-context";
-import { addToLocalCart } from "@/lib/cart/local-cart";
+import { addToLocalCart, setBuyNowItem } from "@/lib/cart/local-cart";
 import { formatPrice, materialIds, materialOptions, phoneModels, type Material, type MaterialPrice, type PhoneBrand } from "@/lib/data/product-options";
+
+import { useRouter } from "next/navigation";
 
 // Lean product shape — decoupled from StorefrontProduct
 export type PurchaseProduct = {
@@ -16,9 +19,11 @@ export type PurchaseProduct = {
   images: Array<{ src: string; alt: string }>;
   pricing: Record<Material, MaterialPrice>;
   supportedBrands: readonly PhoneBrand[];
+  materialsEnabled: Record<Material, boolean>;
 };
 
 export function ProductPurchase({ product }: { product: PurchaseProduct }) {
+  const router = useRouter();
   const { material, setMaterial } = useProductMaterial();
   const [brand, setBrand] = useState<PhoneBrand>("iPhone");
   const [model, setModel] = useState("");
@@ -39,30 +44,47 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
     }
   }
 
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function handleAction(mode: "cart" | "buy-now") {
     if (!product.available || !model || !network) return;
     try {
-      addToLocalCart({ kind: "product", productId: product.id, slug: product.slug, productName: product.name, material, phoneBrand: brand, phoneModel: model, networkType: network, quantity, discountedUnitPrice: price.discounted, originalUnitPrice: price.original, image: product.images[0]?.src ?? '', subtotal: quantity * price.discounted });
-      setFailed(false);
-      setFeedback(`${quantity} × ${product.name} added to your bag — ${materialOptions[material].label}, ${model}, ${network}. Saved on this device.`);
+      const item = { kind: "product" as const, productId: product.id, slug: product.slug, productName: product.name, material, phoneBrand: brand, phoneModel: model, networkType: network, quantity, discountedUnitPrice: price.discounted, originalUnitPrice: price.original, image: product.images[0]?.src ?? '', subtotal: quantity * price.discounted };
+      
+      if (mode === "buy-now") {
+        setBuyNowItem(item);
+        setFailed(false);
+        router.push("/checkout?mode=buy-now");
+      } else {
+        addToLocalCart(item, "cart");
+        setFailed(false);
+        setFeedback("Added to cart.");
+      }
     } catch {
       setFailed(true);
       setFeedback("We couldn't save this selection. Check that browser storage is available and your bag has fewer than 99 of this configuration, then try again.");
     }
   }
 
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const action = (event.nativeEvent as SubmitEvent).submitter?.getAttribute("value");
+    handleAction(action === "buy-now" ? "buy-now" : "cart");
+  }
+
   return (
     <form className="pdp-purchase" onSubmit={submit} onChange={() => setFeedback("")}>
       <div className="pdp-price" aria-live="polite" aria-atomic="true">
         <strong>{formatPrice(price.discounted)}</strong>
-        <del><span className="sr-only">Original price </span>{formatPrice(price.original)}</del>
-        <span className="pdp-saving">Save {formatPrice(price.original - price.discounted)}</span>
+        {price.original > price.discounted && (
+          <>
+            <del><span className="sr-only">Original price </span>{formatPrice(price.original)}</del>
+            <span className="pdp-saving">Save {formatPrice(price.original - price.discounted)}</span>
+          </>
+        )}
       </div>
       <fieldset disabled={!product.available}>
         <legend>01 <span>Choose your material</span></legend>
         <div className="pdp-materials">
-          {materialIds.map((id) => (
+          {materialIds.filter(id => product.materialsEnabled[id]).map((id) => (
             <label key={id}>
               <input type="radio" name="material" value={id} checked={material === id} onChange={() => changeMaterial(id)} />
               <span className="pdp-material-card">
@@ -107,9 +129,14 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
           <output aria-label="Selected quantity" aria-live="polite">{quantity}</output>
           <button type="button" aria-label="Increase quantity" disabled={!product.available || quantity === 99} onClick={() => { setQuantity((value) => value + 1); setFeedback(""); }}><Plus size={16} /></button>
         </div>
-        <button className="pdp-add" type="submit" disabled={!product.available}>{product.available ? <>Add to Cart <span>{formatPrice(quantity * price.discounted)}</span><ArrowRight size={18} aria-hidden="true" /></> : "Sold Out"}</button>
+        <button className="pdp-add" type="submit" name="action" value="cart" disabled={!product.available}>
+          {product.available ? <>Add to Cart</> : "Sold Out"}
+        </button>
+        <button className="pdp-buy-now" type="submit" name="action" value="buy-now" disabled={!product.available}>
+          {product.available ? <>Buy It Now</> : "Sold Out"}
+        </button>
       </div>
-      <p className={`pdp-feedback ${failed ? "pdp-feedback-error" : ""}`} role="status">{feedback}</p>
+      <p className={`pdp-feedback ${failed ? "pdp-feedback-error" : ""}`} role="status">{feedback} {feedback === "Added to cart." && <Link href="/cart">View Cart →</Link>}</p>
       <div className="pdp-purchase-note"><Check size={15} aria-hidden="true" /><span>Your design. Your material. Your phone.</span></div>
     </form>
   );

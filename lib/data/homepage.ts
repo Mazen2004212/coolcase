@@ -1,6 +1,12 @@
-import { defaultMaterialPricing, formatPrice } from "@/lib/data/product-options";
+import {
+  defaultMaterialPricing,
+  formatPrice,
+} from "@/lib/data/product-options";
 
-export type SiteNavItem = Readonly<{ href: string; label: string }>;
+export type SiteNavItem = Readonly<{
+  href: string;
+  label: string;
+}>;
 
 export type HeroSlide = Readonly<{
   id: "women" | "men" | "cases";
@@ -14,7 +20,9 @@ export type HeroSlide = Readonly<{
 }>;
 
 // Homepage presentation only. Product prices are not authoritative.
-export const startingPriceLabel = `From ${formatPrice(defaultMaterialPricing.silicon.discounted)}`;
+export const startingPriceLabel = `From ${formatPrice(
+  defaultMaterialPricing.silicon.discounted,
+)}`;
 
 export const siteNavigation = [
   { href: "/shop", label: "Shop" },
@@ -49,11 +57,12 @@ export const heroSlides = [
   {
     id: "cases",
     imagePath: "/assets/hero/hero-cases.png",
-    imageAlt: "Three Coolcase designs styled on stone with metallic accessories",
+    imageAlt:
+      "Three Coolcase designs styled on stone with metallic accessories",
     desktopPosition: "50% 50%",
     tabletPosition: "50% 50%",
     mobilePosition: "50% center",
-    ctaPlacement: "top",
+    ctaPlacement: "center",
     ctaTone: "dark",
   },
 ] as const satisfies readonly HeroSlide[];

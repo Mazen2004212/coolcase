@@ -1,5 +1,8 @@
 import { ArrowUpRight, Smartphone } from "lucide-react";
 import Link from "next/link";
+import { customCasePricing, formatPrice } from "@/lib/data/product-options";
+
+const startingPrice = Math.min(...Object.values(customCasePricing).map(price => price.discounted));
 
 export function CustomCaseCard() {
   return (
@@ -18,7 +21,7 @@ export function CustomCaseCard() {
           <p>Upload your image. We’ll make the case.</p>
         </div>
         <span>
-          Customize · From 239 EGP
+          Customize · From {formatPrice(startingPrice)}
           <ArrowUpRight aria-hidden="true" size={18} strokeWidth={1.7} />
         </span>
       </Link>

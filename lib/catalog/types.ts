@@ -25,6 +25,7 @@ export type CatalogProduct = {
   displayOrder: number;
   images: CatalogImage[];
   pricing: Record<Material, MaterialPrice>;
+  materialsEnabled: Record<Material, boolean>;
   // Convenience: primary image URL for product card thumbnail
   coverImage: string | null;
 };

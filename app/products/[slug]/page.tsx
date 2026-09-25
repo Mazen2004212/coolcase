@@ -45,6 +45,7 @@ export default async function ProductPage({ params }: Props) {
     images:         galleryImages,
     pricing:        product.pricing,
     supportedBrands:[...phoneBrands] as typeof phoneBrands,
+    materialsEnabled: product.materialsEnabled,
   };
 
   return (

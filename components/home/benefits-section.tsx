@@ -3,7 +3,7 @@ import { Layers3, LifeBuoy, Palette } from "lucide-react";
 import { SiteContainer } from "@/components/layout/site-container";
 
 const benefits = [
-  { icon: Layers3, label: "Silicone or Acrylic" },
+  { icon: Layers3, label: "Silicone / Acrylic / Double Layer" },
   { icon: Palette, label: "Your Choice of Design" },
   { icon: LifeBuoy, label: "Help Choosing Your Case" },
 ] as const;
