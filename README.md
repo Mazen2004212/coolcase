@@ -15,7 +15,7 @@ Production e-commerce platform for customizable phone cases in Egypt. The reposi
 Requirements:
 
 - Node.js 20.9 or newer
-- npm 11
+- npm 11.
 - A configured Supabase project
 
 Copy `.env.example` to `.env.local` and provide the required local values. Never commit `.env.local` or production credentials.
