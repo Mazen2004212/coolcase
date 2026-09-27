@@ -21,5 +21,6 @@ export const getStaffProfile = cache(async function getStaffProfile(): Promise<S
     role: data.role as 'OWNER' | 'MANAGER' | 'ORDER_STAFF',
     permissions: data.permissions as string[],
     isActive: data.is_active,
+    displayName: customer.profile?.full_name?.trim() || customer.profile?.email || customer.user.email || 'Staff account',
   };
 });

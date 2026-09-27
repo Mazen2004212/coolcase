@@ -26,6 +26,7 @@ export type StaffProfile = {
   role: AdminRole;
   permissions: string[];
   isActive: boolean;
+  displayName: string;
 };
 
 export type ProductStatus = typeof productStatuses[number];

@@ -1,5 +1,5 @@
 /* Shared presentation tokens. Domain rules remain in their existing modules. */
-:root { --cc-success:#166534; --cc-success-bg:#f0fdf4; --cc-warning:#92400e; --cc-warning-bg:#fffbeb; --cc-danger:#991b1b; --cc-danger-bg:#fef2f2; --cc-info:#1e40af; --cc-info-bg:#eff6ff; --cc-neutral:#5d5149; --cc-neutral-bg:#f3f1ef; --cc-disabled:var(--cc-disabled-text); --cc-space-1:4px; --cc-space-2:8px; --cc-space-3:12px; --cc-space-4:16px; --cc-space-6:24px; --cc-space-8:32px; --cc-space-12:48px; --cc-space-16:64px; }
+:root { --cc-success:#166534; --cc-success-bg:#f0fdf4; --cc-warning:#92400e; --cc-warning-bg:#fffbeb; --cc-danger:#991b1b; --cc-danger-bg:#fef2f2; --cc-info:#1e40af; --cc-info-bg:#eff6ff; --cc-neutral:#555555; --cc-neutral-bg:#f7f7f7; --cc-disabled:var(--cc-disabled-text); --cc-space-1:4px; --cc-space-2:8px; --cc-space-3:12px; --cc-space-4:16px; --cc-space-6:24px; --cc-space-8:32px; --cc-space-12:48px; --cc-space-16:64px; }
 [data-tone=success] { --tone:var(--cc-success); --tone-bg:var(--cc-success-bg); }
 [data-tone=warning] { --tone:var(--cc-warning); --tone-bg:var(--cc-warning-bg); }
 [data-tone=danger] { --tone:var(--cc-danger); --tone-bg:var(--cc-danger-bg); }
@@ -8,6 +8,26 @@
 body .cc-badge { display:inline-flex; align-items:center; width:fit-content; max-width:100%; border:1px solid transparent; border-radius:999px; padding:5px 10px; color:var(--tone,var(--cc-neutral)); background:var(--tone-bg,var(--cc-neutral-bg)); font-size:12px; font-weight:600; line-height:1.4; white-space:normal; }
 body .cc-badge-outline { background:transparent; border-color:#9ca3af; color:var(--cc-neutral); }
 body .cc-feedback { margin:12px 0; padding:12px 16px; color:var(--tone,var(--cc-info)); background:var(--tone-bg,var(--cc-info-bg)); border:1px solid currentColor; border-radius:var(--cc-radius-sm); font-size:14px; line-height:1.6; overflow-wrap:anywhere; }
+.cc-upload-field{display:grid;gap:7px;min-width:0;margin:12px 0;color:var(--cc-text)}
+.cc-upload-label{font-size:13px;font-weight:650}
+.cc-upload-control{position:relative;display:flex;align-items:center;gap:12px;min-width:0;min-height:52px;padding:6px;border:1px solid var(--cc-border);border-radius:var(--cc-radius-sm);background:var(--cc-white);cursor:pointer;transition:border-color .18s ease,background-color .18s ease,box-shadow .18s ease}
+.cc-upload-control input[type=file],body .payment-proof-upload .cc-upload-control input[type=file],.ad-root .cc-upload-control input[type=file]{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;padding:0;border:0;opacity:0;cursor:pointer;z-index:1}
+.cc-upload-button{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:0 12px;border:1px solid var(--cc-border-strong);border-radius:var(--cc-radius-sm);background:var(--cc-surface-soft);color:var(--cc-text);font-size:13px;font-weight:650;white-space:nowrap}
+.cc-upload-filename{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--cc-text-secondary);font-size:13px}
+.cc-upload-help{color:var(--cc-text-muted);font-size:12px;line-height:1.45}
+.cc-upload-error{color:var(--cc-danger);font-size:12px}
+.cc-upload-field[data-invalid=true] .cc-upload-control{border-color:var(--cc-danger)}
+.cc-upload-field[data-disabled=true] .cc-upload-control{background:var(--cc-surface-soft);opacity:.65;cursor:not-allowed}
+.cc-upload-field[data-disabled=true] .cc-upload-control input{cursor:not-allowed}
+.cc-upload-control:focus-within{border-color:var(--cc-focus);box-shadow:0 0 0 3px rgb(17 17 17 / 14%)}
+body .payment-proof-upload label.cc-upload-control{display:flex;align-items:center;gap:12px;font-size:13px;text-transform:none}
+body .payment-proof-upload .cc-upload-field>label.cc-upload-label{display:block;font-size:13px;text-transform:none}
+body .cc-feedback:has(>button){display:flex;align-items:center;justify-content:space-between;gap:16px}
+body .cc-feedback:has(>button)>span{min-width:0;flex:1}
+body .cc-feedback:has(>button)>button{display:grid;flex:none;min-width:32px;min-height:32px;place-items:center;margin-left:auto;border:0;border-radius:50%;background:transparent;color:inherit;font-size:20px;line-height:1;cursor:pointer}
+body .cc-feedback:has(>button)>button:hover{background:rgb(0 0 0 / 8%)}
+@media(hover:hover){.cc-upload-control:hover{border-color:#8a8a8a;background:var(--cc-surface-soft)}.cc-upload-control:hover .cc-upload-button{border-color:#111111}}
+@media(max-width:390px){.cc-upload-control{gap:8px}.cc-upload-button{padding-inline:9px;font-size:12px}}
 body .cc-button { display:inline-flex; justify-content:center; align-items:center; gap:8px; min-height:44px; padding:10px 18px; border:1px solid var(--cc-border-strong); border-radius:var(--cc-radius-md); background:var(--cc-white); color:var(--cc-latte-800); font-size:14px; font-weight:600; cursor:pointer; box-shadow:var(--cc-shadow-card); }
 body .cc-button:hover { background:var(--cc-latte-50); }
 body button:disabled { cursor:not-allowed; }

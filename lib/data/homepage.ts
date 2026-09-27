@@ -12,10 +12,11 @@ export type HeroSlide = Readonly<{
   id: "women" | "men" | "cases";
   imageAlt: string;
   imagePath: string;
+  ctaLabel?: string;
   desktopPosition: string;
   tabletPosition: string;
   mobilePosition: string;
-  ctaPlacement: "center" | "top";
+  ctaPlacement: "center" | "top" | "left";
   ctaTone: "dark" | "light";
 }>;
 
@@ -56,13 +57,14 @@ export const heroSlides = [
   },
   {
     id: "cases",
-    imagePath: "/assets/hero/hero-cases.png",
+    imagePath: "/assets/hero/hero-cases.jpeg",
     imageAlt:
-      "Three Coolcase designs styled on stone with metallic accessories",
+      "Coolcase polka-dot and heart cases beside Your Phone, Your Style campaign artwork",
     desktopPosition: "50% 50%",
     tabletPosition: "50% 50%",
     mobilePosition: "50% center",
-    ctaPlacement: "center",
+    ctaLabel: "SHOP YOU FAVORITE CASES",
+    ctaPlacement: "left",
     ctaTone: "dark",
   },
 ] as const satisfies readonly HeroSlide[];

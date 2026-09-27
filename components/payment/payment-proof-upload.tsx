@@ -62,7 +62,7 @@ export function PaymentProofUpload({
         });
       }}
     >
-      <FileUploadField label={status === 'REJECTED' ? 'Upload new payment proof' : 'Upload payment proof'} guidance="JPEG, PNG, or WebP · prepared to 1 MiB or less before upload" inputRef={inputRef} name="file" accept="image/jpeg,image/png,image/webp" required disabled={isPending || isPreparing} onChange={async event => {
+      <FileUploadField label={status === 'REJECTED' ? 'Upload new payment proof' : 'Upload payment proof'} guidance="JPEG, PNG, or WebP · prepared to 1 MiB or less before upload" inputRef={inputRef} selectedFileName={file?.name ?? ''} error={message || undefined} name="file" accept="image/jpeg,image/png,image/webp" required disabled={isPending || isPreparing} onChange={async event => {
         const selected = event.target.files?.[0] ?? null;
         setMessage('');
         setFile(null);
@@ -85,7 +85,6 @@ export function PaymentProofUpload({
         <Upload aria-hidden="true" />
         Submit Proof
       </LoadingButton>
-      {message ? <p className="payment-proof-error" role="alert">{message}</p> : null}
     </form>
   );
 }

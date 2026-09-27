@@ -38,7 +38,7 @@
 .auth-complete > a { display: inline-flex; min-width: 180px; min-height: 49px; align-items: center; justify-content: space-between; gap: 15px; margin-top: 25px; border-radius: 3px; background: var(--cc-button); color: var(--cc-button-text); padding: 0 16px; font-size: 11px; font-weight: 650; }
 .auth-complete > a svg { width: 16px; }
 
-/* Warm premium split shell — login and signup only. */
+/* Monochrome split shell — login and signup only. */
 #top:has(.auth-split-shell) > header,
 #top:has(.auth-split-shell) > footer { display: none; }
 .auth-page:has(.auth-split-shell) {
@@ -75,7 +75,7 @@
   padding: clamp(30px, 3.5vw, 48px);
 }
 .auth-brand { display: flex; width: min(100%, 420px); flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 24px; margin-inline: auto; }
-.auth-brand a { display: inline-flex; flex: 0 0 auto; border-radius: var(--cc-radius-sm); background: var(--cc-chrome-dark); padding: 5px 10px; box-shadow: var(--cc-shadow-card); }
+.auth-brand a { display: inline-flex; flex: 0 0 auto; border: 0; border-radius: 0; background: transparent; padding: 0; box-shadow: none; }
 .auth-brand p { display: grid; gap: 2px; color: var(--cc-muted); font-size: 9px; font-weight: 650; letter-spacing: .18em; line-height: 1.25; text-align: right; text-transform: uppercase; }
 .auth-brand p span { display: block; }
 .auth-tabs { display: flex; width: min(100%, 420px); flex: 0 0 auto; gap: 30px; margin: 30px auto 0; border-bottom: 1px solid var(--cc-border); }
@@ -120,7 +120,7 @@
 .auth-split-shell .auth-form select:focus-visible {
   border-color: var(--cc-focus);
   outline: 0;
-  box-shadow: 0 0 0 4px rgb(166 124 91 / 14%);
+  box-shadow: 0 0 0 4px rgb(17 17 17 / 12%);
 }
 .auth-split-shell .auth-form input[aria-invalid="true"],
 .auth-split-shell .auth-form select[aria-invalid="true"] { border-color: #9a3027; }
@@ -177,7 +177,7 @@
   .auth-page:has(.auth-split-shell) { padding: 12px; }
   .auth-split-shell { gap: 0; border-radius: var(--cc-radius-lg); }
   .auth-split-form-panel { border-radius: 0; padding: 25px 20px 30px; }
-  .auth-brand .brand-logo-frame { --brand-logo-width:138px !important; }
+  .auth-brand .brand-logo-frame { --brand-logo-width:155px !important; --brand-logo-height:40px !important; }
   .auth-brand p { font-size: 8px; }
   .auth-tabs { margin-top: 24px; }
   .auth-split-content,

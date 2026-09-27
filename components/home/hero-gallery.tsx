@@ -8,7 +8,7 @@ import type { CSSProperties } from "react";
 import { heroSlides, type HeroSlide } from "@/lib/data/homepage";
 
 const AUTOPLAY_DELAY = 6000;
-const HERO_ASSET_VERSION = "20260926-latte-brand-final";
+const HERO_ASSET_VERSION = "20260927-hero-cases";
 
 type SlideStyle = CSSProperties & {
   "--hero-desktop-position": string;
@@ -60,7 +60,7 @@ function CampaignSlide({
         }
         tabIndex={isActive ? 0 : -1}
       >
-        Shop Now
+        {slide.ctaLabel ?? "Shop Now"}
       </Link>
     </article>
   );

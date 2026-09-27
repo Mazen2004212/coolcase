@@ -9,6 +9,7 @@ import { deleteCollection, saveCollection, type CollectionInput } from '@/app/ad
 import { preprocessClientImage, fileToDataUrl } from '@/lib/images/client-preprocess';
 import { requirePermission } from '@/lib/admin/permissions';
 import { useAdmin } from './admin-provider';
+import { FileUploadField } from '@/components/ui/file-upload-field';
 import { ActionLink, ConfirmReal, Empty, PageHeading, Panel, Pill, Table, Thumb, Toggle } from './admin-ui';
 
 export type AdminCollection = {
@@ -59,7 +60,7 @@ export function CollectionsListLive({ collections }: { collections: AdminCollect
   return (
     <>
       <PageHeading title="Collections" description="Organize products into curated storefront groups." action={canManage ? <ActionLink href="/admin/collections/new">Create Collection</ActionLink> : undefined} />
-      {message ? <div className="ad-notice" role="status">{message}<button type="button" aria-label="Dismiss" onClick={() => setMessage('')}>×</button></div> : null}
+      {message ? <div className="ad-notice" role="status"><span>{message}</span><button type="button" aria-label="Dismiss notification" onClick={() => setMessage('')}>×</button></div> : null}
       <Panel title={`${collections.length} collections`}>
         {collections.length ? (
           <Table headings={['Banner', 'Collection', 'Type', 'Products', 'Status', 'Featured', 'Order', 'Actions']}>
@@ -193,7 +194,7 @@ export function CollectionEditorLive({ collection, products }: { collection: Adm
         <div className="ad-stack">
           <Panel title="Collection banner">
             <div className="ad-collection-banner-preview">{bannerPreview && !removeBanner ? <Image src={bannerPreview} alt="Collection banner preview" fill unoptimized={bannerPreview.startsWith('data:')} /> : <span>No banner selected</span>}</div>
-            {canManage ? <><label className="ad-upload">Choose banner<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={event => void chooseBanner(event.target.files?.[0])} /><span>JPEG, PNG, WebP, or AVIF. The image is optimized before upload.</span></label>{bannerPreview && !removeBanner ? <button type="button" onClick={() => { setBannerFile(null); setBannerPreview(''); setRemoveBanner(true); }}><Trash2 size={15} /> Remove banner</button> : null}</> : null}
+            {canManage ? <><FileUploadField label="Collection banner" guidance="JPEG, PNG, WebP, or AVIF. The image is optimized before upload." accept="image/jpeg,image/png,image/webp,image/avif" onChange={event => void chooseBanner(event.target.files?.[0])} />{bannerPreview && !removeBanner ? <button type="button" onClick={() => { setBannerFile(null); setBannerPreview(''); setRemoveBanner(true); }}><Trash2 size={15} /> Remove banner</button> : null}</> : null}
           </Panel>
           <Panel title="Publishing">
             <Toggle label="Active on storefront" checked={isActive} disabled={!canManage} onChange={setIsActive} />

@@ -26,7 +26,7 @@ body :is(.search-form input,.track-form input,.shop-control-bar select,.pdp-devi
 body :is(.search-form input,.track-form input,.shop-control-bar select,.pdp-device-selects select,.cart-quantity input,.checkout-fields input,.checkout-fields select,.checkout-fields textarea,.checkout-coupon-row input,.custom-builder-form input,.custom-builder-form select,.custom-builder-form textarea,.account-form input,.account-form select,.address-form-grid input,.address-form-grid select,.payment-proof-upload input):focus-visible {
   border-color:var(--cc-focus);
   outline:0;
-  box-shadow:0 0 0 4px rgb(166 124 91 / 14%);
+  box-shadow:0 0 0 4px rgb(17 17 17 / 12%);
 }
 
 body :is(.pdp-materials label>.pdp-material-card,.pdp-network-options span,.checkout-payment label>span,.checkout-address-mode label,.checkout-address-mode span,.checkout-saved-card,.checkout-saved-card>span,.custom-upload-control) { border-color:var(--cc-border); border-radius:var(--cc-radius-sm); background:var(--cc-white); color:var(--cc-text); }

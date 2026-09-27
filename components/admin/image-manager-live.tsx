@@ -2,6 +2,7 @@
 
 import { useState, useRef, useTransition } from 'react';
 import Image from 'next/image';
+import { FileUploadField } from '@/components/ui/file-upload-field';
 import { uploadProductImage, deleteProductImage, updateImageMetadata } from '@/app/admin/actions/products';
 import { Confirm } from './admin-ui';
 import { preprocessClientImage } from '@/lib/images/client-preprocess';
@@ -123,20 +124,8 @@ export function ImageManagerLive({ productId, initialImages }: Props) {
 
   return (
     <>
-      <label className="ad-upload">
-        {busy ? 'Uploading…' : 'Add images'}
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp,image/avif"
-          multiple
-          disabled={busy}
-          onChange={handleFileChange}
-        />
-        <span>PNG, JPEG, WebP or AVIF · optimized to 1.5 MB or less · 12 maximum</span>
-      </label>
+      <FileUploadField label={busy ? 'Uploading…' : 'Add images'} guidance="PNG, JPEG, WebP or AVIF · optimized to 1.5 MB or less · 12 maximum" inputRef={inputRef} accept="image/png,image/jpeg,image/webp,image/avif" multiple disabled={busy} error={error || undefined} onChange={handleFileChange} />
       {busy && <p role="status" style={{ color: 'var(--muted)' }}>Working…</p>}
-      {error && <p className="ad-error" role="alert">{error}</p>}
       <p style={{ fontSize: '0.8125rem', color: 'var(--muted)' }}>
         Images upload immediately to the configured public media storage. The first image marked as cover appears on the storefront.
       </p>

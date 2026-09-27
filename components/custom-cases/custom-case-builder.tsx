@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Minus, Plus, Upload } from "lucide-react";
+import { ArrowRight, Minus, Plus } from "lucide-react";
+import { FileUploadField } from "@/components/ui/file-upload-field";
 import { addToLocalCart, setBuyNowItem } from "@/lib/cart/local-cart";
 import { customCasePricing, formatPrice, materialIds, materialOptions, phoneBrands, phoneModels, type Material, type PhoneBrand } from "@/lib/data/product-options";
 import { DeliveryTimeline } from "@/components/storefront/delivery-timeline";
@@ -97,7 +98,7 @@ export function CustomCaseBuilder() {
         <p className="custom-builder-description">Make your phone personal. Upload your own image and we’ll turn it into a Coolcase.</p>
         <div className="pdp-price"><strong>{formatPrice(pricing.discounted)}</strong><del><span className="sr-only">Original price </span>{formatPrice(pricing.original)}</del><span className="pdp-saving">Save {formatPrice(pricing.original - pricing.discounted)}</span></div>
         <form className="custom-builder-form" onSubmit={submit} noValidate>
-          <label className="custom-upload-control">01 <span>Upload your image</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={selectImage} disabled={processing} aria-describedby="custom-upload-help" /><strong><Upload size={17} aria-hidden="true" />{processing ? "Preparing preview…" : fileName ? `Replace: ${fileName}` : "Choose JPEG, PNG, or WebP"}</strong></label><p id="custom-upload-help" className="cc-helper" role="status">JPEG, PNG, or WebP · automatically prepared for secure upload. {processing ? "Preparing your image preview…" : ""}</p>
+          <FileUploadField label="01 · Upload your image" guidance={`JPEG, PNG, or WebP · automatically prepared for secure upload. ${processing ? 'Preparing your image preview…' : ''}`} selectedFileName={fileName} accept="image/jpeg,image/png,image/webp" onChange={selectImage} disabled={processing} />
           <fieldset><legend>02 <span>Choose your material</span></legend><div className="pdp-materials">
             {materialIds.map((id) => <label key={id}><input type="radio" name="custom-material" value={id} checked={material === id} onChange={() => changeMaterial(id)} /><span className="pdp-material-card"><span className="pdp-material-image"><Image src={materialOptions[id].optionImage.src} alt={materialOptions[id].optionImage.alt} fill sizes="(min-width: 640px) 140px, 30vw" /></span><strong>{materialOptions[id].label}</strong><small>{formatPrice(customCasePricing[id].discounted)}</small></span></label>)}
           </div><p className="pdp-material-note" aria-live="polite">{materialOptions[material].note}</p>{material === "acrylic" ? <p className="pdp-compatibility-note">Acrylic cases are currently available for iPhone models only.</p> : null}</fieldset>

@@ -23,8 +23,8 @@ export async function SiteHeader() {
   return (
     <header className="site-header sticky top-0 z-50 h-[var(--header-height)] text-[var(--cc-text-on-dark)]">
       <SiteContainer className="relative flex h-full items-center justify-between gap-4">
-        <Link href="/" className="brand-wordmark" aria-label="Coolcase home">
-          <BrandLogo width={150} height={30} priority />
+        <Link href="/" className="brand-wordmark site-header-logo" aria-label="Coolcase home">
+          <BrandLogo width={164} height={34} priority />
         </Link>
         <nav aria-label="Primary navigation" className="hidden lg:block">
           <ul className="flex items-center gap-8">
@@ -51,7 +51,7 @@ export async function SiteHeader() {
             isStaff={isStaff} 
           />
           <CartBadgeLink />
-          <MobileNav items={siteNavigation} accountHref={accountHref} />
+          <MobileNav items={siteNavigation} accountHref={accountHref} isStaff={isStaff} />
         </div>
       </SiteContainer>
     </header>

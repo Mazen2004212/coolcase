@@ -121,8 +121,8 @@ export function ProductsListLive({ products }: { products: LiveProduct[] }) {
       />
       {message && (
         <div className="ad-notice" role="status">
-          {message}
-          <button aria-label="Dismiss" onClick={() => setMessage('')}>×</button>
+          <span>{message}</span>
+          <button type="button" aria-label="Dismiss notification" onClick={() => setMessage('')}>×</button>
         </div>
       )}
       <Panel title={`${filtered.length} products`}>

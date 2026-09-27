@@ -23,7 +23,7 @@ export function AuthShell({
       <div className="auth-split-form-panel">
         <header className="auth-brand">
           <Link href="/" aria-label="Coolcase home">
-            <BrandLogo width={148} height={30} priority />
+            <BrandLogo width={185} height={44} priority />
           </Link>
           <p><span>Cases for</span><span>A cooler you</span></p>
         </header>

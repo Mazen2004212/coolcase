@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { canVisit } from '@/lib/admin/permissions';
 import { useEffect, useState } from 'react';
 
 import {
@@ -28,6 +29,7 @@ import {
   Table,
   Thumb,
 } from './admin-ui';
+import { useAdmin } from './admin-provider';
 
 function dashboardStatusTone(status: string): Tone {
   if (status === 'Delivered') return 'success';
@@ -64,6 +66,7 @@ export function DashboardLive({
 }: {
   analytics?: boolean;
 }) {
+  const { staff } = useAdmin();
   const [loadError, setLoadError] = useState('');
   const [period, setPeriod] = useState('30 days');
   const [from, setFrom] = useState('');
@@ -77,6 +80,7 @@ export function DashboardLive({
 
   const [refreshKey, setRefreshKey] =
     useState(0);
+  const [hoveredBucket, setHoveredBucket] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -239,6 +243,12 @@ export function DashboardLive({
       String(data.totalCustomers),
     ],
   ];
+  const kpiDestinations: Record<string, { href: string; section: string }> = {
+    Orders: { href: '/admin/orders', section: 'Orders' },
+    'Pending Orders': { href: '/admin/orders', section: 'Orders' },
+    'Active Products': { href: '/admin/products', section: 'Products' },
+    Customers: { href: '/admin/customers', section: 'Customers' },
+  };
 
   return (
     <>
@@ -339,7 +349,8 @@ export function DashboardLive({
       <div className="ad-kpis">
         {kpis.map(
           ([label, value]) => (
-            <div key={label}>
+            <div key={label} data-clickable={Boolean(kpiDestinations[label] && canVisit(staff, kpiDestinations[label].section))}>
+              {kpiDestinations[label] && canVisit(staff, kpiDestinations[label].section) ? <Link className="ad-kpi-hit" href={kpiDestinations[label].href} aria-label={`View ${label}`} /> : null}
               <span>{label}</span>
               <strong>{value}</strong>
 
@@ -363,10 +374,11 @@ export function DashboardLive({
             )}
           </strong>
 
+          <div className="ad-chart-wrap">
           <svg
             className="ad-chart"
             viewBox="0 0 700 220"
-            role="img"
+            role="group"
             aria-label={`Sales overview for ${start} to ${end}: ${money(
               metrics.revenue,
             )}`}
@@ -417,19 +429,10 @@ export function DashboardLive({
                   145;
 
                 return (
-                  <circle
-                    key={index}
-                    cx={x}
-                    cy={y}
-                    r="3"
-                    fill="#171717"
-                  >
-                    <title>
-                      {money(
-                        value,
-                      )}
-                    </title>
-                  </circle>
+                  <g key={index}>
+                    <circle cx={x} cy={y} r="4" fill="#111111" />
+                    <circle cx={x} cy={y} r="16" fill="transparent" tabIndex={0} role="button" aria-label={`${bucketLabel(index)}: ${money(value)}`} onPointerEnter={() => setHoveredBucket(index)} onPointerLeave={event => { if (event.pointerType === 'mouse') setHoveredBucket(null); }} onFocus={() => setHoveredBucket(index)} onBlur={() => setHoveredBucket(null)} onClick={() => setHoveredBucket(index)} />
+                  </g>
                 );
               },
             )}
@@ -449,6 +452,8 @@ export function DashboardLive({
               {end}
             </text>
           </svg>
+          {hoveredBucket !== null && buckets[hoveredBucket] !== undefined ? <div className="ad-chart-tooltip" role="status" style={{ left: `${(35 + (hoveredBucket * 630) / Math.max(1, buckets.length - 1)) / 700 * 100}%`, top: `${(185 - (buckets[hoveredBucket] / peak) * 145) / 220 * 100}%` }}><span>{bucketLabel(hoveredBucket)}</span><strong>{money(buckets[hoveredBucket])}</strong></div> : null}
+          </div>
 
           <p className="cc-helper">Scale: 0–{money(peak)} · Dates and times below are UTC.</p><details>
             <summary>

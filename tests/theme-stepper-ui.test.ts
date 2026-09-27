@@ -21,18 +21,18 @@ test("canonical theme and cart progress render from live CSS", async ({ page }) 
     const footer = document.querySelector<HTMLElement>(".site-footer");
     const hero = document.querySelector<HTMLElement>(".hero-carousel");
     return {
-      brownDeep: root.getPropertyValue("--cc-brown-deep").trim(),
+      mainDark: root.getPropertyValue("--cc-brown-deep").trim(),
       white: getComputedStyle(document.body).backgroundColor,
-      headerBackground: header ? getComputedStyle(header).backgroundImage : "",
-      footerBackground: footer ? getComputedStyle(footer).backgroundImage : "",
+      headerBackground: header ? getComputedStyle(header).backgroundColor : "",
+      footerBackground: footer ? getComputedStyle(footer).backgroundColor : "",
       heroOverlay: hero ? getComputedStyle(hero, "::before").backgroundImage : "",
     };
   });
 
-  expect(theme.brownDeep).toBe("#58402e");
+  expect(["#111", "#111111"]).toContain(theme.mainDark);
   expect(theme.white).toBe("rgb(255, 255, 255)");
-  expect(theme.headerBackground).toContain("linear-gradient");
-  expect(theme.footerBackground).toContain("linear-gradient");
+  expect(theme.headerBackground).toBe("rgb(17, 17, 17)");
+  expect(theme.footerBackground).toBe("rgb(17, 17, 17)");
   expect(theme.heroOverlay).toContain("linear-gradient");
 
   await page.goto(`${baseURL}/cart`, { waitUntil: "networkidle" });
@@ -79,7 +79,7 @@ test("storefront routes and progress remain overflow-free", async ({ page }) => 
   await page.screenshot({ path: join(tmpdir(), "coolcase-cart-stepper-mobile.png"), fullPage: false });
 });
 
-test("product-card bag action uses the warm premium treatment", async ({ page }) => {
+test("product-card bag action uses the monochrome treatment", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`${baseURL}/shop`, { waitUntil: "networkidle" });
   const firstCard = page.locator(".product-card").first();
@@ -92,11 +92,11 @@ test("product-card bag action uses the warm premium treatment", async ({ page })
     return { background: style.backgroundColor, border: style.borderColor, color: style.color };
   });
   expect(initial.background).toBe("rgb(255, 255, 255)");
-  expect(initial.border).toBe("rgb(217, 193, 174)");
-  expect(initial.color).toBe("rgb(88, 64, 46)");
+  expect(initial.border).toBe("rgb(228, 228, 228)");
+  expect(initial.color).toBe("rgb(17, 17, 17)");
 
   await firstCard.locator("a").hover();
-  await expect(bag).toHaveCSS("background-color", "rgb(244, 234, 223)");
+  await expect(bag).toHaveCSS("background-color", "rgb(247, 247, 247)");
 });
 
 test("progress renders actual linked order/payment states without database writes", async ({ page }) => {

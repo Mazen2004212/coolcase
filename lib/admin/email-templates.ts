@@ -36,9 +36,9 @@ export type OrderEmailInput = {
 export type OrderEmail = { subject: string; body: string; html: string };
 
 const palette = {
-  heading: '#3d2b21', ink: '#3d2b21', muted: '#9b8373', border: '#dcc8b7', canvas: '#f8f5f2',
-  panel: '#f3ede7', button: '#c8a487', buttonText: '#3d2b21', link: '#7f5f49',
-  success: '#2e9b57', warning: '#d59b2d', danger: '#c95353', white: '#ffffff',
+  heading: '#111111', ink: '#111111', muted: '#555555', border: '#e4e4e4', canvas: '#ffffff',
+  panel: '#f7f7f7', button: '#111111', buttonText: '#ffffff', link: '#111111',
+  success: '#166534', warning: '#92400e', danger: '#991b1b', white: '#ffffff',
 };
 
 function escapeHtml(value: unknown) {
@@ -214,20 +214,19 @@ function wrapper(input: OrderEmailInput, layout: EmailLayoutInput) {
     <tr><td align="center" style="padding:24px 12px;">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:620px;background:${palette.white};border:1px solid ${palette.border};">
         <tr><td align="center" style="background:${palette.canvas};padding:0;">
-          ${headerImage ? `<img src="${escapeHtml(headerImage)}" width="620" alt="Coolcase — premium cases for a more stylish everyday" style="display:block;width:100%;max-width:620px;height:auto;border:0;margin:0 auto;background:${palette.canvas};color:${palette.heading};font-size:18px;line-height:28px;">` : `<div style="padding:22px 24px;font-size:20px;line-height:28px;letter-spacing:4px;color:${palette.heading};font-weight:700;">COOLCASE</div>`}
+          ${headerImage ? `<img src="${escapeHtml(headerImage)}" width="620" alt="Coolcase" style="display:block;width:100%;max-width:620px;height:auto;border:0;margin:0 auto;background:${palette.canvas};color:${palette.heading};font-size:18px;line-height:28px;">` : `<div style="padding:22px 24px;font-size:20px;line-height:28px;letter-spacing:4px;color:${palette.heading};font-weight:700;">COOLCASE</div>`}
         </td></tr>
-        <tr><td style="height:4px;background:${accent};font-size:1px;line-height:1px;">&nbsp;</td></tr>
         <tr><td style="padding:34px 24px 12px;">
-          <div style="font-size:12px;line-height:18px;letter-spacing:1px;text-transform:uppercase;color:${palette.muted};">Hi ${escapeHtml(input.customerName.trim() || 'there')},</div>
-          <h1 style="margin:10px 0 14px;font-size:30px;line-height:36px;letter-spacing:-0.8px;color:${palette.heading};">${escapeHtml(layout.headline)}</h1>
-          <p style="margin:0;font-size:15px;line-height:24px;color:${palette.ink};">${escapeHtml(layout.intro)}</p>
-          ${layout.detail ? `<p style="margin:10px 0 0;font-size:14px;line-height:22px;color:${palette.muted};">${escapeHtml(layout.detail)}</p>` : ''}
+          <div style="font-size:12px;line-height:18px;letter-spacing:1px;text-transform:uppercase;color:${palette.muted};font-weight:700;">Hi ${escapeHtml(input.customerName.trim() || 'there')},</div>
+          <h1 style="margin:10px 0 14px;font-size:32px;line-height:38px;letter-spacing:-0.8px;color:${palette.heading};font-weight:800;">${escapeHtml(layout.headline)}</h1>
+          <p style="margin:0;font-size:16px;line-height:25px;color:${palette.ink};font-weight:600;">${escapeHtml(layout.intro)}</p>
+          ${layout.detail ? `<p style="margin:10px 0 0;font-size:14px;line-height:22px;color:${palette.muted};font-weight:500;">${escapeHtml(layout.detail)}</p>` : ''}
         </td></tr>
         ${shippingHtml(input.shippingInfo)}
-        ${note ? `<tr><td style="padding:8px 24px 18px;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fff8ed;border-left:4px solid ${accent};"><tr><td style="padding:12px 14px;font-size:13px;line-height:20px;color:${palette.ink};"><strong>Order note</strong><br>${escapeHtml(note)}</td></tr></table></td></tr>` : ''}
+        ${note ? `<tr><td style="padding:8px 24px 18px;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:${palette.panel};border-left:4px solid ${accent};"><tr><td style="padding:12px 14px;font-size:13px;line-height:20px;color:${palette.ink};"><strong>Order note</strong><br>${escapeHtml(note)}</td></tr></table></td></tr>` : ''}
         ${itemRows(input.items ?? [])}
         ${summaryRows(input)}
-        ${layout.ctaLabel && ctaUrl ? `<tr><td align="center" style="padding:0 24px 30px;"><table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td bgcolor="${palette.button}" style="border-radius:10px;"><a href="${escapeHtml(ctaUrl)}" style="display:inline-block;padding:13px 22px;color:${palette.buttonText};text-decoration:none;font-size:13px;line-height:18px;font-weight:700;">${escapeHtml(layout.ctaLabel)}</a></td></tr></table></td></tr>` : ''}
+        ${layout.ctaLabel && ctaUrl ? `<tr><td align="center" style="padding:0 24px 30px;"><table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td bgcolor="${palette.button}" style="border-radius:4px;"><a href="${escapeHtml(ctaUrl)}" style="display:inline-block;padding:13px 22px;color:${palette.buttonText};text-decoration:none;font-size:13px;line-height:18px;font-weight:700;">${escapeHtml(layout.ctaLabel)}</a></td></tr></table></td></tr>` : ''}
         <tr><td style="border-top:1px solid ${palette.border};padding:22px 24px;text-align:center;">
           <div style="font-size:13px;line-height:20px;font-weight:700;color:${palette.heading};">Coolcase</div>
           <div style="padding-top:5px;font-size:11px;line-height:18px;color:${palette.muted};">Cases that look better. Feel better. Last longer. Made for you.</div>

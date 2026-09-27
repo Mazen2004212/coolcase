@@ -118,7 +118,7 @@ export function AdminShell({
           </span>
         </div>
 
-        <nav aria-label="Administration">
+        <nav className="admin-sidebar-nav" aria-label="Administration" tabIndex={0}>
           {adminSections
             .filter(
               (item) =>
@@ -228,9 +228,8 @@ export function AdminShell({
           </div>
 
           <div className="ad-user">
-            <span>
-              {staff.role}
-            </span>
+            <span>{staff.role === 'OWNER' ? 'Owner' : staff.role === 'ORDER_STAFF' ? 'Order Staff' : 'Manager'}</span>
+            <small title={staff.displayName}>{staff.displayName}</small>
           </div>
         </header>
 

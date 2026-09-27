@@ -237,8 +237,8 @@ export function OrderDetailLive({ order }: { order: LiveOrderDetail }) {
 
     {actionMessage && (
       <div className="cc-feedback" data-tone={/error|reason is required|reload/i.test(actionMessage) ? "danger" : "success"} role={/error|reason is required|reload/i.test(actionMessage) ? "alert" : "status"}>
-        {actionMessage}
-        <button aria-label="Dismiss" onClick={() => setActionMessage('')}>×</button>
+        <span>{actionMessage}</span>
+        <button type="button" aria-label="Dismiss notification" onClick={() => setActionMessage('')}>×</button>
       </div>
     )}
 

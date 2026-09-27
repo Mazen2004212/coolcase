@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Search, UserRound, X } from "lucide-react";
+import { LayoutDashboard, Menu, Search, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
@@ -10,9 +10,10 @@ import type { SiteNavItem } from "@/lib/data/homepage";
 type MobileNavProps = {
   items: readonly SiteNavItem[];
   accountHref?: string;
+  isStaff?: boolean;
 };
 
-export function MobileNav({ items, accountHref = "/login" }: MobileNavProps) {
+export function MobileNav({ items, accountHref = "/login", isStaff = false }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -119,6 +120,7 @@ export function MobileNav({ items, accountHref = "/login" }: MobileNavProps) {
               Account
             </Link>
           </div>
+          {isStaff ? <Link href="/admin" prefetch={false} onClick={closeMenu} className="mt-2 flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/35 text-sm text-[var(--cc-text-on-dark)] hover:bg-[var(--cc-chrome-darker)]"><LayoutDashboard aria-hidden="true" className="size-4" strokeWidth={1.8} />Admin Dashboard</Link> : null}
         </div>
       ) : null}
     </div>
