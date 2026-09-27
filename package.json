@@ -11,9 +11,16 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:supabase:runtime": "node scripts/verify-supabase-runtime.mjs"
+    "test:supabase:runtime": "node scripts/verify-supabase-runtime.mjs",
+    "test:storage": "tsx --test tests/public-media.test.ts",
+    "test:image-pipeline": "node --conditions=react-server --import tsx scripts/verify-image-pipeline.ts",
+    "test:ui:aws": "playwright test tests/aws-ui-smoke.test.ts --reporter=line --workers=1",
+    "aws:static:prepare": "node scripts/prepare-aws-static.mjs",
+    "aws:docker:build": "node scripts/build-aws-image.mjs coolcase:aws",
+    "aws:docker:build:test": "node scripts/build-aws-image.mjs coolcase-aws:test http://127.0.0.1:8080"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1141.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "@types/nodemailer": "^8.0.2",
@@ -30,6 +37,7 @@
     "zod": "^4.6.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.20.2",
     "@types/react": "^19.3.0",
@@ -37,6 +45,7 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.5",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   },
   "packageManager": "npm@11.6.3"

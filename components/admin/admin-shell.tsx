@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -18,6 +17,7 @@ import {
   Menu,
   Briefcase,
   Palette,
+  Layers3,
 } from 'lucide-react';
 
 import { logoutAction } from '@/lib/auth/actions';
@@ -30,11 +30,13 @@ import {
 import { adminSections, canVisit } from '@/lib/admin/permissions';
 import { useAdmin } from './admin-provider';
 import { Modal } from './admin-ui';
+import { BrandLogo } from '@/components/layout/brand-logo';
 
 const icons = [
   LayoutDashboard,
   ShoppingBag,
   Package,
+  Layers3,
   Palette,
   Users,
   Ticket,
@@ -109,18 +111,7 @@ export function AdminShell({
     return (
       <>
         <div className="ad-brand">
-          <Image
-            src="/assets/logo/coolcase-logo.png"
-            alt="Coolcase"
-            width={130}
-            height={24}
-            style={{
-              height: 24,
-              width: 'auto',
-              objectFit: 'contain',
-              display: 'block',
-            }}
-          />
+          <BrandLogo width={132} height={26} />
 
           <span>
             Administration

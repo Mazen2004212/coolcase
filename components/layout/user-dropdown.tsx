@@ -63,7 +63,7 @@ export function UserDropdown({ customer, isStaff }: DropdownProps) {
     <div className="relative hidden lg:inline-block" ref={ref}>
       <button
         type="button"
-        className={`icon-button hover:bg-white/10 ${open ? 'bg-white/10' : ''}`}
+        className={`icon-button hover:bg-[var(--cc-chrome-darker)] ${open ? 'bg-[var(--cc-chrome-darker)]' : ''}`}
         ref={triggerRef} aria-expanded={open} aria-controls="account-dropdown"
         aria-label="Account menu"
         onClick={() => setOpen(!open)}
@@ -72,54 +72,54 @@ export function UserDropdown({ customer, isStaff }: DropdownProps) {
       </button>
 
       {open && (
-        <div id="account-dropdown" className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/20 bg-surface-black p-2 shadow-2xl text-sm">
+        <div id="account-dropdown" className="user-dropdown-menu absolute right-0 top-full mt-2 w-56 rounded-xl border border-[var(--cc-border-strong)] bg-[var(--cc-white)] p-2 text-sm text-[var(--cc-text)] shadow-xl">
           {!customer ? (
             <div className="flex flex-col space-y-1">
-              <div className="px-3 py-2 border-b border-white/20 mb-2">
-                <p className="font-semibold text-white">Guest</p>
+              <div className="mb-2 border-b border-[var(--cc-border)] px-3 py-2">
+                <p className="font-semibold text-[var(--cc-heading)]">Guest</p>
               </div>
-              <Link href="/login" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-white/90 hover:bg-white/10 hover:text-white">
+              <Link href="/login" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-[var(--cc-text)] hover:bg-[var(--cc-latte-50)] hover:text-[var(--cc-link-hover)]">
                 <UserRound size={16} />
                 Log In
               </Link>
-              <Link href="/signup" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-surface-text hover:bg-white/10 hover:text-white">
+              <Link href="/signup" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-[var(--cc-text)] hover:bg-[var(--cc-latte-50)] hover:text-[var(--cc-link-hover)]">
                 <LogOut size={16} className="rotate-180" />
                 Create Account
               </Link>
             </div>
           ) : (
             <>
-              <div className="px-3 py-2 border-b border-white/20 mb-2">
-                <p className="font-semibold text-white truncate">{customer.fullName || 'My Account'}</p>
-                <p className="text-xs text-white/70 truncate">{customer.email}</p>
+              <div className="mb-2 border-b border-[var(--cc-border)] px-3 py-2">
+                <p className="truncate font-semibold text-[var(--cc-heading)]">{customer.fullName || 'My Account'}</p>
+                <p className="truncate text-xs text-[var(--cc-muted)]">{customer.email}</p>
               </div>
               
               <div className="flex flex-col space-y-1">
                 {isStaff && (
-                  <Link href="/admin" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-white hover:bg-white/10">
-                    <Shield size={16} className="text-white" />
+                  <Link href="/admin" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-[var(--cc-text)] hover:bg-[var(--cc-latte-50)]">
+                    <Shield size={16} />
                     Admin Workspace
                   </Link>
                 )}
-                <Link href="/account" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-surface-text hover:bg-white/10 hover:text-white">
+                <Link href="/account" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-[var(--cc-text)] hover:bg-[var(--cc-latte-50)] hover:text-[var(--cc-link-hover)]">
                   <Settings size={16} />
                   Account Settings
                 </Link>
-                <Link href="/account/addresses" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-surface-text hover:bg-white/10 hover:text-white">
+                <Link href="/account/addresses" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-[var(--cc-text)] hover:bg-[var(--cc-latte-50)] hover:text-[var(--cc-link-hover)]">
                   <UserRound size={16} />
                   Addresses
                 </Link>
-                <Link href="/account/orders" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-surface-text hover:bg-white/10 hover:text-white">
+                <Link href="/account/orders" onClick={closeDropdown} className="flex items-center gap-3 rounded-lg px-3 py-2 text-[var(--cc-text)] hover:bg-[var(--cc-latte-50)] hover:text-[var(--cc-link-hover)]">
                   <ShoppingBag size={16} />
                   My Orders
                 </Link>
                 
-                <hr className="my-1 border-white/20" />
+                <hr className="my-1 border-[var(--cc-border)]" />
                 
                 <button 
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-surface-text hover:bg-white/10 hover:text-white text-left"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[var(--cc-text)] hover:bg-[var(--cc-latte-50)] hover:text-[var(--cc-link-hover)]"
                 >
                   <LogOut size={16} />
                   Log Out

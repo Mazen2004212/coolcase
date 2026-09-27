@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { SiteContainer } from "@/components/layout/site-container";
 import { getCustomer } from "@/lib/auth/user";
+import { BrandLogo } from "@/components/layout/brand-logo";
 
 export async function SiteFooter() {
   const customer = await getCustomer();
@@ -11,13 +11,7 @@ export async function SiteFooter() {
         <div className="footer-main">
           <div className="footer-brand">
             <Link href="#top" className="brand-wordmark" aria-label="Back to top">
-              <Image
-                src="/assets/logo/coolcase-logo.png"
-                alt="Coolcase"
-                width={140}
-                height={26}
-                style={{ height: 26, width: 'auto', objectFit: 'contain', filter: 'invert(1)' }}
-              />
+              <BrandLogo width={140} height={28} />
             </Link>
             <p>Phone cases with a point of view.</p>
           </div>

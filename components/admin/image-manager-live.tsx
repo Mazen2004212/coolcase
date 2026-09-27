@@ -4,6 +4,8 @@ import { useState, useRef, useTransition } from 'react';
 import Image from 'next/image';
 import { uploadProductImage, deleteProductImage, updateImageMetadata } from '@/app/admin/actions/products';
 import { Confirm } from './admin-ui';
+import { preprocessClientImage } from '@/lib/images/client-preprocess';
+import { resolvePublicMediaUrl } from '@/lib/storage/public-media-core';
 
 export type LiveImage = {
   id: string;
@@ -45,8 +47,9 @@ export function ImageManagerLive({ productId, initialImages }: Props) {
     setBusy(true);
     try {
       for (const file of files) {
+        const processed = await preprocessClientImage(file, 'product');
         const fd = new FormData();
-        fd.append('file', file);
+        fd.append('file', processed);
         const result = await uploadProductImage(productId, fd);
         if ('error' in result) { setError(result.error); break; }
         // Derive public URL
@@ -54,13 +57,15 @@ export function ImageManagerLive({ productId, initialImages }: Props) {
         const newImage: LiveImage = {
           id:           result.imageId,
           storagePath:  result.storagePath,
-          src:          `${supabaseUrl}/storage/v1/object/public/product-assets/${result.storagePath}`,
+          src:          resolvePublicMediaUrl(result.storagePath, supabaseUrl),
           alt:          file.name.replace(/\.[^.]+$/, ''),
           isPrimary:    images.length === 0,
           displayOrder: images.length,
         };
         setImages(prev => [...prev, newImage]);
       }
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : 'This image could not be prepared for upload.');
     } finally {
       setBusy(false);
     }
@@ -128,12 +133,12 @@ export function ImageManagerLive({ productId, initialImages }: Props) {
           disabled={busy}
           onChange={handleFileChange}
         />
-        <span>PNG, JPEG, WebP or AVIF · Up to 5 MB each · 12 maximum</span>
+        <span>PNG, JPEG, WebP or AVIF · optimized to 1.5 MB or less · 12 maximum</span>
       </label>
       {busy && <p role="status" style={{ color: 'var(--muted)' }}>Working…</p>}
       {error && <p className="ad-error" role="alert">{error}</p>}
       <p style={{ fontSize: '0.8125rem', color: 'var(--muted)' }}>
-        Images upload immediately to Supabase Storage. The first image marked as cover appears on the storefront.
+        Images upload immediately to the configured public media storage. The first image marked as cover appears on the storefront.
       </p>
       <div className="ad-image-grid">
         {images.map((image, i) => (

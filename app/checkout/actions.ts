@@ -9,6 +9,7 @@ import { FIXED_NAMED_CASE_IMAGE, FIXED_NAMED_CASE_TEMPLATE_ID, renderNamedCaseTe
 import { parseStoredBoolean } from '@/lib/settings/parsers';
 import { z } from 'zod';
 import { processUploadImage } from '@/lib/images/process-upload';
+import { resolvePublicMediaUrl } from '@/lib/storage/public-media-core';
 
 // ─── Supported materials and their DB enum values ────────────────────────────
 
@@ -81,6 +82,8 @@ export type CheckoutResult =
       totalAmount: number;
       paymentExpectedAmount: number;
       remainingCodAmount: number;
+      orderStatus: string;
+      paymentStatus: string;
       isTest: boolean;
     }
   | {
@@ -737,8 +740,7 @@ export async function submitCheckout(
             process.env
               .NEXT_PUBLIC_SUPABASE_URL!;
 
-          productImageSnapshot =
-            `${SUPABASE_URL}/storage/v1/object/public/product-assets/${primaryImg.storage_path}`;
+          productImageSnapshot = resolvePublicMediaUrl(primaryImg.storage_path, SUPABASE_URL);
         }
 
         // Per-product override or global price
@@ -939,7 +941,7 @@ export async function submitCheckout(
     const result = parsedResult.data;
     const { data: paymentTerms, error: paymentTermsError } = await supabase
       .from('payments')
-      .select('expected_amount')
+      .select('expected_amount, status, orders(status)')
       .eq('order_id', result.order_id)
       .single();
     if (paymentTermsError || !paymentTerms) {
@@ -1003,6 +1005,8 @@ export async function submitCheckout(
       paymentExpectedAmount,
       remainingCodAmount,
       isTest: result.is_test,
+      orderStatus: paymentTerms.orders?.status ?? 'PENDING_ADMIN_APPROVAL',
+      paymentStatus: paymentTerms.status,
     };
   } catch (err) {
     console.error(
@@ -1041,7 +1045,7 @@ export async function submitCheckout(
 // ─── Custom case image upload ─────────────────────────────────────────────────
 
 const MAX_CUSTOM_SIZE =
-  10 * 1024 * 1024;
+  3 * 1024 * 1024;
 
 const ALLOWED_CUSTOM_TYPES: Record<
   string,
@@ -1161,7 +1165,7 @@ export async function uploadCustomDesign(
       return {
         ok: false,
         error:
-          'Image must be under 10 MB.',
+          'Image must be 3 MB or less after browser preparation.',
       };
     }
 

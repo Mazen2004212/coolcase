@@ -1,5 +1,5 @@
 import type { StaffProfile } from './types';
-export const adminSections = ['Dashboard', 'Orders', 'Products', 'Custom Cases', 'Customers', 'Coupons', 'Analytics', 'Shipping', 'Settings', 'Employees'] as const;
+export const adminSections = ['Dashboard', 'Orders', 'Products', 'Collections', 'Custom Cases', 'Customers', 'Coupons', 'Analytics', 'Shipping', 'Settings', 'Employees'] as const;
 
 export function requirePermission(staff: StaffProfile | null, permission: string): boolean {
   if (!staff || !staff.isActive) return false;
@@ -23,6 +23,7 @@ export function canVisit(staff: StaffProfile | null, section: string) {
   if (sectionKey === 'dashboard') return requirePermission(staff, 'dashboard.view');
   if (sectionKey === 'orders') return requirePermission(staff, 'orders.view');
   if (sectionKey === 'products') return requirePermission(staff, 'products.view');
+  if (sectionKey === 'collections') return requirePermission(staff, 'products.view');
   if (sectionKey === 'custom cases') return requirePermission(staff, 'products.view');
   if (sectionKey === 'customers') return requirePermission(staff, 'customers.view');
   if (sectionKey === 'coupons') return requirePermission(staff, 'coupons.view');

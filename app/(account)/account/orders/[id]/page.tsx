@@ -13,6 +13,7 @@ import { requireCustomer } from "@/lib/auth/user";
 import { formatPrice } from "@/lib/data/product-options";
 import { formatNetworkType } from "@/lib/utils/network-label";
 import { namedCaseColorLabel } from "@/lib/custom-cases/templates";
+import { CheckoutProgress } from "@/components/checkout/checkout-progress";
 
 export const metadata: Metadata = { title: "Order Details" };
 type Props = { params: Promise<{ id: string }> };
@@ -39,6 +40,7 @@ export default async function OrderDetailsPage({ params }: Props) {
   return (
     <section className="order-detail">
       <Link href="/account/orders" className="order-back"><ArrowLeft aria-hidden="true" />Back to My Orders</Link>
+      <CheckoutProgress phase="ORDER" orderStatus={order.status} paymentStatus={payment?.status} />
       <p className="account-eyebrow">Order details</p>
       <h2>{order.order_number}</h2>
       {order.is_test ? <TestOrderBadge/> : null}

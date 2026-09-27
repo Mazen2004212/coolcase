@@ -61,7 +61,7 @@ export function MobileNav({ items, accountHref = "/login" }: MobileNavProps) {
       <button
         ref={triggerRef}
         type="button"
-        className="flex size-11 items-center justify-center rounded-[var(--button-radius)] text-white hover:bg-white/10"
+        className="flex size-11 items-center justify-center rounded-[var(--button-radius)] text-[var(--cc-text-on-dark)] hover:bg-[var(--cc-chrome-darker)]"
         aria-controls="mobile-navigation"
         aria-expanded={isOpen}
         aria-label={isOpen ? "Close menu" : "Open menu"}
@@ -79,17 +79,17 @@ export function MobileNav({ items, accountHref = "/login" }: MobileNavProps) {
           ref={menuRef}
           id="mobile-navigation"
           onKeyDown={trapFocus}
-          className="absolute inset-x-0 top-full border-t border-white/15 bg-surface-black px-5 pb-7 pt-4 shadow-2xl"
+          className="absolute inset-x-0 top-full border-t border-white/20 bg-[var(--cc-chrome)] px-5 pb-7 pt-4 shadow-xl"
         >
           <nav aria-label="Mobile navigation">
-            <ul className="divide-y divide-white/10">
+            <ul className="divide-y divide-white/20">
               {items.map((item, index) => (
                 <li key={`${item.label}-${item.href}`}>
                   <Link
                     ref={index === 0 ? firstLinkRef : undefined}
                     href={item.href}
                     prefetch={false}
-                    className="flex min-h-12 items-center text-base font-medium text-white/90 hover:text-white"
+                    className="flex min-h-12 items-center text-base font-medium text-[var(--cc-text-on-dark)] hover:text-white"
                     onClick={closeMenu}
                   >
                     {item.label}
@@ -99,12 +99,12 @@ export function MobileNav({ items, accountHref = "/login" }: MobileNavProps) {
             </ul>
           </nav>
 
-          <div className="mt-5 grid grid-cols-2 gap-2 border-t border-white/15 pt-5">
+          <div className="mt-5 grid grid-cols-2 gap-2 border-t border-white/20 pt-5">
             <Link
               href="/search"
               prefetch={false}
               onClick={closeMenu}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/15 text-sm text-white"
+              className="flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/35 text-sm text-[var(--cc-text-on-dark)] hover:bg-[var(--cc-chrome-darker)]"
             >
               <Search aria-hidden="true" className="size-4" strokeWidth={1.8} />
               Search
@@ -112,7 +112,7 @@ export function MobileNav({ items, accountHref = "/login" }: MobileNavProps) {
             <Link
               href={accountHref}
               prefetch={false}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/15 text-sm text-white"
+              className="flex min-h-12 items-center justify-center gap-2 rounded-[var(--button-radius)] border border-white/35 text-sm text-[var(--cc-text-on-dark)] hover:bg-[var(--cc-chrome-darker)]"
               onClick={closeMenu}
             >
               <UserRound aria-hidden="true" className="size-4" strokeWidth={1.8} />

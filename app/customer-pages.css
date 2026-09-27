@@ -5,10 +5,12 @@
 .customer-page-heading > span, .contact-panel > div:first-child > span { display: block; max-width: 58ch; margin-top: 16px; color: #5f5f5f; font-size: 13px; line-height: 1.65; }
 
 .collection-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding-top: 34px; }
-.collection-card { min-width: 0; border: 1px solid #d7d7d7; }
+.collection-card { min-width: 0; border: 1px solid var(--cc-border); border-radius:18px; overflow:hidden; background:var(--cc-white); box-shadow:var(--cc-shadow-card); }
+.collection-card.is-featured { grid-column:span 2; }
 .collection-card > a { display: grid; min-height: 390px; grid-template-columns: minmax(0, 1.1fr) minmax(240px, .9fr); }
-.collection-card-image { position: relative; min-height: 100%; background: #f3f3f3; overflow: hidden; }
+.collection-card-image { position: relative; min-height: 100%; background: var(--cc-surface-soft); overflow: hidden; }
 .collection-card-image img { object-fit: contain; padding: 24px; transition: transform .35s ease; }
+.collection-card-placeholder { display:grid; place-items:center; background:linear-gradient(145deg,var(--cc-surface-soft),var(--cc-surface-muted)); color:var(--cc-chrome-light); font-size:clamp(56px,8vw,110px); font-weight:800; letter-spacing:-.09em; }
 .collection-card a:hover .collection-card-image img { transform: scale(1.025); }
 .collection-card a > div:last-child { display: flex; flex-direction: column; padding: clamp(24px, 3vw, 42px); }
 .collection-card a > div:last-child > p { color: #888; font-size: 9px; text-transform: uppercase; }
@@ -16,6 +18,16 @@
 .collection-card a > div:last-child > span { margin-top: 15px; color: #666; font-size: 11px; line-height: 1.6; }
 .collection-card b { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: auto; border-top: 1px solid #ddd; padding-top: 16px; font-size: 10px; text-transform: uppercase; }
 .collection-card b svg { width: 16px; }
+.collection-detail-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; border-bottom:1px solid var(--cc-border); padding-bottom:28px; }
+.collection-detail-heading p { color:var(--cc-text-muted); font-size:10px; font-weight:650; letter-spacing:.15em; text-transform:uppercase; }
+.collection-detail-heading h1 { margin-top:8px; color:var(--cc-text); font-size:clamp(42px,6vw,78px); font-weight:670; letter-spacing:-.075em; line-height:.9; text-transform:uppercase; }
+.collection-detail-heading span { display:block; max-width:62ch; margin-top:16px; color:var(--cc-text-soft); font-size:13px; line-height:1.65; }
+.collection-detail-heading>strong { flex:0 0 auto; color:var(--cc-text-muted); font-size:11px; font-weight:650; text-transform:uppercase; }
+.collection-detail-banner { position:relative; width:100%; aspect-ratio:2.9/1; overflow:hidden; border:1px solid var(--cc-border); border-radius:18px; margin:32px 0 40px; background:var(--cc-surface-soft); box-shadow:var(--cc-shadow-card); }
+.collection-detail-banner img { object-fit:cover; }
+.collection-product-grid { padding-top:34px; }
+.collection-detail-banner + .collection-product-grid { padding-top:0; }
+.customer-empty .cc-button { width:fit-content; margin:20px auto 0; }
 
 .search-form { padding: 30px 0; border-bottom: 1px solid #d8d8d8; }
 .search-form > label { display: block; margin-bottom: 8px; color: #555; font-size: 10px; font-weight: 650; text-transform: uppercase; }
@@ -113,6 +125,9 @@
 @media (max-width: 767px) {
   .customer-page { padding: 30px 0 58px; }
   .collection-grid, .about-values, .contact-panel { grid-template-columns: 1fr; }
+  .collection-card.is-featured { grid-column:auto; }
+  .collection-detail-heading { align-items:flex-start; flex-direction:column; }
+  .collection-detail-banner { aspect-ratio:1.6/1; margin:24px 0 30px; }
   .collection-card > a { grid-template-columns: minmax(130px, .8fr) minmax(0, 1.2fr); min-height: 260px; }
   .collection-card-image { min-height: 100%; }
   .about-values section { min-height: 210px; border-right: 0; border-bottom: 1px solid #d8d8d8; }

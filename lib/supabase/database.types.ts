@@ -219,6 +219,84 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_products: {
+        Row: {
+          collection_id: string
+          created_at: string
+          product_id: string
+          sort_order: number
+        }
+        Insert: {
+          collection_id: string
+          created_at?: string
+          product_id: string
+          sort_order?: number
+        }
+        Update: {
+          collection_id?: string
+          created_at?: string
+          product_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_products_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          banner_image_url: string | null
+          collection_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_featured: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          banner_image_url?: string | null
+          collection_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          banner_image_url?: string | null
+          collection_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coupon_redemptions: {
         Row: {
           coupon_id: string
@@ -1193,6 +1271,7 @@ export type Database = {
         }
         Returns: Json
       }
+      delete_collection: { Args: { p_collection_id: string }; Returns: string }
       generate_order_number: { Args: never; Returns: string }
       review_instapay_payment: {
         Args: {
@@ -1211,6 +1290,21 @@ export type Database = {
           p_rejection_reason?: string
         }
         Returns: Json
+      }
+      save_collection: {
+        Args: {
+          p_banner_image_url: string
+          p_collection_id: string
+          p_collection_type: string
+          p_description: string
+          p_is_active: boolean
+          p_is_featured: boolean
+          p_name: string
+          p_product_ids: string[]
+          p_slug: string
+          p_sort_order: number
+        }
+        Returns: string
       }
       set_default_address: {
         Args: { target_address_id: string }

@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { processUploadImage } from '@/lib/images/process-upload';
 
-const MAX_PROOF_BYTES = 5 * 1024 * 1024;
+const MAX_PROOF_BYTES = 1024 * 1024;
 const orderIdSchema = z.string().uuid();
 const attachResultSchema = z.object({
   payment_id: z.string().uuid(),
@@ -176,7 +176,7 @@ export async function uploadPaymentProof(
     return { ok: false, error: 'Choose a payment screenshot to upload.' };
   }
   if (value.size > MAX_PROOF_BYTES) {
-    return { ok: false, error: 'Payment proof must be 5 MiB or smaller.' };
+    return { ok: false, error: 'Payment proof must be 1 MiB or smaller after browser preparation.' };
   }
   if (!['image/jpeg', 'image/png', 'image/webp'].includes(value.type)) {
     return { ok: false, error: 'Use a JPEG, PNG, or WebP image.' };

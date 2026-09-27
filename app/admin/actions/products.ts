@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/server';
 import { processUploadImage } from '@/lib/images/process-upload';
-const BUCKET = 'product-assets';
+import { deletePublicMedia, uploadPublicMedia } from '@/lib/storage/public-media';
 
 // â”€â”€â”€ Auth guard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -40,7 +40,7 @@ const ALLOWED_TYPES: Record<string, string> = {
   'image/webp': 'webp',
   'image/avif': 'avif',
 };
-const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_SIZE = 1.5 * 1024 * 1024;
 
 /** Magic byte signatures for image format verification */
 function verifyMagicBytes(buf: Uint8Array, mimeType: string): boolean {
@@ -61,7 +61,7 @@ export async function uploadProductImage(
 
     const file = formData.get('file') as File | null;
     if (!file || file.size === 0) return { error: 'No file provided.' };
-    if (file.size > MAX_SIZE) return { error: 'File exceeds the 5 MB limit.' };
+    if (file.size > MAX_SIZE) return { error: 'Image exceeds the safe 1.5 MB upload limit.' };
     if (!ALLOWED_TYPES[file.type]) return { error: 'Only JPEG, PNG, WebP, and AVIF images are allowed.' };
 
     const bytes = new Uint8Array(await file.arrayBuffer());
@@ -75,13 +75,20 @@ export async function uploadProductImage(
       return { error: 'The product image is not a valid supported image.' };
     }
 
-    const imageUuid = crypto.randomUUID();
-    const storagePath = `products/${productId}/${imageUuid}.${processed.extension}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from(BUCKET)
-      .upload(storagePath, processed.bytes, { contentType: processed.mimeType, upsert: false });
-    if (uploadError) return { error: `Upload failed: ${uploadError.message}` };
+    let storagePath: string;
+    try {
+      storagePath = await uploadPublicMedia({
+        category: 'products',
+        supabasePrefix: `products/${productId}`,
+        object: {
+          bytes: processed.bytes,
+          contentType: processed.mimeType,
+          extension: processed.extension,
+        },
+      });
+    } catch (uploadError) {
+      return { error: uploadError instanceof Error ? uploadError.message : 'Upload failed.' };
+    }
 
     // Count existing images to set display_order
     const { count } = await supabase
@@ -103,7 +110,7 @@ export async function uploadProductImage(
 
     if (imgError) {
       // Clean up orphaned storage object
-      await supabase.storage.from(BUCKET).remove([storagePath]);
+      await deletePublicMedia(storagePath).catch(() => undefined);
       return { error: `Could not save image metadata: ${imgError.message}` };
     }
 
@@ -128,7 +135,7 @@ export async function deleteProductImage(
     if (dbError) return { error: dbError.message };
 
     // Best-effort storage cleanup â€” don't fail if already gone
-    await supabase.storage.from(BUCKET).remove([storagePath]);
+    await deletePublicMedia(storagePath).catch(() => undefined);
 
     return {};
   } catch (err) {
@@ -388,7 +395,7 @@ export async function deleteProduct(id: string, slug: string): Promise<{ error?:
 
     // Clean up storage objects (best-effort)
     if (images && images.length > 0) {
-      await supabase.storage.from(BUCKET).remove(images.map(i => i.storage_path));
+      await Promise.allSettled(images.map(image => deletePublicMedia(image.storage_path)));
     }
 
     revalidateCatalog(slug);

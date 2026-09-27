@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import "./cart.css";
 
 export const metadata: Metadata = { title: "Your Cart", description: "Review your Coolcase selections." };
+export const dynamic = "force-dynamic";
 
 import { createAdminClient } from "@/lib/supabase/server";
 

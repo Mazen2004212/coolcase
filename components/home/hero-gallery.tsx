@@ -8,7 +8,7 @@ import type { CSSProperties } from "react";
 import { heroSlides, type HeroSlide } from "@/lib/data/homepage";
 
 const AUTOPLAY_DELAY = 6000;
-const HERO_ASSET_VERSION = "20260924-hero-cases-2";
+const HERO_ASSET_VERSION = "20260926-latte-brand-final";
 
 type SlideStyle = CSSProperties & {
   "--hero-desktop-position": string;

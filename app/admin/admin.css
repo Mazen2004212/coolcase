@@ -42,3 +42,75 @@
 @media(max-width:760px){.ad-shipping-orders-heading{align-items:flex-start;flex-direction:column}.ad-shipping-filter{width:100%}.ad-shipping-orders-table{display:none}.ad-shipping-order-cards{display:grid;gap:12px}.ad-shipping-order-cards article{border:1px solid var(--ad-border);border-radius:7px;padding:15px;display:grid;gap:14px}.ad-shipping-order-cards header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.ad-shipping-order-cards dl{display:grid;gap:8px;margin:0}.ad-shipping-order-cards dl>div{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #eceef0;padding-bottom:8px}.ad-shipping-order-cards dl>div:last-child{border:0;padding-bottom:0}.ad-shipping-order-cards dt{color:var(--ad-muted)}.ad-shipping-order-cards dd{margin:0;text-align:right}.ad-shipping-order-cards .ad-button{width:100%}.ad-shipping-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.ad-root .ad-shipping-summary button{min-height:78px}}
 .ad-root .named-case-preview{position:relative;aspect-ratio:4/5;overflow:hidden;background:#f3f1ed}.ad-root .named-case-preview>img{object-fit:contain}.ad-root .named-case-preview>span{position:absolute;width:76%;line-height:1.05;white-space:pre-wrap;overflow-wrap:anywhere;pointer-events:none}
 .ad-named-fulfillment{display:grid;gap:10px;margin-top:12px;border:1px solid var(--ad-border);border-radius:6px;background:var(--ad-surface);padding:12px}.ad-named-fulfillment>strong{font-size:11px;letter-spacing:.04em}.ad-named-fulfillment dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 16px;margin:0}.ad-named-fulfillment dl>div{min-width:0}.ad-named-fulfillment dt{color:var(--ad-muted);font-size:10px}.ad-named-fulfillment dd{margin:2px 0 0;font-size:12px;font-weight:600;overflow-wrap:anywhere;user-select:text}@media(max-width:760px){.ad-named-fulfillment dl{grid-template-columns:1fr}}
+
+/* Final Coolcase admin presentation; operational semantic colors remain unchanged. */
+.ad-root{--ad-border:var(--cc-border);--ad-muted:var(--cc-text-muted);background:var(--cc-bg);color:var(--cc-text)}
+.ad-root h1,.ad-root h2,.ad-root h3{color:var(--cc-text)}
+.ad-root p,.ad-root small{color:var(--cc-text-muted)}
+.ad-sidebar,.ad-drawer{background:var(--cc-chrome-gradient);border-color:rgb(255 255 255 / 18%);color:var(--cc-cream);box-shadow:var(--cc-shadow-soft)}
+.ad-brand{color:#fff8f2}
+.ad-brand span{color:var(--cc-latte-light)}
+.ad-sidebar a,.ad-sidebar-bottom button,.ad-drawer nav a{border-radius:15px;color:var(--cc-cream)}
+.ad-sidebar a:hover,.ad-sidebar-bottom button:hover,.ad-drawer nav a:hover{background:var(--cc-brown-hover);color:#fff;text-decoration:none}
+.ad-sidebar a[aria-current],.ad-drawer a[aria-current]{background:var(--cc-brown-dark);color:#fff;box-shadow:inset 0 0 0 1px rgb(255 255 255 / 5%)}
+.ad-sidebar-bottom{border-color:rgb(255 255 255 / 18%)}
+.ad-root .ad-sidebar-bottom button{border:0;background:transparent;color:var(--cc-text-on-dark);box-shadow:none}
+.ad-root .ad-sidebar-bottom button:hover{background:var(--cc-brown-hover)}
+.ad-topbar{background:var(--cc-white);border-color:var(--cc-border);box-shadow:0 5px 18px rgba(90,60,35,.04)}
+.ad-root button,.ad-button{border-color:var(--cc-border);border-radius:14px;background:var(--cc-white);color:var(--cc-brown-deep)}
+.ad-root button:hover,.ad-button:hover{background:var(--cc-surface-soft)}
+.ad-root .ad-primary{border-color:var(--cc-accent-hover);border-radius:var(--cc-radius-sm);background:var(--cc-button);color:var(--cc-button-text);box-shadow:var(--cc-shadow-card)}
+.ad-root .ad-primary:hover{border-color:var(--cc-button-hover);background:var(--cc-button-hover)}
+.ad-root input,.ad-root select,.ad-root textarea{border-color:var(--cc-border);border-radius:var(--cc-radius-sm);background:var(--cc-white);color:var(--cc-text)}
+.ad-root :focus-visible{outline-color:var(--cc-focus)}
+.ad-root :is(input,select,textarea):focus-visible{border-color:var(--cc-latte);outline:0;box-shadow:0 0 0 4px rgb(166 124 91 / 14%)}
+.ad-panel,.ad-kpis>div{border-color:var(--cc-border);border-radius:var(--cc-radius-md);background:var(--cc-white);box-shadow:var(--cc-shadow-card)}
+.ad-kpis span{color:var(--cc-text-muted)}
+.ad-root th{background:var(--cc-surface-soft);color:var(--cc-text-soft)}
+.ad-root td,.ad-status-list>div,.ad-activity li,.ad-totals>div{border-color:var(--cc-border)}
+.ad-pill{border-radius:999px}
+.ad-tabs button[aria-pressed=true],.ad-shipping-summary button[aria-pressed=true]{border-color:var(--cc-chrome-dark);background:var(--cc-surface-soft);box-shadow:inset 0 0 0 1px var(--cc-chrome-dark)}
+.ad-upload,.ad-image-grid article,.ad-shipping-order-cards article,.ad-named-fulfillment{border-color:var(--cc-border);border-radius:var(--cc-radius-md);background:var(--cc-surface-soft)}
+.ad-thumb,.ad-image-preview,.ad-payment-proof>img{border-radius:var(--cc-radius-sm);background:var(--cc-surface-soft)}
+.ad-modal{border-color:var(--cc-border);border-radius:var(--cc-radius-lg);color:var(--cc-text);background:var(--cc-white);box-shadow:var(--cc-shadow-soft)}
+.ad-email,.ad-email-preview-frame,.ad-email-text-preview .ad-email-body{border-color:var(--cc-border);border-radius:var(--cc-radius-sm);background:var(--cc-surface-soft)}
+
+/* Collections catalog management */
+.ad-collection-editor{align-items:start}
+.ad-collection-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.ad-root .ad-collection-type-grid button{min-height:104px;align-items:flex-start;flex-direction:column;text-align:left;padding:16px}
+.ad-collection-type-grid button[aria-pressed=true]{border-color:var(--cc-chrome-dark);background:var(--cc-surface-muted);box-shadow:inset 0 0 0 1px var(--cc-chrome-dark)}
+.ad-collection-type-grid strong{font-size:13px}.ad-collection-type-grid span{color:var(--ad-muted);font-size:11px;line-height:1.5}
+.ad-collection-search{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;border:1px solid var(--cc-border);border-radius:14px;margin-bottom:14px;background:white;padding-left:10px}
+.ad-root .ad-collection-search input{border:0;box-shadow:none}
+.ad-product-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:430px;overflow:auto;padding:2px}
+.ad-product-picker>label{display:grid;grid-template-columns:18px 44px minmax(0,1fr);align-items:center;gap:10px;border:1px solid var(--cc-border);border-radius:14px;padding:10px;background:white;cursor:pointer}
+.ad-product-picker>label:has(input:checked){border-color:var(--cc-chrome-dark);background:var(--cc-surface-soft)}
+.ad-product-picker span{min-width:0}.ad-product-picker strong,.ad-product-picker small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ad-product-picker small{margin-top:4px}
+.ad-selected-products{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.ad-selected-products li{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--cc-border);border-radius:14px;padding:9px 11px}
+.ad-selected-products li>span{display:flex;min-width:0;align-items:center;gap:10px}.ad-selected-products li>span>b{display:grid;width:24px;height:24px;place-items:center;border-radius:8px;background:var(--cc-surface-muted);font-size:10px}.ad-selected-products li>span>strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ad-selected-products .ad-actions{flex-wrap:nowrap}.ad-selected-products .ad-actions button{min-width:36px;padding:7px}
+.ad-collection-banner-preview{position:relative;display:grid;width:100%;aspect-ratio:2/1;place-items:center;overflow:hidden;border:1px solid var(--cc-border);border-radius:16px;margin-bottom:14px;background:var(--cc-surface-soft);color:var(--ad-muted);font-size:11px}
+.ad-collection-banner-preview img{object-fit:cover}.ad-collection-save{width:100%;min-height:50px}
+
+@media(max-width:700px){.ad-collection-type-grid,.ad-product-picker{grid-template-columns:1fr}.ad-selected-products li{align-items:flex-start;flex-direction:column}.ad-selected-products .ad-actions{width:100%;justify-content:flex-end}}
+
+/* Premium admin interactions; status and danger semantics remain static. */
+.ad-sidebar a,.ad-sidebar-bottom button,.ad-drawer nav a{transition:background-color var(--cc-motion-base) var(--cc-ease-premium),color var(--cc-motion-base) var(--cc-ease-premium)}
+.ad-sidebar a svg,.ad-sidebar-bottom button svg,.ad-drawer nav a svg{transition:transform var(--cc-motion-base) var(--cc-ease-premium)}
+.ad-root button,.ad-button{transition:transform var(--cc-motion-fast) var(--cc-ease-premium),border-color var(--cc-motion-base) var(--cc-ease-premium),background-color var(--cc-motion-base) var(--cc-ease-premium),box-shadow var(--cc-motion-base) var(--cc-ease-premium)}
+.ad-root .ad-primary{position:relative;overflow:hidden;border-color:rgb(77 54 38 / 22%);border-radius:14px;background:var(--cc-button-gradient);color:var(--cc-text-on-dark);box-shadow:0 8px 20px rgb(77 54 38 / 14%),inset 0 1px 0 rgb(255 255 255 / 16%)}
+.ad-root .ad-collection-save::after{position:absolute;top:-20%;bottom:-20%;left:-45%;width:28%;background:linear-gradient(90deg,transparent,rgb(255 255 255 / 24%),transparent);content:"";pointer-events:none;transform:translateX(-170%) skewX(-18deg)}
+.ad-upload{transition:border-color var(--cc-motion-base) var(--cc-ease-premium),background-color var(--cc-motion-base) var(--cc-ease-premium),box-shadow var(--cc-motion-base) var(--cc-ease-premium)}
+.ad-upload svg{transition:transform var(--cc-motion-base) var(--cc-ease-premium)}
+@media(hover:hover) and (pointer:fine){
+  .ad-sidebar a:hover svg,.ad-sidebar-bottom button:hover svg,.ad-drawer nav a:hover svg{transform:translateX(2px)}
+  .ad-sidebar a[aria-current]:hover svg,.ad-drawer a[aria-current]:hover svg{transform:none}
+  .ad-root .ad-primary:hover:not(:disabled){border-color:rgb(77 54 38 / 38%);background:var(--cc-button-gradient-hover);box-shadow:0 12px 27px rgb(77 54 38 / 20%),inset 0 1px 0 rgb(255 255 255 / 16%);transform:translateY(-2px)}
+  .ad-root .ad-collection-save:hover:not(:disabled)::after{animation:cc-button-sheen 640ms var(--cc-ease-premium) both}
+  .ad-root .ad-primary:active:not(:disabled){transform:translateY(0) scale(.99)}
+  .ad-main button:not(.ad-primary):not(.ad-danger):hover:not(:disabled),.ad-main .ad-button:not(.ad-primary):hover{border-color:var(--cc-latte);background:var(--cc-cream);transform:translateY(-1px)}
+  .ad-upload:hover{border-color:var(--cc-chrome);background:var(--cc-surface-muted)}
+  .ad-upload:hover svg{transform:translateY(-2px)}
+}

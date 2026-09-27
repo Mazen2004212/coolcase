@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { resolvePublicMediaUrl } from "@/lib/storage/public-media-core";
 
 export const namedCaseScripts = ["LATIN", "ARABIC", "BOTH"] as const;
 export const namedCaseFontKeys = ["INTER", "GEORGIA", "ARIAL", "TAHOMA"] as const;
@@ -148,5 +149,5 @@ export function templateArabicStyle(template: NamedCaseTemplate): ArabicNamedCas
 
 export function productAssetUrl(path: string) {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  return `${base}/storage/v1/object/public/product-assets/${path}`;
+  return resolvePublicMediaUrl(path, base);
 }

@@ -5,7 +5,7 @@ import type { Material, MaterialPrice } from '@/lib/data/product-options';
 
 export type CatalogImage = {
   id: string;
-  src: string;       // Full public URL to Supabase Storage (or static path)
+  src: string;       // Historical absolute Supabase URL or same-origin public media path
   alt: string;
   isPrimary: boolean;
   displayOrder: number;
@@ -22,6 +22,7 @@ export type CatalogProduct = {
   isAvailable: boolean;   // sold-out flag (true = in stock)
   isActive: boolean;      // published flag
   isFeatured: boolean;
+  isNewArrival: boolean;
   displayOrder: number;
   images: CatalogImage[];
   pricing: Record<Material, MaterialPrice>;
@@ -52,8 +53,14 @@ export type StoreSettings = {
 };
 
 export type CatalogCollection = {
+  id: string;
   name: string;
   slug: string;
-  description: string;
-  representative: CatalogProduct; // first product in category
+  description: string | null;
+  collectionType: 'CUSTOM' | 'NEW_ARRIVALS';
+  bannerImage: string | null;
+  isFeatured: boolean;
+  sortOrder: number;
+  productCount: number;
+  representative: CatalogProduct | null;
 };

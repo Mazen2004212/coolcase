@@ -39,7 +39,7 @@ export function NamedCaseBuilder({ template }: { template: StorefrontTemplate })
   const [englishTouched, setEnglishTouched] = useState(false);
   const [arabicTouched, setArabicTouched] = useState(false);
   const [material, setMaterial] = useState<Material>("silicon");
-  const [brand, setBrand] = useState<PhoneBrand>("iPhone");
+  const [brand, setBrand] = useState<PhoneBrand | "">("");
   const [model, setModel] = useState("");
   const [network, setNetwork] = useState<"4G" | "5G" | "">("");
   const [quantity, setQuantity] = useState(1);
@@ -56,14 +56,14 @@ export function NamedCaseBuilder({ template }: { template: StorefrontTemplate })
   const arabicStyle = { ...templateArabicStyle(template), textColor: arabicColor };
   const pricing = customCasePricing[material];
   const brands = material === "acrylic" ? phoneBrands.filter(item => item === "iPhone") : phoneBrands;
-  const ready = englishValidation.ok && arabicValidation.ok && Boolean(model) && Boolean(network);
+  const ready = englishValidation.ok && arabicValidation.ok && Boolean(brand) && Boolean(model) && Boolean(network);
 
   function changeMaterial(next: Material) {
     setMaterial(next);
     setError("");
     setFeedback("");
     if (next === "acrylic" && brand !== "iPhone") {
-      setBrand("iPhone");
+      setBrand("");
       setModel("");
       setNetwork("");
     }
@@ -76,6 +76,7 @@ export function NamedCaseBuilder({ template }: { template: StorefrontTemplate })
     setArabicTouched(true);
     if (!englishValidation.ok) { setError(englishValidation.error); return null; }
     if (!arabicValidation.ok) { setError(arabicValidation.error); return null; }
+    if (!brand) { setError("Choose your phone brand."); return null; }
     if (!model) { setError("Choose your phone model."); return null; }
     if (!network) { setError("Choose 4G or 5G for the right fit."); return null; }
 
@@ -149,10 +150,10 @@ export function NamedCaseBuilder({ template }: { template: StorefrontTemplate })
       </fieldset>
 
       <fieldset><legend>02 <span>Choose your material</span></legend><div className="pdp-materials">{materialIds.map(id => <label key={id}><input type="radio" name="named-material" checked={material === id} onChange={() => changeMaterial(id)} /><span className="pdp-material-card"><span className="pdp-material-image"><Image src={materialOptions[id].optionImage.src} alt={materialOptions[id].optionImage.alt} fill sizes="120px" /></span><strong>{materialOptions[id].label}</strong><small>{formatPrice(customCasePricing[id].discounted)}</small></span></label>)}</div></fieldset>
-      <fieldset><legend>03 <span>Find your phone fit</span></legend><div className="pdp-device-selects"><label>Phone brand<select value={brand} onChange={event => { setBrand(event.target.value as PhoneBrand); setModel(""); setNetwork(""); }}>{brands.map(item => <option key={item}>{item}</option>)}</select></label><label>Phone model<select value={model} onChange={event => { setModel(event.target.value); setNetwork(""); }}><option value="" disabled>Select your model</option>{phoneModels[brand].map(item => <option key={item}>{item}</option>)}</select></label></div></fieldset>
+      <fieldset><legend>03 <span>Find your phone fit</span></legend><div className="pdp-device-selects"><label>Phone brand<select required value={brand} onChange={event => { setBrand(event.target.value as PhoneBrand); setModel(""); setNetwork(""); }}><option value="" disabled>Select your phone brand</option>{brands.map(item => <option key={item}>{item}</option>)}</select></label><label>Phone model<select required value={model} disabled={!brand} onChange={event => { setModel(event.target.value); setNetwork(""); }}><option value="" disabled>Select your model</option>{(brand ? phoneModels[brand] : []).map(item => <option key={item}>{item}</option>)}</select></label></div></fieldset>
       <fieldset className="pdp-network"><legend>04 <span>Network version</span></legend><div className="pdp-network-options">{(["4G", "5G"] as const).map(value => <label key={value}><input type="radio" name="named-network" checked={network === value} onChange={() => setNetwork(value)} /><span>{value}</span></label>)}</div></fieldset>
       <fieldset><legend>05 <span>Quantity</span></legend><div className="pdp-bag-row"><div className="pdp-quantity" role="group" aria-label="Quantity"><button type="button" disabled={quantity === 1} onClick={() => setQuantity(value => value - 1)} aria-label="Decrease quantity"><Minus /></button><output>{quantity}</output><button type="button" disabled={quantity === 99} onClick={() => setQuantity(value => value + 1)} aria-label="Increase quantity"><Plus /></button></div><button type="button" className="pdp-add" disabled={!ready} onClick={add}>Add to Cart <span>{formatPrice(quantity * pricing.discounted)}</span></button></div></fieldset>
-      {!ready ? <p className="cc-helper" role="status">{!englishValidation.ok ? "Enter a valid English name." : !arabicValidation.ok ? "Enter a valid Arabic name." : !model ? "Choose your phone model to continue." : "Choose your network version to continue."}</p> : null}
+      {!ready ? <p className="cc-helper" role="status">{!englishValidation.ok ? "Enter a valid English name." : !arabicValidation.ok ? "Enter a valid Arabic name." : !brand ? "Choose your phone brand to continue." : !model ? "Choose your phone model to continue." : "Choose your network version to continue."}</p> : null}
       <button type="button" className="pdp-buy-now" disabled={!ready} onClick={buy}>Buy It Now</button>
       <p className="pdp-feedback pdp-feedback-error" role="alert">{error}</p><p className="pdp-feedback" role="status">{feedback} {feedback ? <Link href="/cart">View Cart →</Link> : null}</p>
     </section>

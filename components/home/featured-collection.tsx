@@ -14,6 +14,7 @@ export async function FeaturedCollection() {
     slug:       p.slug,
     name:       p.name,
     available:  p.isAvailable,
+    isNewArrival: p.isNewArrival,
     coverImage: p.coverImage,
     category:   p.categoryName ?? '',
     images:     p.images.map(img => ({ src: img.src, alt: img.alt })),

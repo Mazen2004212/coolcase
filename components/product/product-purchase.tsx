@@ -25,7 +25,7 @@ export type PurchaseProduct = {
 export function ProductPurchase({ product }: { product: PurchaseProduct }) {
   const router = useRouter();
   const { material, setMaterial } = useProductMaterial();
-  const [brand, setBrand] = useState<PhoneBrand>("iPhone");
+  const [brand, setBrand] = useState<PhoneBrand | "">("");
   const [model, setModel] = useState("");
   const [network, setNetwork] = useState<"4G" | "5G" | "">("");
   const [quantity, setQuantity] = useState(1);
@@ -38,14 +38,14 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
     setMaterial(next);
     setFeedback("");
     if (next === "acrylic" && brand !== "iPhone") {
-      setBrand("iPhone");
+      setBrand("");
       setModel("");
       setNetwork("");
     }
   }
 
   function handleAction(mode: "cart" | "buy-now") {
-    if (!product.available || !model || !network) return;
+    if (!product.available || !brand || !model || !network) return;
     try {
       const item = { kind: "product" as const, productId: product.id, slug: product.slug, productName: product.name, material, phoneBrand: brand, phoneModel: model, networkType: network, quantity, discountedUnitPrice: price.discounted, originalUnitPrice: price.original, image: product.images[0]?.src ?? '', subtotal: quantity * price.discounted };
       
@@ -102,14 +102,15 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
         <legend>02 <span>Find your phone fit</span></legend>
         <div className="pdp-device-selects">
           <label>Phone brand
-            <select value={brand} onChange={(event) => { setBrand(event.target.value as PhoneBrand); setModel(""); setNetwork(""); }}>
+            <select required value={brand} onChange={(event) => { setBrand(event.target.value as PhoneBrand); setModel(""); setNetwork(""); }}>
+              <option value="" disabled>Select your phone brand</option>
               {brands.map((item) => <option key={item}>{item}</option>)}
             </select>
           </label>
           <label>Phone model
-            <select required value={model} onChange={(event) => { setModel(event.target.value); setNetwork(""); }}>
+            <select required value={model} disabled={!brand} onChange={(event) => { setModel(event.target.value); setNetwork(""); }}>
               <option value="" disabled>Select your model</option>
-              {phoneModels[brand].map((item) => <option key={item}>{item}</option>)}
+              {(brand ? phoneModels[brand] : []).map((item) => <option key={item}>{item}</option>)}
             </select>
           </label>
         </div>

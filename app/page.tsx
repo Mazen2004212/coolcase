@@ -3,6 +3,7 @@ import { BrandMarquee } from "@/components/home/brand-marquee";
 import { FeaturedCollection } from "@/components/home/featured-collection";
 import { FindYourCase } from "@/components/home/find-your-case";
 import { Hero } from "@/components/home/hero";
+import { NewArrivals } from "@/components/home/new-arrivals";
 import { StatementBanner } from "@/components/home/statement-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -16,6 +17,7 @@ export default function HomePage() {
         <Hero />
         <BrandMarquee />
         <FindYourCase />
+        <NewArrivals />
         <FeaturedCollection />
         <StatementBanner />
         <BenefitsSection />

@@ -11,6 +11,7 @@ export type ShopProduct = {
   slug: string;
   name: string;
   available: boolean;
+  isNewArrival: boolean;
   coverImage: string | null;
   category: string;
   images: Array<{ src: string; alt: string }>;

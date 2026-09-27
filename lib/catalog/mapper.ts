@@ -4,6 +4,7 @@
 import { defaultMaterialPricing } from '@/lib/data/product-options';
 import { parseStoredBoolean } from '@/lib/settings/parsers';
 import type { CatalogProduct, StoreSettings } from './types';
+import { resolvePublicMediaUrl } from '@/lib/storage/public-media-core';
 
 // ─── DB row shape (what Supabase returns from our select) ─────────────────────
 
@@ -85,7 +86,12 @@ export function mapSettings(rows: SettingsRow[]): StoreSettings {
 
 // ─── Product mapper ───────────────────────────────────────────────────────────
 
-export function mapProduct(row: RawProductRow, settings: StoreSettings, supabaseUrl: string): CatalogProduct {
+export function mapProduct(
+  row: RawProductRow,
+  settings: StoreSettings,
+  supabaseUrl: string,
+  isNewArrival = false,
+): CatalogProduct {
   // Sort images: primary first, then by display_order
   const sortedImages = [...row.product_images].sort((a, b) => {
     if (a.is_primary && !b.is_primary) return -1;
@@ -95,7 +101,7 @@ export function mapProduct(row: RawProductRow, settings: StoreSettings, supabase
 
   const images = sortedImages.map(img => ({
     id: img.id,
-    src: `${supabaseUrl}/storage/v1/object/public/product-assets/${img.storage_path}`,
+    src: resolvePublicMediaUrl(img.storage_path, supabaseUrl),
     alt: img.alt_text ?? `${row.name} phone case`,
     isPrimary: img.is_primary,
     displayOrder: img.display_order,
@@ -130,6 +136,7 @@ export function mapProduct(row: RawProductRow, settings: StoreSettings, supabase
     isAvailable:     row.is_available,
     isActive:        row.is_active,
     isFeatured:      row.is_featured,
+    isNewArrival,
     displayOrder:    row.display_order,
     materialsEnabled: {
       silicon: row.silicone_enabled ?? true,

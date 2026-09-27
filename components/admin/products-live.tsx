@@ -11,6 +11,7 @@ import { ImageManagerLive } from './image-manager-live';
 import type { LiveImage } from './image-manager-live';
 import { useAdmin } from './admin-provider';
 import { requirePermission } from '@/lib/admin/permissions';
+import { resolvePublicMediaUrl } from '@/lib/storage/public-media-core';
 
 // ─── Types matching fetchAdminProducts() output ───────────────────────────────
 
@@ -59,7 +60,7 @@ function coverSrc(p: LiveProduct): string {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
   const primary = p.product_images.find(i => i.is_primary) ?? p.product_images[0];
   if (!primary) return '';
-  return `${supabaseUrl}/storage/v1/object/public/product-assets/${primary.storage_path}`;
+  return resolvePublicMediaUrl(primary.storage_path, supabaseUrl);
 }
 
 // ─── Products List ────────────────────────────────────────────────────────────
@@ -205,7 +206,7 @@ export function ProductsListLive({ products }: { products: LiveProduct[] }) {
       {archiveConfirm && (
         <ConfirmReal
           title={`Delete ${archiveConfirm.length} product(s)?`}
-          description="This removes the products and all their images from Supabase Storage permanently."
+          description="This removes the products and all their public media permanently."
           confirmLabel="Delete permanently"
           close={() => setArchiveConfirm(null)}
           onConfirm={async () => {
@@ -224,7 +225,7 @@ export function ProductsListLive({ products }: { products: LiveProduct[] }) {
       {deleteConfirm && (
         <ConfirmReal
           title={`Delete "${deleteConfirm.name}"?`}
-          description="This removes the product and all its images from Supabase Storage permanently."
+          description="This removes the product and all its public media permanently."
           confirmLabel="Delete permanently"
           close={() => setDeleteConfirm(null)}
           onConfirm={() => handleDelete(deleteConfirm)}
@@ -284,7 +285,7 @@ export function ProductEditorLive({ id, product, categories, pricingSettings }: 
     .map(img => ({
       id:           img.id,
       storagePath:  img.storage_path,
-      src:          `${supabaseUrl}/storage/v1/object/public/product-assets/${img.storage_path}`,
+      src:          resolvePublicMediaUrl(img.storage_path, supabaseUrl),
       alt:          img.alt_text ?? '',
       isPrimary:    img.is_primary,
       displayOrder: img.display_order,
@@ -495,7 +496,7 @@ export function ProductEditorLive({ id, product, categories, pricingSettings }: 
             {!isNew && product && (
               <Panel title="Danger zone">
                 <p style={{ fontSize: '0.8125rem', color: 'var(--muted)', marginBottom: 12 }}>
-                  Deleting removes the product and all its images from Supabase Storage permanently.
+                  Deleting removes the product and all its public media permanently.
                 </p>
                 <button type="button" className="ad-danger" disabled={busy} onClick={() => setShowDeleteConfirm(true)}>
                   Delete product
@@ -517,7 +518,7 @@ export function ProductEditorLive({ id, product, categories, pricingSettings }: 
       {showDeleteConfirm && (
         <ConfirmReal
           title={`Delete "${product?.name}"?`}
-          description="This removes the product and all its images from Supabase Storage permanently."
+          description="This removes the product and all its public media permanently."
           confirmLabel="Delete permanently"
           close={() => setShowDeleteConfirm(false)}
           onConfirm={handleDelete}

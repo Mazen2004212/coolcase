@@ -17,6 +17,8 @@ import { EmployeesLive } from '@/components/admin/employees-live';
 import { CustomCaseTemplateEditorLive, CustomCaseTemplatesLive } from '@/components/admin/custom-cases-live';
 import { fetchAdminCustomCaseTemplate, fetchAdminCustomCaseTemplates } from '@/app/admin/actions/custom-cases';
 import type { NamedCaseTemplate } from '@/lib/custom-cases/templates';
+import { CollectionEditorLive, CollectionsListLive, type AdminCollection, type CollectionProductOption } from '@/components/admin/collections-live';
+import { fetchAdminCollection, fetchAdminCollections, fetchCollectionProductOptions } from '@/app/admin/actions/collections';
 
 export default async function Page({ params }: { params: Promise<{ path?: string[] }> }) {
   const { path = [] } = await params;
@@ -24,7 +26,7 @@ export default async function Page({ params }: { params: Promise<{ path?: string
 
   const valid =
     !section ||
-    (['orders', 'products', 'custom-cases', 'customers', 'coupons'].includes(section)
+    (['orders', 'products', 'collections', 'custom-cases', 'customers', 'coupons'].includes(section)
       ? path.length <= 2
       : ['analytics', 'shipping', 'settings', 'employees'].includes(section) && path.length === 1);
 
@@ -42,6 +44,16 @@ export default async function Page({ params }: { params: Promise<{ path?: string
     }
     const products = await fetchAdminProducts();
     return <ProductsListLive products={products as unknown as LiveProduct[]} />;
+  }
+
+  if (section === 'collections') {
+    if (id === 'new') return <CollectionEditorLive collection={null} products={await fetchCollectionProductOptions() as CollectionProductOption[]} />;
+    if (id) {
+      const [collection, products] = await Promise.all([fetchAdminCollection(id), fetchCollectionProductOptions()]);
+      if (!collection) notFound();
+      return <CollectionEditorLive collection={collection as AdminCollection} products={products as CollectionProductOption[]} />;
+    }
+    return <CollectionsListLive collections={await fetchAdminCollections() as AdminCollection[]} />;
   }
 
   // ── Orders

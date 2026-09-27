@@ -38,6 +38,8 @@ The application requires:
 
 Transactional email uses `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_APP_PASSWORD`, and `EMAIL_FROM`. See `.env.example` for safe placeholders and defaults.
 
+AWS deployments can select S3 for new public product and template media with `PUBLIC_MEDIA_BACKEND=s3`, while local development defaults to Supabase. Private payment proofs and customer artwork always remain in Supabase Storage. See the AWS deployment plan for the complete environment classification.
+
 The Supabase verification and seed scripts use separate `COOLCASE_SUPABASE_*` variables so production credentials do not need to be exposed as public application variables.
 
 ## Validation
@@ -46,6 +48,7 @@ The Supabase verification and seed scripts use separate `COOLCASE_SUPABASE_*` va
 npm run typecheck
 npm run lint
 npm run build
+npm run test:storage
 ```
 
 Linked Supabase runtime verification is available when its dedicated environment variables are configured:
@@ -70,6 +73,7 @@ npm run test:supabase:runtime
 - [Database schema](docs/DATABASE_SCHEMA.md)
 - [User flows](docs/USER_FLOWS.md)
 - [Supabase setup](docs/SUPABASE_SETUP.md)
+- [AWS serverless deployment plan](docs/AWS_DEPLOYMENT.md)
 
 ## Security
 

@@ -20,6 +20,7 @@ export default async function SearchPage({ searchParams }: Props) {
         .filter((p) => `${p.name} ${p.description ?? ''} ${p.categoryName ?? ''}`.toLocaleLowerCase("en").includes(normalized))
         .map(p => ({
           id: p.id, slug: p.slug, name: p.name, available: p.isAvailable,
+          isNewArrival: p.isNewArrival,
           coverImage: p.coverImage, category: p.categoryName ?? '',
           images: p.images.map(img => ({ src: img.src, alt: img.alt })),
           pricing: p.pricing,

@@ -43,6 +43,7 @@ import { TransferDetails } from "@/components/payment/transfer-details";
 import { DiscountRow } from "@/components/ui/price-display";
 import { PaymentProofUpload } from "@/components/payment/payment-proof-upload";
 import { namedCaseColorLabel } from "@/lib/custom-cases/templates";
+import { CheckoutProgress } from "@/components/checkout/checkout-progress";
 
 export type CheckoutSavedAddress = {
   id: string;
@@ -310,6 +311,8 @@ function Completion({
   remainingCodAmount,
   orderNumber,
   orderId,
+  orderStatus,
+  paymentStatus,
   storeSettings,
 }: {
   email: string;
@@ -319,6 +322,8 @@ function Completion({
   remainingCodAmount: number;
   orderNumber: string;
   orderId: string;
+  orderStatus: string;
+  paymentStatus: string;
   storeSettings?: CheckoutStoreSettings;
 }) {
   const instaPay = paymentMethod === "INSTAPAY";
@@ -329,69 +334,88 @@ function Completion({
       className="checkout-success"
       aria-labelledby="checkout-success-title"
     >
-      <span>
-        <Check aria-hidden="true" />
-      </span>
+      <CheckoutProgress
+        phase="ORDER"
+        orderStatus={orderStatus}
+        paymentStatus={paymentStatus}
+      />
+      <div className="checkout-success-layout">
+        <div className="checkout-success-overview">
+          <span className="checkout-success-icon">
+            <Check aria-hidden="true" />
+          </span>
 
-      <p>Pending admin approval</p>
+          <p className="checkout-success-status">Pending admin approval</p>
 
-      <h1 id="checkout-success-title">
-        ORDER RECEIVED
-      </h1>
+          <h1 id="checkout-success-title">ORDER RECEIVED</h1>
 
-      {orderNumber ? (
-        <p className="checkout-success-ref">
-          Order reference:{" "}
-          <strong>{orderNumber}</strong>
-        </p>
-      ) : null}
+          {orderNumber ? (
+            <p className="checkout-success-ref">
+              Order reference: <strong>{orderNumber}</strong>
+            </p>
+          ) : null}
 
-      <h2>
-        {instaPay
-          ? "Your order has been received and is pending payment verification and approval."
-          : "Your order has been received. Upload the 50% deposit proof for verification and approval."}
-      </h2>
+          <h2>
+            {instaPay
+              ? "Your order is waiting for payment verification and approval."
+              : "Upload your 50% deposit proof so we can verify and approve your order."}
+          </h2>
 
-      {instaPay || codDeposit ? (
-        <div className="checkout-success-whatsapp">
-          <h3>{instaPay ? "Complete your InstaPay payment" : "Pay your 50% COD deposit"}</h3>
+          <dl className="checkout-success-summary">
+            <div>
+              <dt>Order total</dt>
+              <dd>{formatPrice(total)}</dd>
+            </div>
+            <div className="checkout-success-summary-emphasis">
+              <dt>Amount to transfer</dt>
+              <dd>{formatPrice(paymentExpectedAmount)}</dd>
+            </div>
+            {codDeposit ? (
+              <div>
+                <dt>Remaining on delivery</dt>
+                <dd>{formatPrice(remainingCodAmount)}</dd>
+              </div>
+            ) : null}
+            <div>
+              <dt>Payment method</dt>
+              <dd>{instaPay ? "InstaPay" : "COD — 50% deposit"}</dd>
+            </div>
+          </dl>
 
-          <p>
-            Transfer the exact amount below, then upload your proof securely.
-          </p>
-          {codDeposit ? <><p>Order total: <strong>{formatPrice(total)}</strong></p><p>Remaining on delivery: <strong>{formatPrice(remainingCodAmount)}</strong></p></> : null}
-          <TransferDetails amount={paymentExpectedAmount} recipient={storeSettings?.instapayNumber || INSTAPAY_TRANSFER_NUMBER} />
-          <p>Upload the transaction screenshot below. Your order will not be confirmed until Coolcase verifies the payment.</p>
-          <PaymentProofUpload orderId={orderId} initialStatus="PENDING" />
-          <p>Need help? WhatsApp support remains available.</p>
-          <WhatsAppButton whatsappNumber={storeSettings?.whatsapp} />
+          <div className="checkout-success-confirmation">
+            <p>
+              Once Coolcase{" "}
+              {instaPay
+                ? "verifies the transaction and approves your order"
+                : "verifies the deposit and approves your order"}
+              , we&apos;ll send a confirmation email to:
+            </p>
+            <strong>{email}</strong>
+          </div>
+
+          <div className="checkout-success-delivery">
+            <span>Estimated delivery after confirmation</span>
+            <b>7&ndash;10 days</b>
+          </div>
+
+          <Link className="checkout-success-continue" href="/shop" prefetch={false}>
+            Continue Shopping
+            <ArrowRight aria-hidden="true" />
+          </Link>
         </div>
-      ) : null}
 
-      <p>
-        Once Coolcase{" "}
-        {instaPay
-          ? "verifies the transaction and approves your order"
-          : "verifies the deposit and approves your order"}
-        , we&apos;ll send a confirmation email to:
-      </p>
-
-      <strong>{email}</strong>
-
-      <div className="checkout-success-delivery">
-        <span>
-          Estimated delivery after confirmation
-        </span>
-        <b>7&ndash;10 days</b>
+        {instaPay || codDeposit ? (
+          <aside className="checkout-success-whatsapp" aria-label="Payment instructions">
+            <h3>{instaPay ? "Complete your InstaPay payment" : "Pay your 50% COD deposit"}</h3>
+            <p>Transfer the exact amount below, then upload your proof securely.</p>
+            <TransferDetails amount={paymentExpectedAmount} recipient={storeSettings?.instapayNumber || INSTAPAY_TRANSFER_NUMBER} />
+            <p>Upload the transaction screenshot below. Your order will not be confirmed until Coolcase verifies the payment.</p>
+            <PaymentProofUpload orderId={orderId} initialStatus={paymentStatus} />
+            <p>Need help? WhatsApp support remains available.</p>
+            <WhatsAppButton whatsappNumber={storeSettings?.whatsapp} />
+          </aside>
+        ) : null}
       </div>
-
-      <Link
-        href="/shop"
-        prefetch={false}
-      >
-        Continue Shopping
-        <ArrowRight aria-hidden="true" />
-      </Link>
     </section>
   );
 }
@@ -517,6 +541,8 @@ export function CheckoutContent({
       total: number;
       paymentExpectedAmount: number;
       remainingCodAmount: number;
+      orderStatus: string;
+      paymentStatus: string;
     } | null>(null);
 
 
@@ -996,6 +1022,8 @@ export function CheckoutContent({
         total: result.totalAmount,
         paymentExpectedAmount: result.paymentExpectedAmount,
         remainingCodAmount: result.remainingCodAmount,
+        orderStatus: result.orderStatus,
+        paymentStatus: result.paymentStatus,
       });
 
       window.scrollTo({
@@ -1031,6 +1059,7 @@ export function CheckoutContent({
 
   return (
     <>
+      <CheckoutProgress phase="INFORMATION" />
       <header className="checkout-heading">
         <div>
           <p>

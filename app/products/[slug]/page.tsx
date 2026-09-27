@@ -77,7 +77,7 @@ export default async function ProductPage({ params }: Props) {
           <section className="pdp-recommendations" id="more-cases" aria-labelledby="more-cases-title">
             <div className="pdp-recommendations-heading"><div><p className="pdp-eyebrow">A different day. A different mood.</p><h2 id="more-cases-title">More Cases</h2></div><span>Keep your options open.</span></div>
             <div className="pdp-related-grid">
-              {related.map((item) => <article key={item.slug}><Link href={`/products/${item.slug}`}><div className="pdp-related-image"><Image src={item.coverImage ?? item.images[0]?.src ?? ''} alt={item.images[0]?.alt ?? item.name} fill sizes="(min-width: 1024px) 23vw, 45vw" />{!item.isAvailable ? <span className="product-sold-out">Sold Out</span> : null}<ArrowRight size={18} aria-hidden="true" /></div><h3>{item.name}</h3><p><strong>From {formatPrice(item.pricing.silicon.discounted)}</strong></p></Link></article>)}
+              {related.map((item) => <article key={item.slug}><Link href={`/products/${item.slug}`}><div className="pdp-related-image">{item.isNewArrival ? <span className="product-new-ribbon">NEW</span> : null}<Image src={item.coverImage ?? item.images[0]?.src ?? ''} alt={item.images[0]?.alt ?? item.name} fill sizes="(min-width: 1024px) 23vw, 45vw" />{!item.isAvailable ? <span className="product-sold-out">Sold Out</span> : null}<ArrowRight size={18} aria-hidden="true" /></div><h3>{item.name}</h3><p><strong>From {formatPrice(item.pricing.silicon.discounted)}</strong></p></Link></article>)}
             </div>
           </section>
         </SiteContainer>

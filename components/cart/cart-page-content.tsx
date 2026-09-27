@@ -16,6 +16,7 @@ import {
 import { formatPrice, materialOptions } from "@/lib/data/product-options";
 import { TotalsSummary, PriceDisplay } from "@/components/ui/price-display";
 import { namedCaseColorLabel } from "@/lib/custom-cases/templates";
+import { CheckoutProgress } from "@/components/checkout/checkout-progress";
 
 
 
@@ -94,17 +95,21 @@ export function CartPageContent({ shippingFee }: { shippingFee: number }) {
 
   if (cart.items.length === 0) {
     return (
-      <section className="cart-empty" aria-labelledby="empty-cart-heading">
-        <p>Nothing in the bag — yet.</p>
-        <h1 id="empty-cart-heading">YOUR CART IS EMPTY</h1>
-        <span>Looks like you haven&apos;t picked your next case yet.</span>
-        <div><Link href="/shop" prefetch={false} className="cart-primary-link">Shop Cases <ArrowRight aria-hidden="true" /></Link><Link href="/custom-cases" prefetch={false} className="cart-secondary-link">Create Your Own</Link></div>
-      </section>
+      <>
+        <CheckoutProgress phase="CART" />
+        <section className="cart-empty" aria-labelledby="empty-cart-heading">
+          <p>Nothing in the bag — yet.</p>
+          <h1 id="empty-cart-heading">YOUR CART IS EMPTY</h1>
+          <span>Looks like you haven&apos;t picked your next case yet.</span>
+          <div><Link href="/shop" prefetch={false} className="cart-primary-link">Shop Cases <ArrowRight aria-hidden="true" /></Link><Link href="/custom-cases" prefetch={false} className="cart-secondary-link">Create Your Own</Link></div>
+        </section>
+      </>
     );
   }
 
   return (
     <>
+      <CheckoutProgress phase="CART" />
       <header className="cart-page-heading"><div><p>Your cases, your way.</p><h1>YOUR CART</h1></div><Link href="/shop" prefetch={false}>Continue Shopping <ArrowRight aria-hidden="true" /></Link></header>
       <div className="cart-layout">
         <section className="cart-lines" aria-label={`Cart items, ${cart.items.length} ${cart.items.length === 1 ? "line" : "lines"}`}>

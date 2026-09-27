@@ -626,7 +626,7 @@ async function verifyStorage(customerA, customerB, adminTest) {
 }
 
 function runDatabaseTests(customerA, customerB, adminTest) {
-  for (const file of ["database_runtime.test.sql", "payment_workflow_runtime.test.sql", "custom_cases_v2_runtime.test.sql", "checkout_item_shapes_runtime.test.sql", "cod_deposit_runtime.test.sql"]) {
+  for (const file of ["database_runtime.test.sql", "payment_workflow_runtime.test.sql", "custom_cases_v2_runtime.test.sql", "checkout_item_shapes_runtime.test.sql", "cod_deposit_runtime.test.sql", "collections_runtime.test.sql"]) {
     const command = process.platform === "win32" ? "cmd.exe" : "npx";
     const filePath = process.platform === "win32" ? `supabase\\tests\\${file}` : `supabase/tests/${file}`;
     const commandArguments = process.platform === "win32"

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { CartBadgeLink } from "@/components/cart/cart-badge-link";
@@ -8,6 +7,7 @@ import { siteNavigation } from "@/lib/data/homepage";
 import { getCustomer } from "@/lib/auth/user";
 import { getStaffProfile } from "@/lib/admin/user";
 import { UserDropdown } from "@/components/layout/user-dropdown";
+import { BrandLogo } from "@/components/layout/brand-logo";
 
 export async function SiteHeader() {
   const customer = await getCustomer();
@@ -21,17 +21,10 @@ export async function SiteHeader() {
   const accountHref = customer ? "/account" : "/login";
 
   return (
-    <header className="sticky top-0 z-50 h-[var(--header-height)] bg-surface-black text-white">
+    <header className="site-header sticky top-0 z-50 h-[var(--header-height)] text-[var(--cc-text-on-dark)]">
       <SiteContainer className="relative flex h-full items-center justify-between gap-4">
         <Link href="/" className="brand-wordmark" aria-label="Coolcase home">
-          <Image
-            src="/assets/logo/coolcase-logo.png"
-            alt="Coolcase"
-            width={160}
-            height={30}
-            style={{ height: 30, width: 'auto', objectFit: 'contain', filter: 'invert(1)' }}
-            priority
-          />
+          <BrandLogo width={150} height={30} priority />
         </Link>
         <nav aria-label="Primary navigation" className="hidden lg:block">
           <ul className="flex items-center gap-8">
@@ -48,7 +41,7 @@ export async function SiteHeader() {
           <Link
             href="/search"
             prefetch={false}
-            className="icon-button hidden hover:bg-white/10 lg:inline-flex"
+            className="icon-button hidden hover:bg-[var(--cc-chrome-darker)] lg:inline-flex"
             aria-label="Search"
           >
             <Search size={20} strokeWidth={1.6} aria-hidden="true" />

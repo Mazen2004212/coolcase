@@ -94,33 +94,45 @@
 .checkout-blocked h1 { margin-top: 10px; font-size: clamp(38px, 6vw, 68px); font-weight: 660; letter-spacing: -.07em; line-height: .95; }
 .checkout-blocked > span { max-width: 52ch; margin-top: 16px; color: #666; font-size: 12px; line-height: 1.6; }
 .checkout-blocked > a { margin-top: 24px; }
-.checkout-success { display: grid; max-width: 720px; min-height: 630px; place-content: center; justify-items: center; margin: auto; padding: 50px 0; text-align: center; }
-.checkout-success > span:first-child { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: #080808; color: #fff; }
-.checkout-success > span:first-child svg { width: 20px; }
-.checkout-success > p:first-of-type { margin-top: 18px; }
-.checkout-success h1 { margin-top: 10px; font-size: clamp(42px, 7vw, 76px); font-weight: 660; letter-spacing: -.075em; line-height: .9; }
-.checkout-success > h2 { max-width: 39ch; margin-top: 19px; font-size: 16px; font-weight: 540; line-height: 1.5; }
-.checkout-success > p:not(:first-of-type) { max-width: 55ch; margin-top: 22px; color: #666; font-size: 11px; line-height: 1.6; }
-.checkout-success > strong { margin-top: 7px; font-size: 14px; overflow-wrap: anywhere; }
-.checkout-success-whatsapp { width: 100%; max-width: 470px; margin-top: 25px; border: 1px solid #ccc; padding: 20px; }
-.checkout-success-whatsapp h3 { font-size: 18px; font-weight: 630; }
-.checkout-success-whatsapp p { margin-top: 7px; color: #666; font-size: 10px; }
-.checkout-success-whatsapp > a:not(.checkout-whatsapp) { display: inline-flex; min-height: 40px; align-items: center; font-size: 16px; font-weight: 650; text-decoration: underline; text-underline-offset: 4px; }
-.checkout-success-instapay-number { display: block; margin-top: 8px; font-size: 20px; overflow-wrap: anywhere; }
-.checkout-success-whatsapp .payment-proof-upload { display: grid; gap: 9px; margin-top: 18px; text-align: left; }
+.checkout-success { width: 100%; max-width: 1180px; margin: auto; padding: 38px 0 46px; }
+.checkout-success-layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: start; gap: clamp(34px, 5vw, 72px); }
+.checkout-success-overview { min-width: 0; padding: 9px 0; }
+.checkout-success-icon { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: #080808; color: #fff; }
+.checkout-success-icon svg { width: 20px; }
+.checkout-success-status { margin-top: 18px; color: #727272; font-size: 10px; font-weight: 650; letter-spacing: .14em; text-transform: uppercase; }
+.checkout-success h1 { max-width: 650px; margin-top: 10px; font-size: clamp(48px, 6vw, 76px); font-weight: 660; letter-spacing: -.075em; line-height: .9; }
+.checkout-success-ref { margin-top: 18px; color: #555; font-size: 12px; }
+.checkout-success-ref strong { color: #111; overflow-wrap: anywhere; }
+.checkout-success-overview > h2 { max-width: 47ch; margin-top: 15px; color: #444; font-size: 16px; font-weight: 520; line-height: 1.55; }
+.checkout-success-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 25px; border: 1px solid #d1d1d1; background: #d1d1d1; }
+.checkout-success-summary > div { min-width: 0; min-height: 92px; background: #fff; padding: 16px; }
+.checkout-success-summary > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.checkout-success-summary dt { color: #707070; font-size: 9px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+.checkout-success-summary dd { margin-top: 8px; font-size: 16px; font-weight: 650; line-height: 1.2; overflow-wrap: anywhere; }
+.checkout-success-summary .checkout-success-summary-emphasis { background: #111; color: #fff; }
+.checkout-success-summary-emphasis dt { color: #bdbdbd; }
+.checkout-success-summary-emphasis dd { font-size: 21px; font-variant-numeric: tabular-nums; }
+.checkout-success-confirmation { margin-top: 22px; border-top: 1px solid #ddd; padding-top: 18px; }
+.checkout-success-confirmation p { max-width: 58ch; color: #666; font-size: 11px; line-height: 1.6; }
+.checkout-success-confirmation strong { display: block; margin-top: 5px; font-size: 13px; overflow-wrap: anywhere; }
+.checkout-success-whatsapp { min-width: 0; border: 1px solid #bdbdbd; background: #fafafa; padding: clamp(22px, 3vw, 32px); }
+.checkout-success-whatsapp h3 { max-width: 20ch; font-size: clamp(25px, 3vw, 34px); font-weight: 640; letter-spacing: -.045em; line-height: 1.02; }
+.checkout-success-whatsapp > p { margin-top: 10px; color: #666; font-size: 11px; line-height: 1.55; }
+.checkout-success-whatsapp .cc-transfer { margin: 20px 0; padding: 18px; }
+.checkout-success-whatsapp .cc-transfer .cc-payable { font-size: clamp(30px, 4vw, 42px); line-height: 1; }
+.checkout-success-whatsapp .payment-proof-upload { display: grid; gap: 9px; margin-top: 17px; text-align: left; }
 .checkout-success-whatsapp .payment-proof-upload label { display: grid; gap: 8px; font-size: 10px; font-weight: 650; text-transform: uppercase; }
 .checkout-success-whatsapp .payment-proof-upload input { width: 100%; border: 1px solid #bbb; border-radius: 3px; background: #fff; padding: 10px; font-size: 11px; text-transform: none; }
 .checkout-success-whatsapp .payment-proof-upload small { color: #777; font-size: 9px; }
-.checkout-success-whatsapp .payment-proof-upload button { display: inline-flex; width: fit-content; min-height: 44px; align-items: center; gap: 8px; border-radius: 3px; background: #080808; color: #fff; padding: 0 16px; font-size: 10px; font-weight: 650; cursor: pointer; text-transform: uppercase; }
+.checkout-success-whatsapp .payment-proof-upload > button { display: inline-flex; width: 100%; min-height: 48px; align-items: center; justify-content: center; gap: 8px; border-radius: 3px; background: #080808; color: #fff; padding: 0 16px; font-size: 10px; font-weight: 650; cursor: pointer; text-transform: uppercase; }
 .checkout-success-whatsapp .payment-proof-upload button:disabled { cursor: wait; opacity: .6; }
 .checkout-success-whatsapp .payment-proof-upload button svg { width: 15px; }
 .checkout-success-whatsapp .payment-proof-state { margin-top: 16px; border: 1px solid #bcd2bf; background: #f5fff6; padding: 12px; color: #265c2d; font-size: 10px; }
 .checkout-success-whatsapp .payment-proof-error { color: #8b2e26; font-size: 10px; }
-.checkout-success-delivery { display: flex; align-items: center; gap: 14px; margin-top: 20px; border-block: 1px solid #ddd; padding: 13px 0; font-size: 10px; }
+.checkout-success-delivery { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 18px; border-block: 1px solid #ddd; padding: 13px 0; font-size: 10px; }
 .checkout-success-delivery b { font-size: 13px; }
-.checkout-success .checkout-success-note { margin-top: 14px; color: #999; font-size: 8px; }
-.checkout-success > a:last-child { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; margin-top: 15px; font-size: 11px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
-.checkout-success > a svg { width: 15px; }
+.checkout-success-continue { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; margin-top: 12px; font-size: 11px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+.checkout-success-continue svg { width: 15px; }
 
 /* Coupon UI */
 .checkout-coupon-section {
@@ -185,8 +197,14 @@
   .checkout-transfer { align-items: flex-start; flex-direction: column; }
   .checkout-transfer button { padding: 0; }
   .checkout-summary { padding: 22px 18px; }
-  .checkout-success { min-height: 560px; padding: 36px 0; }
-  .checkout-success-whatsapp { padding: 17px; }
-  .checkout-success-delivery { flex-direction: column; gap: 4px; }
+  .checkout-success { min-height: 0; padding: 20px 0 34px; }
+  .checkout-success-layout { grid-template-columns: 1fr; gap: 25px; }
+  .checkout-success-overview { padding: 0; }
+  .checkout-success h1 { font-size: 44px; }
+  .checkout-success-summary > div { min-height: 84px; padding: 14px; }
+  .checkout-success-summary dd { font-size: 14px; }
+  .checkout-success-summary-emphasis dd { font-size: 18px; }
+  .checkout-success-whatsapp { padding: 19px; }
+  .checkout-success-delivery { align-items: flex-start; flex-direction: column; gap: 4px; }
   .checkout-coupon-row { flex-direction: column; }
 }

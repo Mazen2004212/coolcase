@@ -1,0 +1,89 @@
+/* Final customer brand application. All color values resolve to globals.css tokens. */
+body :is(.customer-page,.shop-page,.pdp,.cart-page,.checkout-page,.custom-cases-page,.account-page,.auth-page) {
+  background:var(--cc-white);
+  color:var(--cc-text);
+}
+
+body :is(h1,h2,h3,.display-heading,.cc-price strong) { color:var(--cc-heading); }
+body :is(.customer-page-heading>p,.customer-page-heading>span,.shop-intro p,.shop-intro span,.pdp-eyebrow,.pdp-description,.pdp-gallery figcaption,.pdp-material-note,.pdp-network p,.pdp-purchase-note,.cart-configuration,.cart-delivery-note,.cart-checkout-warning,.checkout-section-heading p,.checkout-delivery,.checkout-submit-note,.checkout-summary>small,.custom-builder-description,.custom-preview-panel>p,.custom-how-it-works,.account-intro,.account-eyebrow,.track-note,.payment-proof-upload small) { color:var(--cc-muted); }
+
+body :is(.customer-page-heading,.shop-intro,.shop-control-bar,.cart-page-heading,.checkout-heading,.account-heading,.custom-landing-heading,.pdp-more-designs,.pdp-recommendations,.account-profile-summary) { border-color:var(--cc-border); }
+body :is(.collection-card,.contact-panel,.track-form,.pdp-information,.cart-line,.cart-summary,.checkout-form,.checkout-summary,.checkout-payment-panel,.checkout-success-overview,.checkout-success-whatsapp,.custom-builder-information,.custom-preview-panel,.named-template-section,.account-card-grid a,.address-list>article,.address-add,.orders-list article,.account-payment-proof) {
+  border-color:var(--cc-border);
+  background:var(--cc-white);
+  border-radius:var(--cc-radius-lg);
+}
+body :is(.cart-summary,.checkout-summary,.checkout-payment-panel,.checkout-success-whatsapp,.custom-builder-information,.custom-preview-panel,.account-card-grid a,.address-list>article,.orders-list article,.contact-panel,.track-form) { box-shadow:var(--cc-shadow-card); }
+body :is(.collection-card-image,.pdp-main-image,.pdp-thumbnails button,.pdp-material-image,.pdp-design-row a,.pdp-related-image,.cart-item-image,.checkout-item-image,.custom-preview-image,.named-case-reference,.cc-template-figure) { overflow:hidden; border-radius:var(--cc-radius-md); background:var(--cc-latte-50); }
+
+body :is(.search-form>div,.track-form input,.shop-control-bar select,.pdp-device-selects select,.pdp-quantity,.cart-quantity,.checkout-fields input,.checkout-fields select,.checkout-fields textarea,.checkout-coupon-row input,.custom-builder-form input,.custom-builder-form select,.custom-builder-form textarea,.account-form input,.account-form select,.address-form-grid input,.address-form-grid select,.payment-proof-upload input) {
+  border-color:var(--cc-border);
+  border-radius:var(--cc-radius-sm);
+  background:var(--cc-white);
+  color:var(--cc-text);
+}
+body :is(.search-form input,.track-form input,.shop-control-bar select,.pdp-device-selects select,.cart-quantity input,.checkout-fields input,.checkout-fields select,.checkout-fields textarea,.checkout-coupon-row input,.custom-builder-form input,.custom-builder-form select,.custom-builder-form textarea,.account-form input,.account-form select,.address-form-grid input,.address-form-grid select,.payment-proof-upload input):hover { border-color:var(--cc-border-strong); }
+body :is(.search-form input,.track-form input,.shop-control-bar select,.pdp-device-selects select,.cart-quantity input,.checkout-fields input,.checkout-fields select,.checkout-fields textarea,.checkout-coupon-row input,.custom-builder-form input,.custom-builder-form select,.custom-builder-form textarea,.account-form input,.account-form select,.address-form-grid input,.address-form-grid select,.payment-proof-upload input):focus-visible {
+  border-color:var(--cc-focus);
+  outline:0;
+  box-shadow:0 0 0 4px rgb(166 124 91 / 14%);
+}
+
+body :is(.pdp-materials label>.pdp-material-card,.pdp-network-options span,.checkout-payment label>span,.checkout-address-mode label,.checkout-address-mode span,.checkout-saved-card,.checkout-saved-card>span,.custom-upload-control) { border-color:var(--cc-border); border-radius:var(--cc-radius-sm); background:var(--cc-white); color:var(--cc-text); }
+body :is(.pdp-materials input:checked+span,.pdp-network-options input:checked+span,.checkout-payment input:checked+span,.checkout-address-mode input:checked+span,.checkout-saved-card:has(input:checked)) {
+  border-color:var(--cc-latte);
+  background:var(--cc-latte-50);
+  color:var(--cc-heading);
+  box-shadow:inset 0 0 0 1px var(--cc-latte);
+}
+body :is(.pdp input,.checkout-payment input,.checkout-address-mode input):focus-visible+span { outline:2px solid var(--cc-focus); outline-offset:3px; }
+
+body :is(.search-form button,.track-form button,.pdp-add,.pdp-buy-now,.cart-primary-link,.cart-checkout,.checkout-submit,.checkout-coupon-row button,.custom-builder-form>button,.named-empty a,.payment-proof-upload button,.account-form>button,.account-empty a,.auth-submit,.auth-complete>a) {
+  border:1px solid var(--cc-button);
+  border-radius:var(--cc-radius-md);
+  background:var(--cc-button);
+  color:var(--cc-button-text);
+  box-shadow:var(--cc-shadow-card);
+}
+body :is(.search-form button,.track-form button,.pdp-add,.pdp-buy-now,.cart-primary-link,.cart-checkout,.checkout-submit,.checkout-coupon-row button,.custom-builder-form>button,.named-empty a,.payment-proof-upload button,.account-form>button,.account-empty a,.auth-submit,.auth-complete>a):hover { background:var(--cc-button-hover); border-color:var(--cc-button-hover); }
+body :is(.search-form button,.track-form button,.pdp-add,.pdp-buy-now,.cart-primary-link,.cart-checkout,.checkout-submit,.checkout-coupon-row button,.custom-builder-form>button,.named-empty a,.payment-proof-upload button,.account-form>button,.account-empty a,.auth-submit,.auth-complete>a):active { background:var(--cc-button-active); border-color:var(--cc-button-active); }
+body :is(.search-form button,.track-form button,.pdp-add,.pdp-buy-now,.cart-primary-link,.cart-checkout,.checkout-submit,.checkout-coupon-row button,.custom-builder-form>button,.named-empty a,.payment-proof-upload button,.account-form>button,.account-empty a,.auth-submit,.auth-complete>a):focus-visible { outline:3px solid var(--cc-focus); outline-offset:3px; }
+body :is(.pdp-add,.pdp-buy-now,.cart-checkout,.checkout-submit,.custom-builder-form>button,.payment-proof-upload button,.account-form>button,.auth-submit):disabled { border-color:var(--cc-disabled-bg); background:var(--cc-disabled-bg); color:var(--cc-disabled-text); }
+
+body :is(.cc-button,.cart-page-heading>a,.cart-secondary-link,.cart-summary-continue,.checkout-success-continue,.checkout-whatsapp,.order-back) { display:inline-flex; min-height:46px; align-items:center; justify-content:center; gap:9px; border:1px solid var(--cc-border); border-radius:var(--cc-radius-md); background:var(--cc-white); color:var(--cc-brown-deep); padding:0 18px; text-decoration:none; box-shadow:var(--cc-shadow-card); }
+body :is(.cc-button,.cart-page-heading>a,.cart-secondary-link,.cart-summary-continue,.checkout-success-continue,.checkout-whatsapp,.order-back):hover { border-color:var(--cc-latte); background:var(--cc-cream); color:var(--cc-brown-deep); }
+body .cart-summary-continue { width:100%; margin-top:10px; }
+body .cart-page-heading>a { max-width:none; white-space:nowrap; }
+
+body :is(.text-link,.auth-form-links a,.auth-switch a,.cart-remove,.cart-summary-continue,.order-back,.orders-list a,.account-layout>nav a,.address-list summary,.address-list footer button,.pdp-breadcrumb a,.pdp-more-designs a) { color:var(--cc-link); text-decoration-color:var(--cc-latte-500); }
+body :is(.text-link,.auth-form-links a,.auth-switch a,.cart-summary-continue,.order-back,.orders-list a,.account-layout>nav a,.address-list summary,.address-list footer button,.pdp-breadcrumb a,.pdp-more-designs a):hover { color:var(--cc-link-hover); }
+body .account-layout>nav a[aria-current=page] { border-color:var(--cc-chrome-active); color:var(--cc-latte-800); }
+
+body :is(.cc-price strong,.pdp-price strong,.cart-line-total,.cart-summary-total,.checkout-total,.checkout-success-summary-emphasis strong) { color:var(--cc-heading); }
+body :is(.cc-price del,.pdp-price del,.product-details del) { color:var(--cc-muted); }
+body :is(.cc-saving,.pdp-saving) { background:var(--cc-success-bg); color:var(--cc-success); }
+
+body .custom-choice-grid>a,
+body .custom-choice-grid>a:nth-child(2) { border-color:var(--cc-border); border-radius:var(--cc-radius-lg); background:var(--cc-white); color:var(--cc-text); box-shadow:var(--cc-shadow-card); }
+body .custom-choice-grid>a:hover { border-color:var(--cc-chrome-active); }
+body .custom-choice-grid .cc-template-figure { background:var(--cc-latte-50); }
+body .custom-upload-control strong { border-color:var(--cc-border-strong); border-radius:var(--cc-radius-sm); background:var(--cc-white); color:var(--cc-text); }
+body .custom-upload-control:focus-within strong { outline-color:var(--cc-focus); }
+body .named-text-field input { border-color:var(--cc-border); background:var(--cc-white); color:var(--cc-text); }
+body .named-color-picker input:checked+span { outline-color:var(--cc-chrome-active); }
+
+body :is(.cart-custom-badge,.checkout-item-image>b,.checkout-success-icon) { background:var(--cc-latte-700); color:var(--cc-white); }
+body .checkout-success-summary { overflow:hidden; border-color:var(--cc-border); border-radius:var(--cc-radius-md); background:var(--cc-border); box-shadow:var(--cc-shadow-card); }
+body .checkout-success-summary>div { background:var(--cc-white); }
+body .checkout-success-summary .checkout-success-summary-emphasis { background:var(--cc-latte-50); color:var(--cc-heading); }
+body .checkout-success-summary-emphasis dt { color:var(--cc-muted); }
+body .checkout-payment-panel, body .checkout-success-whatsapp { background:var(--cc-white); }
+body .checkout-transfer { border-color:var(--cc-border-strong); border-radius:var(--cc-radius-sm); background:var(--cc-white); }
+body .payment-proof-upload input[type=file] { border-radius:var(--cc-radius-sm); padding:10px; }
+body .payment-proof-upload input[type=file]::file-selector-button { border-radius:var(--cc-radius-sm); }
+body .checkout-instapay>p a { color:var(--cc-link); }
+
+body .contact-action { border-radius:var(--cc-radius-lg); background:var(--cc-chrome); color:var(--cc-text-on-dark); box-shadow:var(--cc-shadow-soft); }
+body .contact-action p { color:rgb(255 250 246 / 80%); }
+body .contact-action a { border-color:rgb(255 250 246 / 45%); border-radius:var(--cc-radius-md); color:var(--cc-text-on-dark); }
+body .site-footer h2 { color:var(--cc-text-on-dark); }
