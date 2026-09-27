@@ -10,7 +10,7 @@ export async function SiteFooter() {
       <SiteContainer>
         <div className="footer-main">
           <div className="footer-brand">
-            <Link href="#top" className="brand-wordmark" aria-label="Back to top">
+            <Link href="#top" className="brand-wordmark brand-logo-on-dark" aria-label="Back to top">
               <BrandLogo width={140} height={28} />
             </Link>
             <p>Phone cases with a point of view.</p>

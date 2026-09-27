@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import type { ReactNode } from "react";
+import { SiteCursor } from "@/components/ui/site-cursor";
 
 import "@/app/globals.css";
 import "@/app/customer-pages.css";
@@ -26,7 +27,7 @@ type RootLayoutProps = Readonly<{
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body className={geist.variable}>{children}</body>
+      <body className={geist.variable}><SiteCursor />{children}</body>
     </html>
   );
 }

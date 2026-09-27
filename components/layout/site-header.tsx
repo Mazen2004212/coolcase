@@ -23,7 +23,7 @@ export async function SiteHeader() {
   return (
     <header className="site-header sticky top-0 z-50 h-[var(--header-height)] text-[var(--cc-text-on-dark)]">
       <SiteContainer className="relative flex h-full items-center justify-between gap-4">
-        <Link href="/" className="brand-wordmark site-header-logo" aria-label="Coolcase home">
+        <Link href="/" className="brand-wordmark brand-logo-on-dark" aria-label="Coolcase home">
           <BrandLogo width={164} height={34} priority />
         </Link>
         <nav aria-label="Primary navigation" className="hidden lg:block">

@@ -111,7 +111,7 @@ export function AdminShell({
     return (
       <>
         <div className="ad-brand">
-          <BrandLogo width={132} height={26} />
+          <BrandLogo width={132} height={26} className="brand-logo-on-dark" />
 
           <span>
             Administration

@@ -10,9 +10,10 @@ export function StatementBanner() {
       aria-label="Escape boring style campaign"
     >
       <Image
-        src="/assets/banners/statement-banner.png"
-        alt="Coolcase Escape Boring Style campaign with expressive cases and two models"
+        src="/assets/banners/statement-banner.jpeg"
+        alt="Coolcase Your Phone, Your Style campaign with heart and polka-dot cases"
         fill
+        unoptimized
         sizes="100vw"
       />
       <Link href="/shop" prefetch={false} className="statement-banner-link">

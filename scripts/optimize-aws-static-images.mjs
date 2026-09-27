@@ -38,6 +38,12 @@ function formatBytes(bytes) {
 }
 
 async function optimizeImage(file) {
+  const relativePath = path.relative(ROOT, file).replaceAll("\\", "/");
+  if (/^assets\/(hero|banners|auth)\//.test(relativePath)) {
+    const size = (await stat(file)).size;
+    return { file, before: size, after: size, skipped: "campaign-artwork" };
+  }
+
   const extension = path.extname(file).toLowerCase();
 
   if (!SUPPORTED.has(extension)) {

@@ -126,7 +126,7 @@
 .ad-chart-tooltip span{color:#d0d0d0}.ad-chart-tooltip strong{font-size:13px}
 .ad-template-image-preview{position:relative;aspect-ratio:4/5;overflow:hidden;border:1px solid var(--cc-border);border-radius:var(--cc-radius-sm);background:var(--cc-surface-soft)}
 .ad-template-image-preview img{object-fit:contain}
-.ad-brand .brand-logo-frame{box-sizing:content-box;width:var(--brand-logo-width,132px);padding:5px 8px;border-radius:3px;background:#ffffff}
+.ad-brand .brand-logo-frame{box-sizing:content-box;width:var(--brand-logo-width,132px);padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
 @media(hover:hover){.ad-root .ad-kpis>div:hover{border-color:#8a8a8a;box-shadow:0 10px 22px rgb(0 0 0 / 9%);transform:translateY(-3px)}}
 @media(prefers-reduced-motion:reduce){.ad-root .ad-kpis>div{transition:none}.ad-root .ad-kpis>div:hover{transform:none}}
 @media(max-width:600px){.ad-user{max-width:42vw}.ad-chart-tooltip{transform:translate(-20%,calc(-100% - 12px))}}

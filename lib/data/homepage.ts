@@ -9,14 +9,14 @@ export type SiteNavItem = Readonly<{
 }>;
 
 export type HeroSlide = Readonly<{
-  id: "women" | "men" | "cases";
+  id: "women" | "cases";
   imageAlt: string;
   imagePath: string;
   ctaLabel?: string;
   desktopPosition: string;
   tabletPosition: string;
   mobilePosition: string;
-  ctaPlacement: "center" | "top" | "left";
+  ctaPlacement: "center" | "top" | "right";
   ctaTone: "dark" | "light";
 }>;
 
@@ -45,26 +45,15 @@ export const heroSlides = [
     ctaTone: "light",
   },
   {
-    id: "men",
-    imagePath: "/assets/hero/hero-men.png",
-    imageAlt:
-      "Coolcase campaign with a man holding a star case beside statement case designs",
-    desktopPosition: "50% 50%",
-    tabletPosition: "50% 50%",
-    mobilePosition: "57% center",
-    ctaPlacement: "center",
-    ctaTone: "light",
-  },
-  {
     id: "cases",
-    imagePath: "/assets/hero/hero-cases.jpeg",
+    imagePath: "/assets/hero/hero-cases.PNG",
     imageAlt:
-      "Coolcase polka-dot and heart cases beside Your Phone, Your Style campaign artwork",
+      "Four Coolcase designs displayed on hangers beside Cool Case campaign artwork",
     desktopPosition: "50% 50%",
     tabletPosition: "50% 50%",
     mobilePosition: "50% center",
-    ctaLabel: "SHOP YOU FAVORITE CASES",
-    ctaPlacement: "left",
+    ctaLabel: "SHOP YOUR FAVORITE CASES",
+    ctaPlacement: "right",
     ctaTone: "dark",
   },
 ] as const satisfies readonly HeroSlide[];

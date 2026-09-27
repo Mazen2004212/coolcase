@@ -140,7 +140,7 @@ body .cc-order-cards header { display:flex; justify-content:space-between; flex-
   body .cc-orders-desktop { display:none; }
 }
 @media(max-width:639px) {
-  body .hero-stage { height:calc(100vw / 2.5 + 76px); }
+  body .hero-stage { height:calc(100vw * 777 / 2025 + 76px); }
   body .hero-campaign-slide>img { height:calc(100% - 76px)!important; object-fit:contain; }
   body .hero-shop-link { top:auto; bottom:14px; transform:translateX(-50%); min-height:48px; }
   body .cc-price strong { font-size:28px; }

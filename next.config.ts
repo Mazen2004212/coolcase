@@ -34,6 +34,7 @@ const buildId = process.env.COOLCASE_BUILD_ID?.trim();
 
 const nextConfig: NextConfig = {
   agentRules: false,
+  allowedDevOrigins: ["127.0.0.1"],
   reactStrictMode: true,
   output: "standalone",
 
