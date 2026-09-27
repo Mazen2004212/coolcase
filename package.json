@@ -18,7 +18,9 @@
   "aws:static:prepare": "node scripts/prepare-aws-static.mjs",
   "aws:static:optimize": "node scripts/optimize-aws-static-images.mjs",
   "aws:docker:build": "node scripts/build-aws-image.mjs coolcase:aws",
-  "aws:docker:build:test": "node scripts/build-aws-image.mjs coolcase-aws:test http://127.0.0.1:8080"
+  "aws:docker:build:test": "node scripts/build-aws-image.mjs coolcase-aws:test http://127.0.0.1:8080",
+  "deploy:assets": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-assets.ps1",
+  "deploy:aws": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-aws.ps1"
 },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1141.0",
