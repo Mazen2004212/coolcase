@@ -5,20 +5,21 @@
   "engines": {
     "node": ">=20.9.0"
   },
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test:supabase:runtime": "node scripts/verify-supabase-runtime.mjs",
-    "test:storage": "tsx --test tests/public-media.test.ts",
-    "test:image-pipeline": "node --conditions=react-server --import tsx scripts/verify-image-pipeline.ts",
-    "test:ui:aws": "playwright test tests/aws-ui-smoke.test.ts --reporter=line --workers=1",
-    "aws:static:prepare": "node scripts/prepare-aws-static.mjs",
-    "aws:docker:build": "node scripts/build-aws-image.mjs coolcase:aws",
-    "aws:docker:build:test": "node scripts/build-aws-image.mjs coolcase-aws:test http://127.0.0.1:8080"
-  },
+"scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "eslint .",
+  "typecheck": "tsc --noEmit",
+  "test:supabase:runtime": "node scripts/verify-supabase-runtime.mjs",
+  "test:storage": "tsx --test tests/public-media.test.ts",
+  "test:image-pipeline": "node --conditions=react-server --import tsx scripts/verify-image-pipeline.ts",
+  "test:ui:aws": "playwright test tests/aws-ui-smoke.test.ts --reporter=line --workers=1",
+  "aws:static:prepare": "node scripts/prepare-aws-static.mjs",
+  "aws:static:optimize": "node scripts/optimize-aws-static-images.mjs",
+  "aws:docker:build": "node scripts/build-aws-image.mjs coolcase:aws",
+  "aws:docker:build:test": "node scripts/build-aws-image.mjs coolcase-aws:test http://127.0.0.1:8080"
+},
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1141.0",
     "@supabase/ssr": "^0.12.7",
